@@ -21,6 +21,9 @@ import exerciseKettlebell from '@/assets/exercise-kettlebell.jpg';
 import exerciseBands from '@/assets/exercise-bands.jpg';
 import exerciseEzbar from '@/assets/exercise-ezbar.jpg';
 import exerciseSmith from '@/assets/exercise-smith.jpg';
+import exerciseCardioHiit from '@/assets/exercise-cardio-hiit.jpg';
+import exerciseCardioRope from '@/assets/exercise-cardio-rope.jpg';
+import exerciseCardioRowing from '@/assets/exercise-cardio-rowing.jpg';
 
 interface ExerciseCardProps {
   exercise: Exercise;
@@ -34,11 +37,19 @@ const difficultyColors = {
   advanced: 'bg-red-500/10 text-red-600 border-red-500/30',
 };
 
-// Map exercise to images based on equipment first, then muscle group
+// Map exercise to images based on category, equipment, then muscle group
 function getExerciseImage(exercise: Exercise): string {
   const equipment = exercise.equipment.toLowerCase();
+  const name = exercise.name.toLowerCase();
   
-  // First, try to match by equipment for more variety
+  // Check for cardio exercises first
+  if (exercise.category === 'cardio') {
+    if (name.includes('jump') || name.includes('rope') || name.includes('battle')) return exerciseCardioRope;
+    if (name.includes('rowing') || name.includes('row')) return exerciseCardioRowing;
+    return exerciseCardioHiit; // Default cardio image for burpees, mountain climbers, etc.
+  }
+  
+  // Then, try to match by equipment for more variety
   if (equipment.includes('barbell')) return exerciseBarbell;
   if (equipment.includes('dumbbell')) return exerciseDumbbell;
   if (equipment.includes('cable')) return exerciseCable;

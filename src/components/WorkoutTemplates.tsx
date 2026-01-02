@@ -1,13 +1,41 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { workoutTemplates, WorkoutTemplate } from '@/data/workoutTemplates';
-import { Calendar, Dumbbell, Target, ChevronRight, Download, X } from 'lucide-react';
+import { workoutTemplates, WorkoutTemplate, TemplateExercise } from '@/data/workoutTemplates';
+import { Calendar, Dumbbell, Target, ChevronRight, Download, X, Edit2, Plus, Trash2, Save, RotateCcw } from 'lucide-react';
+import { ExercisePickerModal } from './ExercisePickerModal';
+import { toast } from '@/hooks/use-toast';
+
+const CUSTOM_TEMPLATES_KEY = 'musclepedia-custom-templates';
 
 export function WorkoutTemplates() {
   const [selectedTemplate, setSelectedTemplate] = useState<WorkoutTemplate | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingTemplate, setEditingTemplate] = useState<WorkoutTemplate | null>(null);
+  const [editingDayIndex, setEditingDayIndex] = useState<number | null>(null);
+  const [customTemplates, setCustomTemplates] = useState<WorkoutTemplate[]>([]);
+
+  // Load custom templates from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem(CUSTOM_TEMPLATES_KEY);
+    if (saved) {
+      try {
+        setCustomTemplates(JSON.parse(saved));
+      } catch (e) {
+        console.error('Failed to load custom templates:', e);
+      }
+    }
+  }, []);
+
+  // Save custom templates to localStorage
+  const saveCustomTemplates = (templates: WorkoutTemplate[]) => {
+    setCustomTemplates(templates);
+    localStorage.setItem(CUSTOM_TEMPLATES_KEY, JSON.stringify(templates));
+  };
+
+  const allTemplates = [...workoutTemplates, ...customTemplates];
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
@@ -20,6 +48,67 @@ export function WorkoutTemplates() {
       default:
         return '';
     }
+  };
+
+  const isCustomTemplate = (id: string) => customTemplates.some(t => t.id === id);
+
+  const startEditing = () => {
+    if (selectedTemplate) {
+      setEditingTemplate(JSON.parse(JSON.stringify(selectedTemplate)));
+      setIsEditing(true);
+    }
+  };
+
+  const cancelEditing = () => {
+    setIsEditing(false);
+    setEditingTemplate(null);
+    setEditingDayIndex(null);
+  };
+
+  const removeExercise = (dayIndex: number, exerciseIndex: number) => {
+    if (!editingTemplate) return;
+    const updated = { ...editingTemplate };
+    updated.schedule[dayIndex].exercises.splice(exerciseIndex, 1);
+    setEditingTemplate(updated);
+  };
+
+  const addExercise = (exercise: { name: string; sets: number; reps: string; rest: string }) => {
+    if (!editingTemplate || editingDayIndex === null) return;
+    const updated = { ...editingTemplate };
+    updated.schedule[editingDayIndex].exercises.push(exercise);
+    setEditingTemplate(updated);
+    setEditingDayIndex(null);
+  };
+
+  const saveChanges = () => {
+    if (!editingTemplate) return;
+    
+    // Create a custom version with a new ID
+    const customId = `custom-${editingTemplate.id}-${Date.now()}`;
+    const customTemplate: WorkoutTemplate = {
+      ...editingTemplate,
+      id: customId,
+      name: `${editingTemplate.name} (Custom)`,
+    };
+    
+    saveCustomTemplates([...customTemplates, customTemplate]);
+    setIsEditing(false);
+    setEditingTemplate(null);
+    setSelectedTemplate(null);
+    toast({
+      title: 'Template Saved',
+      description: 'Your custom template has been saved.',
+    });
+  };
+
+  const deleteCustomTemplate = (id: string) => {
+    const updated = customTemplates.filter(t => t.id !== id);
+    saveCustomTemplates(updated);
+    setSelectedTemplate(null);
+    toast({
+      title: 'Template Deleted',
+      description: 'Your custom template has been removed.',
+    });
   };
 
   const downloadTemplate = (template: WorkoutTemplate) => {
@@ -55,10 +144,12 @@ export function WorkoutTemplates() {
     URL.revokeObjectURL(url);
   };
 
+  const displayTemplate = isEditing && editingTemplate ? editingTemplate : selectedTemplate;
+
   return (
     <div className="space-y-6">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {workoutTemplates.map((template) => (
+        {allTemplates.map((template) => (
           <Card
             key={template.id}
             className="cursor-pointer hover:shadow-lg transition-all hover:border-primary/50 group"
@@ -66,9 +157,14 @@ export function WorkoutTemplates() {
           >
             <CardHeader>
               <div className="flex items-start justify-between">
-                <Badge className={getDifficultyColor(template.difficulty)}>
-                  {template.difficulty}
-                </Badge>
+                <div className="flex items-center gap-2">
+                  <Badge className={getDifficultyColor(template.difficulty)}>
+                    {template.difficulty}
+                  </Badge>
+                  {isCustomTemplate(template.id) && (
+                    <Badge variant="outline" className="text-xs">Custom</Badge>
+                  )}
+                </div>
                 <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
               </div>
               <CardTitle className="text-lg mt-2">{template.name}</CardTitle>
@@ -92,36 +188,44 @@ export function WorkoutTemplates() {
         ))}
       </div>
 
-      <Dialog open={!!selectedTemplate} onOpenChange={() => setSelectedTemplate(null)}>
+      <Dialog open={!!selectedTemplate} onOpenChange={(open) => {
+        if (!open) {
+          setSelectedTemplate(null);
+          cancelEditing();
+        }
+      }}>
         <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
-          {selectedTemplate && (
+          {displayTemplate && (
             <>
               <DialogHeader>
                 <div className="flex items-center justify-between pr-8">
                   <div>
-                    <DialogTitle className="text-2xl">{selectedTemplate.name}</DialogTitle>
+                    <DialogTitle className="text-2xl">
+                      {displayTemplate.name}
+                      {isEditing && <span className="text-primary ml-2">(Editing)</span>}
+                    </DialogTitle>
                     <DialogDescription className="mt-2">
-                      {selectedTemplate.description}
+                      {displayTemplate.description}
                     </DialogDescription>
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-3 pt-4">
-                  <Badge className={getDifficultyColor(selectedTemplate.difficulty)}>
-                    {selectedTemplate.difficulty}
+                  <Badge className={getDifficultyColor(displayTemplate.difficulty)}>
+                    {displayTemplate.difficulty}
                   </Badge>
                   <Badge variant="outline" className="flex items-center gap-1">
                     <Calendar className="w-3 h-3" />
-                    {selectedTemplate.daysPerWeek} days/week
+                    {displayTemplate.daysPerWeek} days/week
                   </Badge>
                   <Badge variant="outline" className="flex items-center gap-1">
                     <Target className="w-3 h-3" />
-                    {selectedTemplate.goal}
+                    {displayTemplate.goal}
                   </Badge>
                 </div>
               </DialogHeader>
 
               <div className="grid gap-4 mt-6 md:grid-cols-2">
-                {selectedTemplate.schedule.map((day) => (
+                {displayTemplate.schedule.map((day, dayIndex) => (
                   <Card key={day.day} className="bg-muted/50">
                     <CardHeader className="pb-2">
                       <Badge variant="outline" className="w-fit mb-1">
@@ -134,34 +238,92 @@ export function WorkoutTemplates() {
                     </CardHeader>
                     <CardContent className="pt-0">
                       <ul className="space-y-2">
-                        {day.exercises.map((exercise, index) => (
-                          <li key={index} className="text-sm">
-                            <p className="font-medium">{exercise.name}</p>
-                            <p className="text-xs text-muted-foreground">
-                              {exercise.sets} × {exercise.reps} • Rest: {exercise.rest}
-                            </p>
+                        {day.exercises.map((exercise, exerciseIndex) => (
+                          <li key={exerciseIndex} className="text-sm flex items-start justify-between gap-2">
+                            <div className="flex-1">
+                              <p className="font-medium">{exercise.name}</p>
+                              <p className="text-xs text-muted-foreground">
+                                {exercise.sets} × {exercise.reps} • Rest: {exercise.rest}
+                              </p>
+                            </div>
+                            {isEditing && (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-6 w-6 text-destructive hover:text-destructive"
+                                onClick={() => removeExercise(dayIndex, exerciseIndex)}
+                              >
+                                <X className="h-3 w-3" />
+                              </Button>
+                            )}
                           </li>
                         ))}
                       </ul>
+                      {isEditing && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-full mt-3"
+                          onClick={() => setEditingDayIndex(dayIndex)}
+                        >
+                          <Plus className="w-3 h-3 mr-1" />
+                          Add Exercise
+                        </Button>
+                      )}
                     </CardContent>
                   </Card>
                 ))}
               </div>
 
-              <div className="flex justify-end gap-2 mt-6 pt-4 border-t">
-                <Button variant="outline" onClick={() => setSelectedTemplate(null)}>
-                  <X className="w-4 h-4 mr-2" />
-                  Close
-                </Button>
-                <Button onClick={() => downloadTemplate(selectedTemplate)}>
-                  <Download className="w-4 h-4 mr-2" />
-                  Download Template
-                </Button>
+              <div className="flex flex-wrap justify-end gap-2 mt-6 pt-4 border-t">
+                {isEditing ? (
+                  <>
+                    <Button variant="outline" onClick={cancelEditing}>
+                      <RotateCcw className="w-4 h-4 mr-2" />
+                      Cancel
+                    </Button>
+                    <Button onClick={saveChanges}>
+                      <Save className="w-4 h-4 mr-2" />
+                      Save as Custom
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    {selectedTemplate && isCustomTemplate(selectedTemplate.id) && (
+                      <Button 
+                        variant="destructive" 
+                        onClick={() => deleteCustomTemplate(selectedTemplate.id)}
+                      >
+                        <Trash2 className="w-4 h-4 mr-2" />
+                        Delete
+                      </Button>
+                    )}
+                    <Button variant="outline" onClick={() => setSelectedTemplate(null)}>
+                      <X className="w-4 h-4 mr-2" />
+                      Close
+                    </Button>
+                    <Button variant="outline" onClick={startEditing}>
+                      <Edit2 className="w-4 h-4 mr-2" />
+                      Edit
+                    </Button>
+                    <Button onClick={() => selectedTemplate && downloadTemplate(selectedTemplate)}>
+                      <Download className="w-4 h-4 mr-2" />
+                      Download
+                    </Button>
+                  </>
+                )}
               </div>
             </>
           )}
         </DialogContent>
       </Dialog>
+
+      <ExercisePickerModal
+        open={editingDayIndex !== null}
+        onClose={() => setEditingDayIndex(null)}
+        onSelectExercise={addExercise}
+        dayFocus={editingDayIndex !== null && editingTemplate ? editingTemplate.schedule[editingDayIndex].focus : undefined}
+      />
     </div>
   );
 }
