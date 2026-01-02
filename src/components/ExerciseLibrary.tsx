@@ -2,7 +2,6 @@ import { useState, useMemo, useEffect } from 'react';
 import { exercises, MuscleGroup } from '@/data/exercises';
 import { ExerciseCard } from './ExerciseCard';
 import { ExerciseCardSkeleton } from './ExerciseCardSkeleton';
-import { InteractiveMuscleSelector } from './InteractiveMuscleSelector';
 import { SearchAutocomplete } from './SearchAutocomplete';
 import { ExerciseFilters } from './ExerciseFilters';
 import { useFavorites } from '@/hooks/useFavorites';
@@ -86,16 +85,9 @@ export function ExerciseLibrary({ initialMuscleFilter = [] }: ExerciseLibraryPro
   const hasActiveFilters = search || selectedMuscles.length > 0 || selectedDifficulty || selectedCategory || selectedEquipment.length > 0 || showFavoritesOnly;
 
   return (
-    <div className="space-y-6">
-      {/* Interactive Muscle Map */}
-      <InteractiveMuscleSelector
-        selectedMuscles={selectedMuscles}
-        onMuscleToggle={toggleMuscle}
-        onClear={clearMuscleSelection}
-      />
-
+    <div className="space-y-4">
       {/* Search and Filters */}
-      <div className="space-y-4">
+      <div className="space-y-3">
         {/* Search Autocomplete */}
         <SearchAutocomplete
           exercises={exercises}
@@ -128,8 +120,8 @@ export function ExerciseLibrary({ initialMuscleFilter = [] }: ExerciseLibraryPro
         </p>
       </div>
 
-      {/* Exercise Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {/* Exercise Grid - single column on mobile for compact view */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
         {isLoading ? (
           Array.from({ length: 6 }).map((_, i) => (
             <ExerciseCardSkeleton key={i} />

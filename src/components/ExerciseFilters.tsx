@@ -6,9 +6,10 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Checkbox } from '@/components/ui/checkbox';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { ChevronDown, X, Heart, Filter, SlidersHorizontal } from 'lucide-react';
+import { ChevronDown, X, Heart, SlidersHorizontal } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 interface ExerciseFiltersProps {
@@ -83,11 +84,12 @@ export function ExerciseFilters({
     (selectedDifficulty ? 1 : 0) + 
     (showFavoritesOnly ? 1 : 0);
 
-  const FilterContent = () => (
-    <div className="space-y-4">
-      {/* Favorites Toggle */}
-      <div className="flex items-center justify-between">
-        <Label htmlFor="favorites-filter" className="flex items-center gap-2 cursor-pointer">
+  // Collapsible filter content for mobile
+  const MobileFilterContent = () => (
+    <div className="space-y-2">
+      {/* Favorites Toggle - always visible */}
+      <div className="flex items-center justify-between py-2 px-1">
+        <Label htmlFor="favorites-filter-mobile" className="flex items-center gap-2 cursor-pointer">
           <Heart className={`w-4 h-4 ${showFavoritesOnly ? 'fill-destructive text-destructive' : ''}`} />
           Favorites only
           {favoritesCount > 0 && (
@@ -95,91 +97,121 @@ export function ExerciseFilters({
           )}
         </Label>
         <Switch
-          id="favorites-filter"
+          id="favorites-filter-mobile"
           checked={showFavoritesOnly}
           onCheckedChange={onFavoritesToggle}
         />
       </div>
 
-      {/* Equipment */}
-      <div>
-        <p className="text-sm font-medium mb-2">Equipment</p>
-        <div className="grid grid-cols-2 gap-2">
-          {equipmentTypes.map((eq) => (
-            <div key={eq} className="flex items-center space-x-2">
-              <Checkbox
-                id={`eq-${eq}`}
-                checked={selectedEquipment.includes(eq)}
-                onCheckedChange={() => onEquipmentToggle(eq)}
-              />
-              <Label htmlFor={`eq-${eq}`} className="text-sm cursor-pointer">{eq}</Label>
+      <Accordion type="multiple" className="w-full" defaultValue={['muscles', 'category']}>
+        {/* Muscle Groups */}
+        <AccordionItem value="muscles">
+          <AccordionTrigger className="text-sm font-medium py-3">
+            Muscle Groups
+            {selectedMuscles.length > 0 && (
+              <Badge variant="secondary" className="ml-2">{selectedMuscles.length}</Badge>
+            )}
+          </AccordionTrigger>
+          <AccordionContent>
+            <div className="space-y-3 pb-2">
+              {Object.entries(groupedMuscles).map(([category, muscles]) => (
+                <div key={category}>
+                  <p className="text-xs text-muted-foreground mb-1.5">{category}</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {muscles.map((muscle) => (
+                      <Badge
+                        key={muscle.id}
+                        variant={selectedMuscles.includes(muscle.id) ? 'default' : 'outline'}
+                        className="cursor-pointer text-xs"
+                        onClick={() => onMuscleToggle(muscle.id)}
+                      >
+                        {muscle.name}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-      </div>
+          </AccordionContent>
+        </AccordionItem>
 
-      {/* Category */}
-      <div>
-        <p className="text-sm font-medium mb-2">Category</p>
-        <div className="flex flex-wrap gap-1.5">
-          {categories.map((cat) => (
-            <Badge
-              key={cat.id}
-              variant={selectedCategory === cat.id ? 'default' : 'outline'}
-              className="cursor-pointer"
-              onClick={() => onCategoryChange(selectedCategory === cat.id ? null : cat.id)}
-            >
-              {cat.label}
-            </Badge>
-          ))}
-        </div>
-      </div>
-
-      {/* Difficulty */}
-      <div>
-        <p className="text-sm font-medium mb-2">Difficulty</p>
-        <div className="flex flex-wrap gap-1.5">
-          {difficulties.map((diff) => (
-            <Badge
-              key={diff.id}
-              variant={selectedDifficulty === diff.id ? 'default' : 'outline'}
-              className="cursor-pointer capitalize flex items-center gap-1.5"
-              onClick={() => onDifficultyChange(selectedDifficulty === diff.id ? null : diff.id)}
-            >
-              <span className={`w-2 h-2 rounded-full ${diff.color}`} />
-              {diff.label}
-            </Badge>
-          ))}
-        </div>
-      </div>
-
-      {/* Muscle Groups */}
-      <div>
-        <p className="text-sm font-medium mb-2">Muscle Groups</p>
-        <div className="space-y-3">
-          {Object.entries(groupedMuscles).map(([category, muscles]) => (
-            <div key={category}>
-              <p className="text-xs text-muted-foreground mb-1.5">{category}</p>
-              <div className="flex flex-wrap gap-1.5">
-                {muscles.map((muscle) => (
-                  <Badge
-                    key={muscle.id}
-                    variant={selectedMuscles.includes(muscle.id) ? 'default' : 'outline'}
-                    className="cursor-pointer text-xs"
-                    onClick={() => onMuscleToggle(muscle.id)}
-                  >
-                    {muscle.name}
-                  </Badge>
-                ))}
-              </div>
+        {/* Category */}
+        <AccordionItem value="category">
+          <AccordionTrigger className="text-sm font-medium py-3">
+            Category
+            {selectedCategory && (
+              <Badge variant="secondary" className="ml-2">1</Badge>
+            )}
+          </AccordionTrigger>
+          <AccordionContent>
+            <div className="flex flex-wrap gap-1.5 pb-2">
+              {categories.map((cat) => (
+                <Badge
+                  key={cat.id}
+                  variant={selectedCategory === cat.id ? 'default' : 'outline'}
+                  className="cursor-pointer"
+                  onClick={() => onCategoryChange(selectedCategory === cat.id ? null : cat.id)}
+                >
+                  {cat.label}
+                </Badge>
+              ))}
             </div>
-          ))}
-        </div>
-      </div>
+          </AccordionContent>
+        </AccordionItem>
+
+        {/* Difficulty */}
+        <AccordionItem value="difficulty">
+          <AccordionTrigger className="text-sm font-medium py-3">
+            Difficulty
+            {selectedDifficulty && (
+              <Badge variant="secondary" className="ml-2">1</Badge>
+            )}
+          </AccordionTrigger>
+          <AccordionContent>
+            <div className="flex flex-wrap gap-1.5 pb-2">
+              {difficulties.map((diff) => (
+                <Badge
+                  key={diff.id}
+                  variant={selectedDifficulty === diff.id ? 'default' : 'outline'}
+                  className="cursor-pointer capitalize flex items-center gap-1.5"
+                  onClick={() => onDifficultyChange(selectedDifficulty === diff.id ? null : diff.id)}
+                >
+                  <span className={`w-2 h-2 rounded-full ${diff.color}`} />
+                  {diff.label}
+                </Badge>
+              ))}
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+
+        {/* Equipment */}
+        <AccordionItem value="equipment">
+          <AccordionTrigger className="text-sm font-medium py-3">
+            Equipment
+            {selectedEquipment.length > 0 && (
+              <Badge variant="secondary" className="ml-2">{selectedEquipment.length}</Badge>
+            )}
+          </AccordionTrigger>
+          <AccordionContent>
+            <div className="grid grid-cols-2 gap-2 pb-2">
+              {equipmentTypes.map((eq) => (
+                <div key={eq} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`eq-mobile-${eq}`}
+                    checked={selectedEquipment.includes(eq)}
+                    onCheckedChange={() => onEquipmentToggle(eq)}
+                  />
+                  <Label htmlFor={`eq-mobile-${eq}`} className="text-sm cursor-pointer">{eq}</Label>
+                </div>
+              ))}
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
 
       {/* Clear All */}
       {hasActiveFilters && (
-        <Button variant="ghost" size="sm" onClick={onClearAll} className="w-full">
+        <Button variant="ghost" size="sm" onClick={onClearAll} className="w-full mt-4">
           <X className="w-4 h-4 mr-1.5" />
           Clear all filters
         </Button>
@@ -187,10 +219,10 @@ export function ExerciseFilters({
     </div>
   );
 
-  // Mobile: Sheet drawer
+  // Mobile: Sheet drawer with collapsible sections
   if (isMobile) {
     return (
-      <div className="space-y-3">
+      <div className="space-y-2">
         <Sheet>
           <SheetTrigger asChild>
             <Button variant="outline" className="w-full justify-between">
@@ -203,50 +235,55 @@ export function ExerciseFilters({
               )}
             </Button>
           </SheetTrigger>
-          <SheetContent side="bottom" className="h-[80vh]">
+          <SheetContent side="bottom" className="h-[75vh]">
             <SheetHeader>
               <SheetTitle>Filter Exercises</SheetTitle>
             </SheetHeader>
-            <ScrollArea className="h-full py-4">
-              <FilterContent />
+            <ScrollArea className="h-[calc(100%-3rem)] py-2">
+              <MobileFilterContent />
             </ScrollArea>
           </SheetContent>
         </Sheet>
 
-        {/* Active Filters Chips */}
+        {/* Active Filters Chips - compact on mobile */}
         {hasActiveFilters && (
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap gap-1">
             {showFavoritesOnly && (
-              <Badge variant="secondary" className="gap-1">
+              <Badge variant="secondary" className="gap-1 text-xs">
                 <Heart className="w-3 h-3 fill-current" />
-                Favorites
                 <X className="w-3 h-3 cursor-pointer" onClick={() => onFavoritesToggle(false)} />
               </Badge>
             )}
             {selectedCategory && (
-              <Badge variant="secondary" className="gap-1">
+              <Badge variant="secondary" className="gap-1 text-xs">
                 {categories.find(c => c.id === selectedCategory)?.label}
                 <X className="w-3 h-3 cursor-pointer" onClick={() => onCategoryChange(null)} />
               </Badge>
             )}
             {selectedDifficulty && (
-              <Badge variant="secondary" className="gap-1 capitalize">
+              <Badge variant="secondary" className="gap-1 text-xs capitalize">
                 {selectedDifficulty}
                 <X className="w-3 h-3 cursor-pointer" onClick={() => onDifficultyChange(null)} />
               </Badge>
             )}
-            {selectedEquipment.map(eq => (
-              <Badge key={eq} variant="secondary" className="gap-1">
+            {selectedEquipment.slice(0, 2).map(eq => (
+              <Badge key={eq} variant="secondary" className="gap-1 text-xs">
                 {eq}
                 <X className="w-3 h-3 cursor-pointer" onClick={() => onEquipmentToggle(eq)} />
               </Badge>
             ))}
-            {selectedMuscles.map(muscle => (
-              <Badge key={muscle} variant="secondary" className="gap-1 capitalize">
+            {selectedEquipment.length > 2 && (
+              <Badge variant="secondary" className="text-xs">+{selectedEquipment.length - 2}</Badge>
+            )}
+            {selectedMuscles.slice(0, 2).map(muscle => (
+              <Badge key={muscle} variant="secondary" className="gap-1 text-xs capitalize">
                 {muscle}
                 <X className="w-3 h-3 cursor-pointer" onClick={() => onMuscleToggle(muscle)} />
               </Badge>
             ))}
+            {selectedMuscles.length > 2 && (
+              <Badge variant="secondary" className="text-xs">+{selectedMuscles.length - 2}</Badge>
+            )}
           </div>
         )}
       </div>
