@@ -5,9 +5,9 @@ import { WorkoutGenerator } from '@/components/WorkoutGenerator';
 import { WorkoutTemplates } from '@/components/WorkoutTemplates';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { HeroSection } from '@/components/HeroSection';
-import { MuscleGroupCards } from '@/components/MuscleGroupCards';
+
 import { Button } from '@/components/ui/button';
-import { Dumbbell, Library, Sparkles, LayoutTemplate, ArrowUp, Github, Twitter, Mail } from 'lucide-react';
+import { Dumbbell, Library, Sparkles, LayoutTemplate, ArrowUp } from 'lucide-react';
 import { MuscleGroup } from '@/data/exercises';
 
 const Index = () => {
@@ -56,9 +56,6 @@ const Index = () => {
         onExploreClick={handleExploreClick}
         onGenerateClick={handleGenerateClick}
       />
-
-      {/* Muscle Group Cards */}
-      <MuscleGroupCards onSelectMuscleGroup={handleMuscleGroupSelect} />
 
       {/* Main Content */}
       <main id="main-content" className="container max-w-6xl mx-auto px-4 py-8">
@@ -112,82 +109,23 @@ const Index = () => {
 
       {/* Footer */}
       <footer className="border-t mt-auto bg-muted/30">
-        <div className="container max-w-6xl mx-auto px-4 py-12">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-            {/* Brand */}
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                <div className="p-2 rounded-lg bg-foreground text-background">
-                  <Dumbbell className="w-4 h-4" />
-                </div>
-                <span className="font-bold text-lg">MuscleAtlas</span>
+        <div className="container max-w-6xl mx-auto px-4 py-6">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 rounded-lg bg-foreground text-background">
+                <Dumbbell className="w-3 h-3" />
               </div>
-              <p className="text-sm text-muted-foreground">
-                Navigate your fitness journey. Discover exercises, master proper form, and generate AI-powered workout plans.
-              </p>
+              <span className="font-semibold">MuscleAtlas</span>
+              <span className="text-sm text-muted-foreground">© {new Date().getFullYear()}</span>
             </div>
-            
-            {/* Quick Links */}
-            <div>
-              <h4 className="font-semibold mb-4">Quick Links</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>
-                  <button 
-                    onClick={() => { setActiveTab('library'); document.getElementById('main-content')?.scrollIntoView({ behavior: 'smooth' }); }}
-                    className="hover:text-foreground transition-colors"
-                  >
-                    Exercise Library
-                  </button>
-                </li>
-                <li>
-                  <button 
-                    onClick={() => { setActiveTab('templates'); document.getElementById('main-content')?.scrollIntoView({ behavior: 'smooth' }); }}
-                    className="hover:text-foreground transition-colors"
-                  >
-                    Workout Templates
-                  </button>
-                </li>
-                <li>
-                  <button 
-                    onClick={() => { setActiveTab('generator'); document.getElementById('main-content')?.scrollIntoView({ behavior: 'smooth' }); }}
-                    className="hover:text-foreground transition-colors"
-                  >
-                    AI Generator
-                  </button>
-                </li>
-              </ul>
-            </div>
-            
-            {/* Connect */}
-            <div>
-              <h4 className="font-semibold mb-4">Connect</h4>
-              <div className="flex gap-3">
-                <Button variant="outline" size="icon" className="rounded-full h-9 w-9">
-                  <Github className="w-4 h-4" />
-                </Button>
-                <Button variant="outline" size="icon" className="rounded-full h-9 w-9">
-                  <Twitter className="w-4 h-4" />
-                </Button>
-                <Button variant="outline" size="icon" className="rounded-full h-9 w-9">
-                  <Mail className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-          </div>
-          
-          {/* Bottom bar */}
-          <div className="pt-8 border-t flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p className="text-sm text-muted-foreground">
-              © {new Date().getFullYear()} MuscleAtlas. All rights reserved.
-            </p>
             <Button 
-              variant="outline" 
+              variant="ghost" 
               size="sm"
               onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-              className="gap-2"
+              className="gap-1"
             >
               <ArrowUp className="w-4 h-4" />
-              Back to top
+              Top
             </Button>
           </div>
         </div>

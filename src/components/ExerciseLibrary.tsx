@@ -6,6 +6,9 @@ import { InteractiveMuscleSelector } from './InteractiveMuscleSelector';
 import { SearchAutocomplete } from './SearchAutocomplete';
 import { ExerciseFilters } from './ExerciseFilters';
 import { useFavorites } from '@/hooks/useFavorites';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Button } from '@/components/ui/button';
+import { ChevronDown, Search } from 'lucide-react';
 
 interface ExerciseLibraryProps {
   initialMuscleFilter?: MuscleGroup[];
@@ -85,18 +88,33 @@ export function ExerciseLibrary({ initialMuscleFilter = [] }: ExerciseLibraryPro
 
   const hasActiveFilters = search || selectedMuscles.length > 0 || selectedDifficulty || selectedCategory || selectedEquipment.length > 0 || showFavoritesOnly;
 
+  const [muscleMapOpen, setMuscleMapOpen] = useState(false);
+
   return (
-    <div className="space-y-6">
-      {/* Interactive Muscle Map */}
-      <InteractiveMuscleSelector
-        selectedMuscles={selectedMuscles}
-        onMuscleToggle={toggleMuscle}
-        onClear={clearMuscleSelection}
-      />
+    <div className="space-y-4">
+      {/* Collapsible Muscle Map */}
+      <Collapsible open={muscleMapOpen} onOpenChange={setMuscleMapOpen}>
+        <CollapsibleTrigger asChild>
+          <Button variant="outline" className="w-full justify-between">
+            <span className="flex items-center gap-2">
+              {selectedMuscles.length > 0 
+                ? `${selectedMuscles.length} muscle${selectedMuscles.length > 1 ? 's' : ''} selected` 
+                : 'Select muscles from body map'}
+            </span>
+            <ChevronDown className={`w-4 h-4 transition-transform ${muscleMapOpen ? 'rotate-180' : ''}`} />
+          </Button>
+        </CollapsibleTrigger>
+        <CollapsibleContent className="pt-4">
+          <InteractiveMuscleSelector
+            selectedMuscles={selectedMuscles}
+            onMuscleToggle={toggleMuscle}
+            onClear={clearMuscleSelection}
+          />
+        </CollapsibleContent>
+      </Collapsible>
 
       {/* Search and Filters */}
       <div className="space-y-4">
-        {/* Search Autocomplete */}
         <SearchAutocomplete
           exercises={exercises}
           value={search}
@@ -104,7 +122,6 @@ export function ExerciseLibrary({ initialMuscleFilter = [] }: ExerciseLibraryPro
           onMuscleSelect={toggleMuscle}
         />
 
-        {/* Filter Bar */}
         <ExerciseFilters
           selectedMuscles={selectedMuscles}
           selectedEquipment={selectedEquipment}
@@ -121,40 +138,51 @@ export function ExerciseLibrary({ initialMuscleFilter = [] }: ExerciseLibraryPro
         />
       </div>
 
-      {/* Results count */}
-      <div className="flex items-center justify-between border-b pb-3">
-        <p className="text-sm text-muted-foreground">
-          {filteredExercises.length} exercise{filteredExercises.length !== 1 ? 's' : ''} found
-        </p>
-      </div>
+      {/* Exercise Grid - Only show when filters are active */}
+      {hasActiveFilters ? (
+        <>
+          <div className="flex items-center justify-between border-b pb-3">
+            <p className="text-sm text-muted-foreground">
+              {filteredExercises.length} exercise{filteredExercises.length !== 1 ? 's' : ''} found
+            </p>
+          </div>
 
-      {/* Exercise Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {isLoading ? (
-          Array.from({ length: 6 }).map((_, i) => (
-            <ExerciseCardSkeleton key={i} />
-          ))
-        ) : (
-          filteredExercises.map((exercise) => (
-            <ExerciseCard
-              key={exercise.id}
-              exercise={exercise}
-              isFavorite={isFavorite(exercise.id)}
-              onToggleFavorite={toggleFavorite}
-            />
-          ))
-        )}
-      </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {isLoading ? (
+              Array.from({ length: 6 }).map((_, i) => (
+                <ExerciseCardSkeleton key={i} />
+              ))
+            ) : (
+              filteredExercises.map((exercise) => (
+                <ExerciseCard
+                  key={exercise.id}
+                  exercise={exercise}
+                  isFavorite={isFavorite(exercise.id)}
+                  onToggleFavorite={toggleFavorite}
+                />
+              ))
+            )}
+          </div>
 
-      {!isLoading && filteredExercises.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-muted-foreground">No exercises match your filters.</p>
-          <button
-            onClick={clearFilters}
-            className="mt-2 text-sm underline hover:no-underline"
-          >
-            Clear filters
-          </button>
+          {!isLoading && filteredExercises.length === 0 && (
+            <div className="text-center py-8">
+              <p className="text-muted-foreground">No exercises match your filters.</p>
+              <button
+                onClick={clearFilters}
+                className="mt-2 text-sm underline hover:no-underline"
+              >
+                Clear filters
+              </button>
+            </div>
+          )}
+        </>
+      ) : (
+        <div className="text-center py-12 border rounded-lg bg-muted/20">
+          <Search className="w-10 h-10 mx-auto mb-3 text-muted-foreground" />
+          <h3 className="font-semibold mb-1">Select Filters to View Exercises</h3>
+          <p className="text-sm text-muted-foreground max-w-md mx-auto">
+            Click the muscle map above, use the search bar, or apply filters to discover exercises.
+          </p>
         </div>
       )}
     </div>

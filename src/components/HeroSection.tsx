@@ -54,7 +54,7 @@ interface HeroSectionProps {
 
 export function HeroSection({ onExploreClick, onGenerateClick }: HeroSectionProps) {
   return (
-    <section className="relative min-h-[70vh] flex items-center justify-center overflow-hidden">
+    <section className="relative min-h-[50vh] flex items-center justify-center overflow-hidden">
       {/* Background Image */}
       <div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
