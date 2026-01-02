@@ -42,8 +42,8 @@ const Index = () => {
                 <Dumbbell className="w-5 h-5" />
               </div>
               <div>
-                <h1 className="text-xl font-bold tracking-tight">Musclepedia</h1>
-                <p className="text-xs text-muted-foreground hidden sm:block">Your complete exercise encyclopedia</p>
+                <h1 className="text-xl font-bold tracking-tight">MuscleAtlas</h1>
+                <p className="text-xs text-muted-foreground hidden sm:block">Navigate your fitness journey</p>
               </div>
             </div>
             <ThemeToggle />
@@ -120,10 +120,10 @@ const Index = () => {
                 <div className="p-2 rounded-lg bg-foreground text-background">
                   <Dumbbell className="w-4 h-4" />
                 </div>
-                <span className="font-bold text-lg">Musclepedia</span>
+                <span className="font-bold text-lg">MuscleAtlas</span>
               </div>
               <p className="text-sm text-muted-foreground">
-                Your complete fitness encyclopedia. Discover exercises, learn proper form, and generate AI-powered workout plans.
+                Navigate your fitness journey. Discover exercises, master proper form, and generate AI-powered workout plans.
               </p>
             </div>
             
@@ -178,7 +178,7 @@ const Index = () => {
           {/* Bottom bar */}
           <div className="pt-8 border-t flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-sm text-muted-foreground">
-              © {new Date().getFullYear()} Musclepedia. All rights reserved.
+              © {new Date().getFullYear()} MuscleAtlas. All rights reserved.
             </p>
             <Button 
               variant="outline" 
