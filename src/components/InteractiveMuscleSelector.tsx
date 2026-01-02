@@ -23,11 +23,11 @@ export function InteractiveMuscleSelector({
   };
 
   return (
-    <div className="flex flex-col items-center gap-4 p-6 bg-muted/30 rounded-lg border">
-      <div className="text-center space-y-1">
-        <h3 className="text-sm font-medium flex items-center gap-2 justify-center">
+    <div className="flex flex-col md:flex-row items-center gap-3 p-4 bg-muted/30 rounded-lg border">
+      <div className="text-center md:text-left space-y-1 flex-shrink-0">
+        <h3 className="text-sm font-medium flex items-center gap-2 justify-center md:justify-start">
           <MousePointerClick className="w-4 h-4" />
-          Click a muscle to filter exercises
+          Click a muscle to filter
         </h3>
         {selectedMuscles.length > 0 ? (
           <p className="text-sm text-primary font-medium">
@@ -35,14 +35,14 @@ export function InteractiveMuscleSelector({
           </p>
         ) : (
           <p className="text-xs text-muted-foreground">
-            Select one or more muscles to see targeted exercises
+            Select muscles to see exercises
           </p>
         )}
       </div>
       
       <MuscleMap
         highlightedMuscles={selectedMuscles}
-        size="lg"
+        size="md"
         interactive
         onMuscleClick={onMuscleToggle}
         selectedMuscle={selectedMuscle}
