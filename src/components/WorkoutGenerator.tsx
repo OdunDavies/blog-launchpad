@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { MuscleGroup } from '@/data/exercises';
-import { Loader2, Download, Dumbbell, Calendar, Sparkles, Save, History, Trash2, Pencil, Check, X, ChevronLeft, ChevronRight, User, Target, Zap } from 'lucide-react';
+import { Loader2, Download, Dumbbell, Calendar, Sparkles, Save, History, Trash2, Pencil, Check, X, ChevronLeft, ChevronRight, User, Target, Zap, Plus } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
@@ -13,16 +13,19 @@ import { StepProfile } from './workout-wizard/StepProfile';
 import { StepGoal } from './workout-wizard/StepGoal';
 import { StepMuscles } from './workout-wizard/StepMuscles';
 import { StepReview } from './workout-wizard/StepReview';
+import { ExercisePickerModal } from './ExercisePickerModal';
+
+interface WorkoutExercise {
+  name: string;
+  sets: number;
+  reps: string;
+  rest: string;
+}
 
 interface WorkoutDay {
   day: string;
   focus: string;
-  exercises: {
-    name: string;
-    sets: number;
-    reps: string;
-    rest: string;
-  }[];
+  exercises: WorkoutExercise[];
 }
 
 interface GeneratedPlan {
@@ -62,6 +65,9 @@ export function WorkoutGenerator() {
   const [showSavedPlans, setShowSavedPlans] = useState(false);
   const [editingPlanId, setEditingPlanId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState('');
+  const [editingDayIndex, setEditingDayIndex] = useState<number | null>(null);
+  const [exercisePickerOpen, setExercisePickerOpen] = useState(false);
+  const [addingToDayIndex, setAddingToDayIndex] = useState<number | null>(null);
   const { toast } = useToast();
 
   // Load saved plans from localStorage on mount
@@ -147,6 +153,53 @@ export function WorkoutGenerator() {
     );
   };
 
+  // Workout editing functions
+  const startEditingDay = (dayIndex: number) => {
+    setEditingDayIndex(dayIndex);
+  };
+
+  const stopEditingDay = () => {
+    setEditingDayIndex(null);
+  };
+
+  const removeExerciseFromDay = (dayIndex: number, exerciseIndex: number) => {
+    if (!generatedPlan) return;
+    
+    const newSchedule = [...generatedPlan.schedule];
+    newSchedule[dayIndex] = {
+      ...newSchedule[dayIndex],
+      exercises: newSchedule[dayIndex].exercises.filter((_, i) => i !== exerciseIndex),
+    };
+    
+    setGeneratedPlan({ ...generatedPlan, schedule: newSchedule });
+    toast({
+      title: "Exercise Removed",
+      description: "The exercise has been removed from your workout.",
+    });
+  };
+
+  const openExercisePicker = (dayIndex: number) => {
+    setAddingToDayIndex(dayIndex);
+    setExercisePickerOpen(true);
+  };
+
+  const addExerciseToDay = (exercise: WorkoutExercise) => {
+    if (!generatedPlan || addingToDayIndex === null) return;
+    
+    const newSchedule = [...generatedPlan.schedule];
+    newSchedule[addingToDayIndex] = {
+      ...newSchedule[addingToDayIndex],
+      exercises: [...newSchedule[addingToDayIndex].exercises, exercise],
+    };
+    
+    setGeneratedPlan({ ...generatedPlan, schedule: newSchedule });
+    setAddingToDayIndex(null);
+    toast({
+      title: "Exercise Added",
+      description: `${exercise.name} has been added to your workout.`,
+    });
+  };
+
   const canProceed = () => {
     switch (currentStep) {
       case 1:
@@ -156,7 +209,7 @@ export function WorkoutGenerator() {
       case 3:
         return !!goal;
       case 4:
-        return true; // Muscles are optional
+        return true;
       case 5:
         return true;
       default:
@@ -269,6 +322,7 @@ export function WorkoutGenerator() {
   const startNewPlan = () => {
     setGeneratedPlan(null);
     setCurrentStep(1);
+    setEditingDayIndex(null);
   };
 
   const renderStep = () => {
@@ -290,6 +344,17 @@ export function WorkoutGenerator() {
 
   return (
     <div className="space-y-6">
+      {/* Exercise Picker Modal */}
+      <ExercisePickerModal
+        open={exercisePickerOpen}
+        onClose={() => {
+          setExercisePickerOpen(false);
+          setAddingToDayIndex(null);
+        }}
+        onSelectExercise={addExerciseToDay}
+        dayFocus={addingToDayIndex !== null && generatedPlan ? generatedPlan.schedule[addingToDayIndex]?.focus : undefined}
+      />
+
       {/* Saved Plans Toggle */}
       {savedPlans.length > 0 && (
         <Card>
@@ -444,11 +509,11 @@ export function WorkoutGenerator() {
       ) : (
         <Card>
           <CardHeader>
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-4">
               <div>
                 <CardTitle>{generatedPlan.splitDays}-Day Workout Split</CardTitle>
                 <CardDescription className="mt-1">
-                  Goal: {generatedPlan.goal.charAt(0).toUpperCase() + generatedPlan.goal.slice(1)}
+                  Goal: {generatedPlan.goal.charAt(0).toUpperCase() + generatedPlan.goal.slice(1)} • Click a day to edit exercises
                 </CardDescription>
               </div>
               <div className="flex gap-2 flex-wrap">
@@ -469,28 +534,84 @@ export function WorkoutGenerator() {
           </CardHeader>
           <CardContent>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {generatedPlan.schedule.map((day) => (
-                <Card key={day.day} className="bg-muted/50">
-                  <CardHeader className="pb-2">
-                    <Badge variant="outline" className="w-fit mb-1">
-                      {day.day}
-                    </Badge>
-                    <CardTitle className="text-base">{day.focus}</CardTitle>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <ul className="space-y-2">
-                      {day.exercises.map((exercise, index) => (
-                        <li key={index} className="text-sm">
-                          <p className="font-medium">{exercise.name}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {exercise.sets} × {exercise.reps} • Rest: {exercise.rest}
-                          </p>
-                        </li>
-                      ))}
-                    </ul>
-                  </CardContent>
-                </Card>
-              ))}
+              {generatedPlan.schedule.map((day, dayIndex) => {
+                const isEditing = editingDayIndex === dayIndex;
+                
+                return (
+                  <Card 
+                    key={day.day} 
+                    className={`bg-muted/50 transition-all ${isEditing ? 'ring-2 ring-primary' : 'cursor-pointer hover:bg-muted'}`}
+                    onClick={() => !isEditing && startEditingDay(dayIndex)}
+                  >
+                    <CardHeader className="pb-2">
+                      <div className="flex items-center justify-between">
+                        <Badge variant="outline" className="w-fit">
+                          {day.day}
+                        </Badge>
+                        {isEditing ? (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              stopEditingDay();
+                            }}
+                          >
+                            <Check className="w-4 h-4 mr-1" />
+                            Done
+                          </Button>
+                        ) : (
+                          <Pencil className="w-4 h-4 text-muted-foreground" />
+                        )}
+                      </div>
+                      <CardTitle className="text-base">{day.focus}</CardTitle>
+                    </CardHeader>
+                    <CardContent className="pt-0">
+                      <ul className="space-y-2">
+                        {day.exercises.map((exercise, exerciseIndex) => (
+                          <li key={exerciseIndex} className="text-sm group/exercise">
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="flex-1">
+                                <p className="font-medium">{exercise.name}</p>
+                                <p className="text-xs text-muted-foreground">
+                                  {exercise.sets} × {exercise.reps} • Rest: {exercise.rest}
+                                </p>
+                              </div>
+                              {isEditing && (
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-6 w-6 text-muted-foreground hover:text-destructive shrink-0"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    removeExerciseFromDay(dayIndex, exerciseIndex);
+                                  }}
+                                >
+                                  <X className="w-3 h-3" />
+                                </Button>
+                              )}
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                      {isEditing && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-full mt-3"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openExercisePicker(dayIndex);
+                          }}
+                        >
+                          <Plus className="w-4 h-4 mr-2" />
+                          Add Exercise
+                        </Button>
+                      )}
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
           </CardContent>
         </Card>

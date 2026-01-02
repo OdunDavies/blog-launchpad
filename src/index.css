@@ -123,6 +123,27 @@
   }
 
   .exercise-card-hover {
-    @apply transition-all duration-200 hover:shadow-md hover:border-foreground/20;
+    @apply transition-all duration-300 hover:shadow-lg hover:border-foreground/20 hover:-translate-y-1;
   }
+
+  .card-image-hover {
+    @apply transition-transform duration-500 group-hover:scale-105;
+  }
+
+  .stat-counter {
+    @apply font-bold text-3xl md:text-4xl;
+  }
+
+  .hero-gradient {
+    background: linear-gradient(
+      to bottom,
+      hsl(var(--background) / 0.8),
+      hsl(var(--background) / 0.6),
+      hsl(var(--background))
+    );
+  }
+}
+
+html {
+  scroll-behavior: smooth;
 }
