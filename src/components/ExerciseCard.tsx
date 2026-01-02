@@ -12,6 +12,15 @@ import muscleShoulders from '@/assets/muscle-shoulders.jpg';
 import muscleArms from '@/assets/muscle-arms.jpg';
 import muscleLegs from '@/assets/muscle-legs.jpg';
 import muscleCore from '@/assets/muscle-core.jpg';
+import exerciseBarbell from '@/assets/exercise-barbell.jpg';
+import exerciseDumbbell from '@/assets/exercise-dumbbell.jpg';
+import exerciseBodyweight from '@/assets/exercise-bodyweight.jpg';
+import exerciseCable from '@/assets/exercise-cable.jpg';
+import exerciseMachine from '@/assets/exercise-machine.jpg';
+import exerciseKettlebell from '@/assets/exercise-kettlebell.jpg';
+import exerciseBands from '@/assets/exercise-bands.jpg';
+import exerciseEzbar from '@/assets/exercise-ezbar.jpg';
+import exerciseSmith from '@/assets/exercise-smith.jpg';
 
 interface ExerciseCardProps {
   exercise: Exercise;
@@ -25,8 +34,22 @@ const difficultyColors = {
   advanced: 'bg-red-500/10 text-red-600 border-red-500/30',
 };
 
-// Map exercise categories/muscles to images
+// Map exercise to images based on equipment first, then muscle group
 function getExerciseImage(exercise: Exercise): string {
+  const equipment = exercise.equipment.toLowerCase();
+  
+  // First, try to match by equipment for more variety
+  if (equipment.includes('barbell')) return exerciseBarbell;
+  if (equipment.includes('dumbbell')) return exerciseDumbbell;
+  if (equipment.includes('cable')) return exerciseCable;
+  if (equipment.includes('machine') || equipment.includes('press machine') || equipment.includes('leg press')) return exerciseMachine;
+  if (equipment.includes('kettlebell')) return exerciseKettlebell;
+  if (equipment.includes('band') || equipment.includes('resistance')) return exerciseBands;
+  if (equipment.includes('ez bar') || equipment.includes('ez-bar')) return exerciseEzbar;
+  if (equipment.includes('smith')) return exerciseSmith;
+  if (equipment === 'bodyweight' || equipment === 'none' || equipment.includes('pull-up') || equipment.includes('dip')) return exerciseBodyweight;
+  
+  // Fallback to muscle-based images
   const primary = exercise.primaryMuscles[0];
   if (primary === 'chest') return muscleChest;
   if (['lats', 'traps', 'back'].includes(primary)) return muscleBack;
@@ -34,7 +57,8 @@ function getExerciseImage(exercise: Exercise): string {
   if (['biceps', 'triceps', 'forearms'].includes(primary)) return muscleArms;
   if (['quads', 'hamstrings', 'glutes', 'calves'].includes(primary)) return muscleLegs;
   if (['abs', 'obliques'].includes(primary)) return muscleCore;
-  return muscleChest;
+  
+  return exerciseBarbell;
 }
 
 function getQuickStats(difficulty: string): { sets: string; reps: string } {
