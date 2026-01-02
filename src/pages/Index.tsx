@@ -4,10 +4,31 @@ import { ExerciseLibrary } from '@/components/ExerciseLibrary';
 import { WorkoutGenerator } from '@/components/WorkoutGenerator';
 import { WorkoutTemplates } from '@/components/WorkoutTemplates';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { HeroSection } from '@/components/HeroSection';
+import { MuscleGroupCards } from '@/components/MuscleGroupCards';
 import { Dumbbell, Library, Sparkles, LayoutTemplate } from 'lucide-react';
+import { MuscleGroup } from '@/data/exercises';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('library');
+  const [selectedMuscleFilter, setSelectedMuscleFilter] = useState<MuscleGroup[]>([]);
+
+  const handleExploreClick = () => {
+    setActiveTab('library');
+    setSelectedMuscleFilter([]);
+    document.getElementById('main-content')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const handleGenerateClick = () => {
+    setActiveTab('generator');
+    document.getElementById('main-content')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const handleMuscleGroupSelect = (muscles: MuscleGroup[]) => {
+    setSelectedMuscleFilter(muscles);
+    setActiveTab('library');
+    document.getElementById('main-content')?.scrollIntoView({ behavior: 'smooth' });
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -21,7 +42,7 @@ const Index = () => {
               </div>
               <div>
                 <h1 className="text-xl font-bold tracking-tight">Musclepedia</h1>
-                <p className="text-xs text-muted-foreground">Your complete exercise encyclopedia</p>
+                <p className="text-xs text-muted-foreground hidden sm:block">Your complete exercise encyclopedia</p>
               </div>
             </div>
             <ThemeToggle />
@@ -29,8 +50,17 @@ const Index = () => {
         </div>
       </header>
 
+      {/* Hero Section */}
+      <HeroSection 
+        onExploreClick={handleExploreClick}
+        onGenerateClick={handleGenerateClick}
+      />
+
+      {/* Muscle Group Cards */}
+      <MuscleGroupCards onSelectMuscleGroup={handleMuscleGroupSelect} />
+
       {/* Main Content */}
-      <main className="container max-w-6xl mx-auto px-4 py-8">
+      <main id="main-content" className="container max-w-6xl mx-auto px-4 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid w-full max-w-xl grid-cols-3">
             <TabsTrigger value="library" className="flex items-center gap-2">
@@ -54,7 +84,7 @@ const Index = () => {
                 Browse our collection of exercises with video demonstrations and muscle targeting info.
               </p>
             </div>
-            <ExerciseLibrary />
+            <ExerciseLibrary initialMuscleFilter={selectedMuscleFilter} />
           </TabsContent>
 
           <TabsContent value="templates" className="mt-6">

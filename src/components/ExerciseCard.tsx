@@ -6,6 +6,13 @@ import { ExercisePreviewCard } from './ExercisePreviewCard';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Dumbbell, Play, Heart } from 'lucide-react';
 
+import muscleChest from '@/assets/muscle-chest.jpg';
+import muscleBack from '@/assets/muscle-back.jpg';
+import muscleShoulders from '@/assets/muscle-shoulders.jpg';
+import muscleArms from '@/assets/muscle-arms.jpg';
+import muscleLegs from '@/assets/muscle-legs.jpg';
+import muscleCore from '@/assets/muscle-core.jpg';
+
 interface ExerciseCardProps {
   exercise: Exercise;
   isFavorite?: boolean;
@@ -13,10 +20,35 @@ interface ExerciseCardProps {
 }
 
 const difficultyColors = {
-  beginner: 'bg-secondary text-secondary-foreground',
-  intermediate: 'bg-muted text-muted-foreground',
-  advanced: 'bg-foreground text-background',
+  beginner: 'bg-green-500/10 text-green-600 border-green-500/30',
+  intermediate: 'bg-yellow-500/10 text-yellow-600 border-yellow-500/30',
+  advanced: 'bg-red-500/10 text-red-600 border-red-500/30',
 };
+
+// Map exercise categories/muscles to images
+function getExerciseImage(exercise: Exercise): string {
+  const primary = exercise.primaryMuscles[0];
+  if (primary === 'chest') return muscleChest;
+  if (['lats', 'traps', 'back'].includes(primary)) return muscleBack;
+  if (primary === 'shoulders') return muscleShoulders;
+  if (['biceps', 'triceps', 'forearms'].includes(primary)) return muscleArms;
+  if (['quads', 'hamstrings', 'glutes', 'calves'].includes(primary)) return muscleLegs;
+  if (['abs', 'obliques'].includes(primary)) return muscleCore;
+  return muscleChest;
+}
+
+function getQuickStats(difficulty: string): { sets: string; reps: string } {
+  switch (difficulty) {
+    case 'beginner':
+      return { sets: '3', reps: '10-12' };
+    case 'intermediate':
+      return { sets: '4', reps: '8-10' };
+    case 'advanced':
+      return { sets: '4-5', reps: '6-8' };
+    default:
+      return { sets: '3', reps: '10' };
+  }
+}
 
 export function ExerciseCard({ exercise, isFavorite = false, onToggleFavorite }: ExerciseCardProps) {
   const handleFavoriteClick = (e: React.MouseEvent) => {
@@ -24,30 +56,58 @@ export function ExerciseCard({ exercise, isFavorite = false, onToggleFavorite }:
     onToggleFavorite?.(exercise.id);
   };
 
+  const exerciseImage = getExerciseImage(exercise);
+  const quickStats = getQuickStats(exercise.difficulty);
+
   return (
     <Dialog>
       <ExercisePreviewCard exercise={exercise}>
         <DialogTrigger asChild>
-          <Card className="exercise-card-hover cursor-pointer group relative">
-            {onToggleFavorite && (
-              <button
-                onClick={handleFavoriteClick}
-                className="absolute top-2 right-2 z-10 p-1.5 rounded-full bg-background/80 hover:bg-background transition-colors"
-                aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
-              >
-                <Heart
-                  className={`w-4 h-4 transition-colors ${
-                    isFavorite ? 'fill-destructive text-destructive' : 'text-muted-foreground hover:text-destructive'
-                  }`}
-                />
-              </button>
-            )}
-            <CardHeader className="pb-3">
-              <div className="flex justify-between items-start gap-2 pr-8">
-                <CardTitle className="text-base font-semibold leading-tight group-hover:text-foreground/80 transition-colors">
+          <Card className="exercise-card-hover cursor-pointer group relative overflow-hidden">
+            {/* Image Header */}
+            <div className="relative h-32 overflow-hidden">
+              <div 
+                className="absolute inset-0 bg-cover bg-center card-image-hover"
+                style={{ backgroundImage: `url(${exerciseImage})` }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
+              
+              {/* Favorite Button */}
+              {onToggleFavorite && (
+                <button
+                  onClick={handleFavoriteClick}
+                  className="absolute top-2 right-2 z-10 p-1.5 rounded-full bg-background/80 hover:bg-background transition-colors"
+                  aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+                >
+                  <Heart
+                    className={`w-4 h-4 transition-colors ${
+                      isFavorite ? 'fill-destructive text-destructive' : 'text-muted-foreground hover:text-destructive'
+                    }`}
+                  />
+                </button>
+              )}
+              
+              {/* Play Icon */}
+              <div className="absolute bottom-2 right-2 p-2 rounded-full bg-primary/90 opacity-0 group-hover:opacity-100 transition-opacity">
+                <Play className="w-4 h-4 text-primary-foreground fill-primary-foreground" />
+              </div>
+              
+              {/* Quick Stats */}
+              <div className="absolute bottom-2 left-2 flex gap-2">
+                <Badge variant="secondary" className="bg-background/80 text-xs">
+                  {quickStats.sets} sets
+                </Badge>
+                <Badge variant="secondary" className="bg-background/80 text-xs">
+                  {quickStats.reps} reps
+                </Badge>
+              </div>
+            </div>
+
+            <CardHeader className="pb-2 pt-3">
+              <div className="flex justify-between items-start gap-2">
+                <CardTitle className="text-base font-semibold leading-tight group-hover:text-primary transition-colors">
                   {exercise.name}
                 </CardTitle>
-                <Play className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
               </div>
               <div className="flex flex-wrap gap-1.5 mt-2">
                 <Badge variant="outline" className={difficultyColors[exercise.difficulty]}>
@@ -58,7 +118,7 @@ export function ExerciseCard({ exercise, isFavorite = false, onToggleFavorite }:
                 </Badge>
               </div>
             </CardHeader>
-            <CardContent className="pt-0">
+            <CardContent className="pt-0 pb-4">
               <div className="flex items-center gap-4">
                 <MuscleMap
                   highlightedMuscles={exercise.primaryMuscles}
@@ -78,11 +138,16 @@ export function ExerciseCard({ exercise, isFavorite = false, onToggleFavorite }:
                     <>
                       <p className="text-xs text-muted-foreground mb-1 mt-2">Secondary</p>
                       <div className="flex flex-wrap gap-1">
-                        {exercise.secondaryMuscles.map((muscle) => (
+                        {exercise.secondaryMuscles.slice(0, 2).map((muscle) => (
                           <Badge key={muscle} variant="outline" className="text-xs capitalize">
                             {muscle}
                           </Badge>
                         ))}
+                        {exercise.secondaryMuscles.length > 2 && (
+                          <Badge variant="outline" className="text-xs">
+                            +{exercise.secondaryMuscles.length - 2}
+                          </Badge>
+                        )}
                       </div>
                     </>
                   )}
