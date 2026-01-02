@@ -1,13 +1,10 @@
 import { useState, useMemo, useEffect } from 'react';
-import { exercises, muscleGroups, MuscleGroup, equipmentTypes } from '@/data/exercises';
+import { exercises, MuscleGroup } from '@/data/exercises';
 import { ExerciseCard } from './ExerciseCard';
 import { ExerciseCardSkeleton } from './ExerciseCardSkeleton';
 import { InteractiveMuscleSelector } from './InteractiveMuscleSelector';
 import { SearchAutocomplete } from './SearchAutocomplete';
-import { Badge } from '@/components/ui/badge';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import { X, Heart } from 'lucide-react';
+import { ExerciseFilters } from './ExerciseFilters';
 import { useFavorites } from '@/hooks/useFavorites';
 
 interface ExerciseLibraryProps {
@@ -86,28 +83,7 @@ export function ExerciseLibrary({ initialMuscleFilter = [] }: ExerciseLibraryPro
     setShowFavoritesOnly(false);
   };
 
-  const groupedMuscles = muscleGroups.reduce(
-    (acc, muscle) => {
-      if (!acc[muscle.category]) {
-        acc[muscle.category] = [];
-      }
-      acc[muscle.category].push(muscle);
-      return acc;
-    },
-    {} as Record<string, typeof muscleGroups>
-  );
-
   const hasActiveFilters = search || selectedMuscles.length > 0 || selectedDifficulty || selectedCategory || selectedEquipment.length > 0 || showFavoritesOnly;
-
-  const categories = [
-    { id: 'push', label: 'Push' },
-    { id: 'pull', label: 'Pull' },
-    { id: 'legs', label: 'Legs' },
-    { id: 'core', label: 'Core' },
-    { id: 'compound', label: 'Compound' },
-    { id: 'cardio', label: 'Cardio' },
-    { id: 'stretching', label: 'Stretching' },
-  ];
 
   return (
     <div className="space-y-6">
@@ -128,108 +104,21 @@ export function ExerciseLibrary({ initialMuscleFilter = [] }: ExerciseLibraryPro
           onMuscleSelect={toggleMuscle}
         />
 
-        {/* Favorites Toggle */}
-        <div className="flex items-center space-x-2">
-          <Switch
-            id="favorites-only"
-            checked={showFavoritesOnly}
-            onCheckedChange={setShowFavoritesOnly}
-          />
-          <Label htmlFor="favorites-only" className="flex items-center gap-1.5 cursor-pointer">
-            <Heart className={`w-4 h-4 ${showFavoritesOnly ? 'fill-destructive text-destructive' : ''}`} />
-            Show favorites only
-            {favorites.length > 0 && (
-              <span className="text-xs text-muted-foreground">({favorites.length})</span>
-            )}
-          </Label>
-        </div>
-
-        {/* Equipment Filter */}
-        <div>
-          <p className="text-sm font-medium mb-2">Equipment</p>
-          <div className="flex flex-wrap gap-2">
-            {equipmentTypes.map((eq) => (
-              <Badge
-                key={eq}
-                variant={selectedEquipment.includes(eq) ? 'default' : 'outline'}
-                className="cursor-pointer"
-                onClick={() => toggleEquipment(eq)}
-              >
-                {eq}
-              </Badge>
-            ))}
-          </div>
-        </div>
-
-        {/* Category Filter */}
-        <div>
-          <p className="text-sm font-medium mb-2">Category</p>
-          <div className="flex flex-wrap gap-2">
-            {categories.map((cat) => (
-              <Badge
-                key={cat.id}
-                variant={selectedCategory === cat.id ? 'default' : 'outline'}
-                className="cursor-pointer"
-                onClick={() =>
-                  setSelectedCategory(selectedCategory === cat.id ? null : cat.id)
-                }
-              >
-                {cat.label}
-              </Badge>
-            ))}
-          </div>
-        </div>
-
-        {/* Difficulty Filter */}
-        <div>
-          <p className="text-sm font-medium mb-2">Difficulty</p>
-          <div className="flex flex-wrap gap-2">
-            {['beginner', 'intermediate', 'advanced'].map((diff) => (
-              <Badge
-                key={diff}
-                variant={selectedDifficulty === diff ? 'default' : 'outline'}
-                className="cursor-pointer capitalize"
-                onClick={() =>
-                  setSelectedDifficulty(selectedDifficulty === diff ? null : diff)
-                }
-              >
-                {diff}
-              </Badge>
-            ))}
-          </div>
-        </div>
-
-        {/* Muscle Group Filters */}
-        <div className="space-y-3">
-          <p className="text-sm font-medium">Muscle Groups</p>
-          {Object.entries(groupedMuscles).map(([category, muscles]) => (
-            <div key={category}>
-              <p className="text-xs text-muted-foreground mb-1.5">{category}</p>
-              <div className="flex flex-wrap gap-1.5">
-                {muscles.map((muscle) => (
-                  <Badge
-                    key={muscle.id}
-                    variant={selectedMuscles.includes(muscle.id) ? 'default' : 'outline'}
-                    className="cursor-pointer text-xs"
-                    onClick={() => toggleMuscle(muscle.id)}
-                  >
-                    {muscle.name}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {hasActiveFilters && (
-          <button
-            onClick={clearFilters}
-            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <X className="w-4 h-4" />
-            Clear all filters
-          </button>
-        )}
+        {/* Filter Bar */}
+        <ExerciseFilters
+          selectedMuscles={selectedMuscles}
+          selectedEquipment={selectedEquipment}
+          selectedCategory={selectedCategory}
+          selectedDifficulty={selectedDifficulty}
+          showFavoritesOnly={showFavoritesOnly}
+          favoritesCount={favorites.length}
+          onMuscleToggle={toggleMuscle}
+          onEquipmentToggle={toggleEquipment}
+          onCategoryChange={setSelectedCategory}
+          onDifficultyChange={setSelectedDifficulty}
+          onFavoritesToggle={setShowFavoritesOnly}
+          onClearAll={clearFilters}
+        />
       </div>
 
       {/* Results count */}

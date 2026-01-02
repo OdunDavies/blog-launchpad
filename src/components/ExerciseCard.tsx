@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { MuscleMap } from './MuscleMap';
 import { ExercisePreviewCard } from './ExercisePreviewCard';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Dumbbell, Play, Heart } from 'lucide-react';
+import { Dumbbell, Heart } from 'lucide-react';
 
 import muscleChest from '@/assets/muscle-chest.jpg';
 import muscleBack from '@/assets/muscle-back.jpg';
@@ -63,11 +63,11 @@ export function ExerciseCard({ exercise, isFavorite = false, onToggleFavorite }:
     <Dialog>
       <ExercisePreviewCard exercise={exercise}>
         <DialogTrigger asChild>
-          <Card className="exercise-card-hover cursor-pointer group relative overflow-hidden">
+          <Card className="cursor-pointer relative overflow-hidden border-border/50">
             {/* Image Header */}
             <div className="relative h-32 overflow-hidden">
               <div 
-                className="absolute inset-0 bg-cover bg-center card-image-hover"
+                className="absolute inset-0 bg-cover bg-center"
                 style={{ backgroundImage: `url(${exerciseImage})` }}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
@@ -87,11 +87,6 @@ export function ExerciseCard({ exercise, isFavorite = false, onToggleFavorite }:
                 </button>
               )}
               
-              {/* Play Icon */}
-              <div className="absolute bottom-2 right-2 p-2 rounded-full bg-primary/90 opacity-0 group-hover:opacity-100 transition-opacity">
-                <Play className="w-4 h-4 text-primary-foreground fill-primary-foreground" />
-              </div>
-              
               {/* Quick Stats */}
               <div className="absolute bottom-2 left-2 flex gap-2">
                 <Badge variant="secondary" className="bg-background/80 text-xs">
@@ -105,7 +100,7 @@ export function ExerciseCard({ exercise, isFavorite = false, onToggleFavorite }:
 
             <CardHeader className="pb-2 pt-3">
               <div className="flex justify-between items-start gap-2">
-                <CardTitle className="text-base font-semibold leading-tight group-hover:text-primary transition-colors">
+                <CardTitle className="text-base font-semibold leading-tight">
                   {exercise.name}
                 </CardTitle>
               </div>

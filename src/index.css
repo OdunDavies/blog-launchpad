@@ -113,28 +113,19 @@
 }
 
 @layer utilities {
-  .muscle-highlight {
-    fill: hsl(var(--muscle-highlight));
-    transition: fill 0.2s ease;
-  }
+.muscle-highlight {
+  @apply transition-all duration-200 cursor-pointer;
+}
 
-  .muscle-default {
-    fill: hsl(var(--muscle-secondary));
-  }
+.muscle-highlight:hover {
+  filter: brightness(1.2);
+}
 
-  .exercise-card-hover {
-    @apply transition-all duration-300 hover:shadow-lg hover:border-foreground/20 hover:-translate-y-1;
-  }
+.muscle-highlight.active {
+  @apply fill-primary stroke-primary;
+}
 
-  .card-image-hover {
-    @apply transition-transform duration-500 group-hover:scale-105;
-  }
-
-  .stat-counter {
-    @apply font-bold text-3xl md:text-4xl;
-  }
-
-  .hero-gradient {
+.hero-gradient {
     background: linear-gradient(
       to bottom,
       hsl(var(--background) / 0.8),
