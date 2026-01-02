@@ -1,11 +1,10 @@
 import { Exercise } from '@/data/exercises';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { MuscleMap } from './MuscleMap';
 import { ExercisePreviewCard } from './ExercisePreviewCard';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Dumbbell, Heart, ChevronRight } from 'lucide-react';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { Dumbbell, Heart } from 'lucide-react';
 
 import muscleChest from '@/assets/muscle-chest.jpg';
 import muscleBack from '@/assets/muscle-back.jpg';
@@ -87,8 +86,6 @@ function getQuickStats(difficulty: string): { sets: string; reps: string } {
 }
 
 export function ExerciseCard({ exercise, isFavorite = false, onToggleFavorite }: ExerciseCardProps) {
-  const isMobile = useIsMobile();
-  
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     onToggleFavorite?.(exercise.id);
@@ -97,136 +94,6 @@ export function ExerciseCard({ exercise, isFavorite = false, onToggleFavorite }:
   const exerciseImage = getExerciseImage(exercise);
   const quickStats = getQuickStats(exercise.difficulty);
 
-  // Compact mobile card
-  if (isMobile) {
-    return (
-      <Dialog>
-        <ExercisePreviewCard exercise={exercise}>
-          <DialogTrigger asChild>
-            <Card className="cursor-pointer relative overflow-hidden border-border/50">
-              <CardContent className="p-3">
-                <div className="flex items-center gap-3">
-                  {/* Small thumbnail */}
-                  <div 
-                    className="w-14 h-14 rounded-lg bg-cover bg-center flex-shrink-0"
-                    style={{ backgroundImage: `url(${exerciseImage})` }}
-                  />
-                  
-                  {/* Content */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between gap-2">
-                      <h3 className="font-medium text-sm leading-tight line-clamp-1">
-                        {exercise.name}
-                      </h3>
-                      {onToggleFavorite && (
-                        <button
-                          onClick={handleFavoriteClick}
-                          className="p-1 -mr-1 flex-shrink-0"
-                          aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
-                        >
-                          <Heart
-                            className={`w-4 h-4 transition-colors ${
-                              isFavorite ? 'fill-destructive text-destructive' : 'text-muted-foreground'
-                            }`}
-                          />
-                        </button>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Badge variant="outline" className={`${difficultyColors[exercise.difficulty]} text-[10px] px-1.5 py-0`}>
-                        {exercise.difficulty}
-                      </Badge>
-                      <span className="text-xs text-muted-foreground capitalize">
-                        {exercise.primaryMuscles[0]}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1 mt-1.5 text-[10px] text-muted-foreground">
-                      <Dumbbell className="w-3 h-3" />
-                      <span className="truncate">{exercise.equipment}</span>
-                    </div>
-                  </div>
-                  
-                  <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                </div>
-              </CardContent>
-            </Card>
-          </DialogTrigger>
-        </ExercisePreviewCard>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="text-xl">{exercise.name}</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            {/* Video embed */}
-            <div className="aspect-video w-full rounded-lg overflow-hidden bg-muted">
-              <iframe
-                src={exercise.videoUrl}
-                title={exercise.name}
-                className="w-full h-full"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              />
-            </div>
-
-            <div className="flex gap-6 items-start">
-              <MuscleMap
-                highlightedMuscles={exercise.primaryMuscles}
-                secondaryMuscles={exercise.secondaryMuscles}
-                size="md"
-              />
-              <div className="flex-1 space-y-3">
-                <div>
-                  <h4 className="font-medium text-sm mb-1">Equipment</h4>
-                  <p className="text-sm text-muted-foreground">{exercise.equipment}</p>
-                </div>
-                <div>
-                  <h4 className="font-medium text-sm mb-1">Difficulty</h4>
-                  <Badge className={difficultyColors[exercise.difficulty]}>
-                    {exercise.difficulty}
-                  </Badge>
-                </div>
-                <div>
-                  <h4 className="font-medium text-sm mb-1">Primary Muscles</h4>
-                  <div className="flex flex-wrap gap-1">
-                    {exercise.primaryMuscles.map((muscle) => (
-                      <Badge key={muscle} variant="secondary" className="capitalize">
-                        {muscle}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-                {exercise.secondaryMuscles.length > 0 && (
-                  <div>
-                    <h4 className="font-medium text-sm mb-1">Secondary Muscles</h4>
-                    <div className="flex flex-wrap gap-1">
-                      {exercise.secondaryMuscles.map((muscle) => (
-                        <Badge key={muscle} variant="outline" className="capitalize">
-                          {muscle}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div>
-              <h4 className="font-medium mb-2">Instructions</h4>
-              <ol className="list-decimal list-inside space-y-1.5">
-                {exercise.instructions.map((instruction, index) => (
-                  <li key={index} className="text-sm text-muted-foreground">
-                    {instruction}
-                  </li>
-                ))}
-              </ol>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-    );
-  }
-
-  // Desktop full card
   return (
     <Dialog>
       <ExercisePreviewCard exercise={exercise}>
@@ -266,11 +133,11 @@ export function ExerciseCard({ exercise, isFavorite = false, onToggleFavorite }:
               </div>
             </div>
 
-            <div className="p-3 pt-2">
+            <CardHeader className="pb-2 pt-3">
               <div className="flex justify-between items-start gap-2">
-                <h3 className="text-base font-semibold leading-tight">
+                <CardTitle className="text-base font-semibold leading-tight">
                   {exercise.name}
-                </h3>
+                </CardTitle>
               </div>
               <div className="flex flex-wrap gap-1.5 mt-2">
                 <Badge variant="outline" className={difficultyColors[exercise.difficulty]}>
@@ -280,7 +147,9 @@ export function ExerciseCard({ exercise, isFavorite = false, onToggleFavorite }:
                   {exercise.category}
                 </Badge>
               </div>
-              <div className="flex items-center gap-4 mt-3">
+            </CardHeader>
+            <CardContent className="pt-0 pb-4">
+              <div className="flex items-center gap-4">
                 <MuscleMap
                   highlightedMuscles={exercise.primaryMuscles}
                   secondaryMuscles={exercise.secondaryMuscles}
@@ -318,7 +187,7 @@ export function ExerciseCard({ exercise, isFavorite = false, onToggleFavorite }:
                 <Dumbbell className="w-3.5 h-3.5" />
                 <span>{exercise.equipment}</span>
               </div>
-            </div>
+            </CardContent>
           </Card>
         </DialogTrigger>
       </ExercisePreviewCard>
