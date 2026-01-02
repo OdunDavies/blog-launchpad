@@ -70,7 +70,7 @@ export function HeroSection({ onExploreClick, onGenerateClick }: HeroSectionProp
         <div className="animate-fade-in">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-6">
             <Dumbbell className="w-4 h-4 text-primary" />
-            <span className="text-sm font-medium text-foreground">Your Complete Fitness Encyclopedia</span>
+            <span className="text-sm font-medium text-foreground">Navigate Your Fitness Journey</span>
           </div>
           
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6">
