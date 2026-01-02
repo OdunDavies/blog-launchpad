@@ -6,7 +6,8 @@ import { WorkoutTemplates } from '@/components/WorkoutTemplates';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { HeroSection } from '@/components/HeroSection';
 import { MuscleGroupCards } from '@/components/MuscleGroupCards';
-import { Dumbbell, Library, Sparkles, LayoutTemplate } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Dumbbell, Library, Sparkles, LayoutTemplate, ArrowUp, Github, Twitter, Mail } from 'lucide-react';
 import { MuscleGroup } from '@/data/exercises';
 
 const Index = () => {
@@ -110,11 +111,85 @@ const Index = () => {
       </main>
 
       {/* Footer */}
-      <footer className="border-t mt-auto">
-        <div className="container max-w-6xl mx-auto px-4 py-6">
-          <p className="text-center text-sm text-muted-foreground">
-            Click on any exercise to see video demonstrations and detailed instructions.
-          </p>
+      <footer className="border-t mt-auto bg-muted/30">
+        <div className="container max-w-6xl mx-auto px-4 py-12">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+            {/* Brand */}
+            <div>
+              <div className="flex items-center gap-2 mb-4">
+                <div className="p-2 rounded-lg bg-foreground text-background">
+                  <Dumbbell className="w-4 h-4" />
+                </div>
+                <span className="font-bold text-lg">Musclepedia</span>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Your complete fitness encyclopedia. Discover exercises, learn proper form, and generate AI-powered workout plans.
+              </p>
+            </div>
+            
+            {/* Quick Links */}
+            <div>
+              <h4 className="font-semibold mb-4">Quick Links</h4>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li>
+                  <button 
+                    onClick={() => { setActiveTab('library'); document.getElementById('main-content')?.scrollIntoView({ behavior: 'smooth' }); }}
+                    className="hover:text-foreground transition-colors"
+                  >
+                    Exercise Library
+                  </button>
+                </li>
+                <li>
+                  <button 
+                    onClick={() => { setActiveTab('templates'); document.getElementById('main-content')?.scrollIntoView({ behavior: 'smooth' }); }}
+                    className="hover:text-foreground transition-colors"
+                  >
+                    Workout Templates
+                  </button>
+                </li>
+                <li>
+                  <button 
+                    onClick={() => { setActiveTab('generator'); document.getElementById('main-content')?.scrollIntoView({ behavior: 'smooth' }); }}
+                    className="hover:text-foreground transition-colors"
+                  >
+                    AI Generator
+                  </button>
+                </li>
+              </ul>
+            </div>
+            
+            {/* Connect */}
+            <div>
+              <h4 className="font-semibold mb-4">Connect</h4>
+              <div className="flex gap-3">
+                <Button variant="outline" size="icon" className="rounded-full h-9 w-9">
+                  <Github className="w-4 h-4" />
+                </Button>
+                <Button variant="outline" size="icon" className="rounded-full h-9 w-9">
+                  <Twitter className="w-4 h-4" />
+                </Button>
+                <Button variant="outline" size="icon" className="rounded-full h-9 w-9">
+                  <Mail className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+          
+          {/* Bottom bar */}
+          <div className="pt-8 border-t flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p className="text-sm text-muted-foreground">
+              © {new Date().getFullYear()} Musclepedia. All rights reserved.
+            </p>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              className="gap-2"
+            >
+              <ArrowUp className="w-4 h-4" />
+              Back to top
+            </Button>
+          </div>
         </div>
       </footer>
     </div>
