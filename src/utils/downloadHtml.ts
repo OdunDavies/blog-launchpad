@@ -1,3 +1,6 @@
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
+
 interface WorkoutExercise {
   name: string;
   sets: number;
@@ -283,6 +286,54 @@ export function generateWorkoutHtml(plan: WorkoutPlanData): string {
   </div>
 </body>
 </html>`;
+}
+
+export async function generateWorkoutPdf(plan: WorkoutPlanData): Promise<void> {
+  // Create a hidden container with the styled HTML
+  const container = document.createElement('div');
+  container.innerHTML = generateWorkoutHtml(plan);
+  container.style.position = 'absolute';
+  container.style.left = '-9999px';
+  container.style.width = '800px';
+  container.style.background = '#f8fafc';
+  document.body.appendChild(container);
+  
+  try {
+    // Capture the HTML as canvas
+    const canvas = await html2canvas(container.querySelector('.container') as HTMLElement, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: '#f8fafc',
+      logging: false,
+    });
+    
+    // Calculate PDF dimensions (A4)
+    const imgWidth = 210; // A4 width in mm
+    const pageHeight = 297; // A4 height in mm
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    let position = 0;
+    let heightLeft = imgHeight;
+    
+    // Add first page
+    pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight;
+    
+    // Add additional pages if content overflows
+    while (heightLeft > 0) {
+      position = heightLeft - imgHeight;
+      pdf.addPage();
+      pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+    }
+    
+    // Download the PDF
+    const filename = plan.name.replace(/\s+/g, '-').toLowerCase();
+    pdf.save(`${filename}-workout-plan.pdf`);
+  } finally {
+    document.body.removeChild(container);
+  }
 }
 
 export function downloadHtmlFile(content: string, filename: string): void {

@@ -14,7 +14,10 @@ import { StepGoal } from './workout-wizard/StepGoal';
 import { StepMuscles } from './workout-wizard/StepMuscles';
 import { StepReview } from './workout-wizard/StepReview';
 import { ExercisePickerModal } from './ExercisePickerModal';
-import { generateWorkoutHtml, downloadHtmlFile } from '@/utils/downloadHtml';
+import { generateWorkoutPdf } from '@/utils/downloadHtml';
+import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
+import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { SortableExerciseItem } from './SortableExerciseItem';
 
 interface WorkoutExercise {
   name: string;
@@ -69,7 +72,17 @@ export function WorkoutGenerator() {
   const [editingDayIndex, setEditingDayIndex] = useState<number | null>(null);
   const [exercisePickerOpen, setExercisePickerOpen] = useState(false);
   const [addingToDayIndex, setAddingToDayIndex] = useState<number | null>(null);
+  const [isDownloading, setIsDownloading] = useState(false);
   const { toast } = useToast();
+
+  // DnD sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    })
+  );
 
   // Load saved plans from localStorage on mount
   useEffect(() => {
@@ -201,6 +214,28 @@ export function WorkoutGenerator() {
     });
   };
 
+  const reorderExercises = (dayIndex: number, oldIndex: number, newIndex: number) => {
+    if (!generatedPlan) return;
+    
+    const newSchedule = [...generatedPlan.schedule];
+    newSchedule[dayIndex] = {
+      ...newSchedule[dayIndex],
+      exercises: arrayMove(newSchedule[dayIndex].exercises, oldIndex, newIndex),
+    };
+    
+    setGeneratedPlan({ ...generatedPlan, schedule: newSchedule });
+  };
+
+  const handleDragEnd = (event: DragEndEvent, dayIndex: number) => {
+    const { active, over } = event;
+    
+    if (over && active.id !== over.id) {
+      const oldIndex = parseInt(active.id.toString().split('-')[1]);
+      const newIndex = parseInt(over.id.toString().split('-')[1]);
+      reorderExercises(dayIndex, oldIndex, newIndex);
+    }
+  };
+
   const canProceed = () => {
     switch (currentStep) {
       case 1:
@@ -285,18 +320,34 @@ export function WorkoutGenerator() {
     }
   };
 
-  const downloadPlan = () => {
-    if (!generatedPlan) return;
-
-    const htmlContent = generateWorkoutHtml({
-      name: `${generatedPlan.splitDays}-Day ${generatedPlan.goal.charAt(0).toUpperCase() + generatedPlan.goal.slice(1)} Workout Plan`,
-      splitDays: generatedPlan.splitDays,
-      goal: generatedPlan.goal,
-      gender: generatedPlan.gender,
-      targetMuscles: generatedPlan.targetMuscles,
-      schedule: generatedPlan.schedule,
-    });
-    downloadHtmlFile(htmlContent, `workout-plan-${generatedPlan.splitDays}day-${generatedPlan.goal}.html`);
+  const downloadPlan = async () => {
+    if (!generatedPlan || isDownloading) return;
+    
+    setIsDownloading(true);
+    try {
+      await generateWorkoutPdf({
+        name: `${generatedPlan.splitDays}-Day ${generatedPlan.goal.charAt(0).toUpperCase() + generatedPlan.goal.slice(1)} Workout Plan`,
+        splitDays: generatedPlan.splitDays,
+        goal: generatedPlan.goal,
+        gender: generatedPlan.gender,
+        targetMuscles: generatedPlan.targetMuscles,
+        schedule: generatedPlan.schedule,
+      });
+      
+      toast({
+        title: "PDF Downloaded",
+        description: "Your workout plan has been saved as a PDF.",
+      });
+    } catch (error) {
+      console.error('PDF generation failed:', error);
+      toast({
+        title: "Download Failed",
+        description: "Failed to generate PDF. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDownloading(false);
+    }
   };
 
   const startNewPlan = () => {
@@ -505,9 +556,13 @@ export function WorkoutGenerator() {
                   <Save className="w-4 h-4 mr-2" />
                   Save
                 </Button>
-                <Button onClick={downloadPlan} variant="outline" size="sm">
-                  <Download className="w-4 h-4 mr-2" />
-                  Download
+                <Button onClick={downloadPlan} variant="outline" size="sm" disabled={isDownloading}>
+                  {isDownloading ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Download className="w-4 h-4 mr-2" />
+                  )}
+                  {isDownloading ? 'Generating...' : 'Download PDF'}
                 </Button>
               </div>
             </div>
@@ -547,33 +602,45 @@ export function WorkoutGenerator() {
                       <CardTitle className="text-base">{day.focus}</CardTitle>
                     </CardHeader>
                     <CardContent className="pt-0">
-                      <ul className="space-y-2">
-                        {day.exercises.map((exercise, exerciseIndex) => (
-                          <li key={exerciseIndex} className="text-sm group/exercise">
-                            <div className="flex items-start justify-between gap-2">
-                              <div className="flex-1">
-                                <p className="font-medium">{exercise.name}</p>
-                                <p className="text-xs text-muted-foreground">
-                                  {exercise.sets} × {exercise.reps} • Rest: {exercise.rest}
-                                </p>
+                      {isEditing ? (
+                        <DndContext
+                          sensors={sensors}
+                          collisionDetection={closestCenter}
+                          onDragEnd={(event) => handleDragEnd(event, dayIndex)}
+                        >
+                          <SortableContext
+                            items={day.exercises.map((_, i) => `exercise-${i}`)}
+                            strategy={verticalListSortingStrategy}
+                          >
+                            <ul className="space-y-2">
+                              {day.exercises.map((exercise, exerciseIndex) => (
+                                <SortableExerciseItem
+                                  key={`exercise-${exerciseIndex}`}
+                                  id={`exercise-${exerciseIndex}`}
+                                  exercise={exercise}
+                                  isEditing={isEditing}
+                                  onRemove={() => removeExerciseFromDay(dayIndex, exerciseIndex)}
+                                />
+                              ))}
+                            </ul>
+                          </SortableContext>
+                        </DndContext>
+                      ) : (
+                        <ul className="space-y-2">
+                          {day.exercises.map((exercise, exerciseIndex) => (
+                            <li key={exerciseIndex} className="text-sm">
+                              <div className="flex items-start justify-between gap-2">
+                                <div className="flex-1">
+                                  <p className="font-medium">{exercise.name}</p>
+                                  <p className="text-xs text-muted-foreground">
+                                    {exercise.sets} × {exercise.reps} • Rest: {exercise.rest}
+                                  </p>
+                                </div>
                               </div>
-                              {isEditing && (
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-6 w-6 text-muted-foreground hover:text-destructive shrink-0"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    removeExerciseFromDay(dayIndex, exerciseIndex);
-                                  }}
-                                >
-                                  <X className="w-3 h-3" />
-                                </Button>
-                              )}
-                            </div>
-                          </li>
-                        ))}
-                      </ul>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
                       {isEditing && (
                         <Button
                           variant="outline"

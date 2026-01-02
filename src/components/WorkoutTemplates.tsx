@@ -4,10 +4,13 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { workoutTemplates, WorkoutTemplate, TemplateExercise } from '@/data/workoutTemplates';
-import { Calendar, Dumbbell, Target, ChevronRight, Download, X, Edit2, Plus, Trash2, Save, RotateCcw } from 'lucide-react';
+import { Calendar, Dumbbell, Target, ChevronRight, Download, X, Edit2, Plus, Trash2, Save, RotateCcw, Loader2 } from 'lucide-react';
 import { ExercisePickerModal } from './ExercisePickerModal';
 import { toast } from '@/hooks/use-toast';
-import { generateWorkoutHtml, downloadHtmlFile } from '@/utils/downloadHtml';
+import { generateWorkoutPdf } from '@/utils/downloadHtml';
+import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
+import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { SortableExerciseItem } from './SortableExerciseItem';
 
 const CUSTOM_TEMPLATES_KEY = 'musclepedia-custom-templates';
 
@@ -17,6 +20,16 @@ export function WorkoutTemplates() {
   const [editingTemplate, setEditingTemplate] = useState<WorkoutTemplate | null>(null);
   const [editingDayIndex, setEditingDayIndex] = useState<number | null>(null);
   const [customTemplates, setCustomTemplates] = useState<WorkoutTemplate[]>([]);
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  // DnD sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    })
+  );
 
   // Load custom templates from localStorage
   useEffect(() => {
@@ -81,6 +94,27 @@ export function WorkoutTemplates() {
     setEditingDayIndex(null);
   };
 
+  const reorderExercises = (dayIndex: number, oldIndex: number, newIndex: number) => {
+    if (!editingTemplate) return;
+    
+    const updated = { ...editingTemplate };
+    updated.schedule[dayIndex] = {
+      ...updated.schedule[dayIndex],
+      exercises: arrayMove(updated.schedule[dayIndex].exercises, oldIndex, newIndex),
+    };
+    setEditingTemplate(updated);
+  };
+
+  const handleDragEnd = (event: DragEndEvent, dayIndex: number) => {
+    const { active, over } = event;
+    
+    if (over && active.id !== over.id) {
+      const oldIndex = parseInt(active.id.toString().split('-')[1]);
+      const newIndex = parseInt(over.id.toString().split('-')[1]);
+      reorderExercises(dayIndex, oldIndex, newIndex);
+    }
+  };
+
   const saveChanges = () => {
     if (!editingTemplate) return;
     
@@ -112,16 +146,34 @@ export function WorkoutTemplates() {
     });
   };
 
-  const downloadTemplate = (template: WorkoutTemplate) => {
-    const htmlContent = generateWorkoutHtml({
-      name: template.name,
-      description: template.description,
-      difficulty: template.difficulty,
-      daysPerWeek: template.daysPerWeek,
-      goal: template.goal,
-      schedule: template.schedule,
-    });
-    downloadHtmlFile(htmlContent, `${template.id}-workout-plan.html`);
+  const downloadTemplate = async (template: WorkoutTemplate) => {
+    if (isDownloading) return;
+    
+    setIsDownloading(true);
+    try {
+      await generateWorkoutPdf({
+        name: template.name,
+        description: template.description,
+        difficulty: template.difficulty,
+        daysPerWeek: template.daysPerWeek,
+        goal: template.goal,
+        schedule: template.schedule,
+      });
+      
+      toast({
+        title: "PDF Downloaded",
+        description: "Your workout plan has been saved as a PDF.",
+      });
+    } catch (error) {
+      console.error('PDF generation failed:', error);
+      toast({
+        title: "Download Failed",
+        description: "Failed to generate PDF. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDownloading(false);
+    }
   };
 
   const displayTemplate = isEditing && editingTemplate ? editingTemplate : selectedTemplate;
@@ -217,28 +269,43 @@ export function WorkoutTemplates() {
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="pt-0">
-                      <ul className="space-y-2">
-                        {day.exercises.map((exercise, exerciseIndex) => (
-                          <li key={exerciseIndex} className="text-sm flex items-start justify-between gap-2">
-                            <div className="flex-1">
-                              <p className="font-medium">{exercise.name}</p>
-                              <p className="text-xs text-muted-foreground">
-                                {exercise.sets} × {exercise.reps} • Rest: {exercise.rest}
-                              </p>
-                            </div>
-                            {isEditing && (
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-6 w-6 text-destructive hover:text-destructive"
-                                onClick={() => removeExercise(dayIndex, exerciseIndex)}
-                              >
-                                <X className="h-3 w-3" />
-                              </Button>
-                            )}
-                          </li>
-                        ))}
-                      </ul>
+                      {isEditing ? (
+                        <DndContext
+                          sensors={sensors}
+                          collisionDetection={closestCenter}
+                          onDragEnd={(event) => handleDragEnd(event, dayIndex)}
+                        >
+                          <SortableContext
+                            items={day.exercises.map((_, i) => `exercise-${i}`)}
+                            strategy={verticalListSortingStrategy}
+                          >
+                            <ul className="space-y-2">
+                              {day.exercises.map((exercise, exerciseIndex) => (
+                                <SortableExerciseItem
+                                  key={`exercise-${exerciseIndex}`}
+                                  id={`exercise-${exerciseIndex}`}
+                                  exercise={exercise}
+                                  isEditing={isEditing}
+                                  onRemove={() => removeExercise(dayIndex, exerciseIndex)}
+                                />
+                              ))}
+                            </ul>
+                          </SortableContext>
+                        </DndContext>
+                      ) : (
+                        <ul className="space-y-2">
+                          {day.exercises.map((exercise, exerciseIndex) => (
+                            <li key={exerciseIndex} className="text-sm">
+                              <div className="flex-1">
+                                <p className="font-medium">{exercise.name}</p>
+                                <p className="text-xs text-muted-foreground">
+                                  {exercise.sets} × {exercise.reps} • Rest: {exercise.rest}
+                                </p>
+                              </div>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
                       {isEditing && (
                         <Button
                           variant="outline"
@@ -286,9 +353,13 @@ export function WorkoutTemplates() {
                       <Edit2 className="w-4 h-4 mr-2" />
                       Edit
                     </Button>
-                    <Button onClick={() => selectedTemplate && downloadTemplate(selectedTemplate)}>
-                      <Download className="w-4 h-4 mr-2" />
-                      Download
+                    <Button onClick={() => selectedTemplate && downloadTemplate(selectedTemplate)} disabled={isDownloading}>
+                      {isDownloading ? (
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      ) : (
+                        <Download className="w-4 h-4 mr-2" />
+                      )}
+                      {isDownloading ? 'Generating...' : 'Download PDF'}
                     </Button>
                   </>
                 )}
