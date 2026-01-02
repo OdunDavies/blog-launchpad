@@ -11,9 +11,9 @@ interface MuscleMapProps {
 }
 
 const sizeClasses = {
-  sm: 'h-48',
-  md: 'h-72',
-  lg: 'h-96',
+  sm: 'h-32',
+  md: 'h-48',
+  lg: 'h-64',
 };
 
 const getMuscleDisplayName = (muscle: string): string => {
@@ -84,7 +84,7 @@ export function MuscleMap({
 
   return (
     <TooltipProvider>
-      <div className={`flex gap-6 items-center justify-center ${sizeClasses[size]} w-full`}>
+      <div className={`flex gap-3 items-center justify-center ${sizeClasses[size]} w-full`}>
         {/* Front View */}
         <div className="h-full aspect-[1/2]">
           <svg viewBox="0 0 200 400" className="h-full w-auto">
