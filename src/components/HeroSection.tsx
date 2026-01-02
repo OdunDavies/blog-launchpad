@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dumbbell, Sparkles, ChevronDown } from 'lucide-react';
 import heroBg from '@/assets/hero-bg.jpg';
+import { exercises, muscleGroups } from '@/data/exercises';
 
 interface StatProps {
   end: number;
@@ -105,9 +106,9 @@ export function HeroSection({ onExploreClick, onGenerateClick }: HeroSectionProp
         
         {/* Stats */}
         <div className="grid grid-cols-3 gap-8 max-w-lg mx-auto p-6 rounded-2xl bg-foreground/90 backdrop-blur-sm">
-          <AnimatedStat end={50} suffix="+" label="Exercises" delay={0} />
-          <AnimatedStat end={14} suffix="" label="Muscle Groups" delay={200} />
-          <AnimatedStat end={3} suffix="" label="AI Tools" delay={400} />
+          <AnimatedStat end={exercises.length} suffix="+" label="Exercises" delay={0} />
+          <AnimatedStat end={muscleGroups.length} suffix="" label="Muscle Groups" delay={200} />
+          <AnimatedStat end={1} suffix="" label="AI Generator" delay={400} />
         </div>
         
         {/* Scroll indicator */}

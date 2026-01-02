@@ -113,19 +113,19 @@
 }
 
 @layer utilities {
-.muscle-highlight {
-  @apply transition-all duration-200 cursor-pointer;
-}
+  .muscle-highlight {
+    @apply transition-all duration-200 cursor-pointer;
+  }
 
-.muscle-highlight:hover {
-  filter: brightness(1.2);
-}
+  .muscle-highlight:hover {
+    filter: brightness(1.2);
+  }
 
-.muscle-highlight.active {
-  @apply fill-primary stroke-primary;
-}
+  .muscle-highlight.active {
+    @apply fill-primary stroke-primary;
+  }
 
-.hero-gradient {
+  .hero-gradient {
     background: linear-gradient(
       to bottom,
       hsl(var(--background) / 0.8),
@@ -133,6 +133,52 @@
       hsl(var(--background))
     );
   }
+
+  /* Card hover animations */
+  .card-hover {
+    @apply transition-all duration-300 ease-out;
+  }
+
+  .card-hover:hover {
+    @apply -translate-y-1 shadow-lg;
+  }
+
+  /* Button smooth transitions */
+  .btn-smooth {
+    @apply transition-all duration-200 ease-out;
+  }
+
+  .btn-smooth:hover {
+    @apply scale-[1.02];
+  }
+
+  .btn-smooth:active {
+    @apply scale-[0.98];
+  }
+
+  /* Fade in animation */
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Staggered animation delay helpers */
+  .stagger-1 { animation-delay: 50ms; }
+  .stagger-2 { animation-delay: 100ms; }
+  .stagger-3 { animation-delay: 150ms; }
+  .stagger-4 { animation-delay: 200ms; }
+  .stagger-5 { animation-delay: 250ms; }
+  .stagger-6 { animation-delay: 300ms; }
 }
 
 html {
