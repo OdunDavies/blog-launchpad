@@ -7,16 +7,12 @@ export default {
   theme: {
     container: {
       center: true,
-      padding: "1.5rem",
+      padding: "2rem",
       screens: {
-        "2xl": "1200px",
+        "2xl": "1400px",
       },
     },
     extend: {
-      fontFamily: {
-        serif: ['Playfair Display', 'Georgia', 'serif'],
-        sans: ['Source Sans 3', 'system-ui', 'sans-serif'],
-      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -67,21 +63,22 @@ export default {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
-      boxShadow: {
-        soft: "var(--shadow-soft)",
-        hover: "var(--shadow-hover)",
-      },
-      transitionProperty: {
-        base: "var(--transition-base)",
-      },
       keyframes: {
         "accordion-down": {
-          from: { height: "0" },
-          to: { height: "var(--radix-accordion-content-height)" },
+          from: {
+            height: "0",
+          },
+          to: {
+            height: "var(--radix-accordion-content-height)",
+          },
         },
         "accordion-up": {
-          from: { height: "var(--radix-accordion-content-height)" },
-          to: { height: "0" },
+          from: {
+            height: "var(--radix-accordion-content-height)",
+          },
+          to: {
+            height: "0",
+          },
         },
       },
       animation: {
