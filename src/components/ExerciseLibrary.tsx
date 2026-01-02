@@ -10,9 +10,13 @@ import { Label } from '@/components/ui/label';
 import { X, Heart } from 'lucide-react';
 import { useFavorites } from '@/hooks/useFavorites';
 
-export function ExerciseLibrary() {
+interface ExerciseLibraryProps {
+  initialMuscleFilter?: MuscleGroup[];
+}
+
+export function ExerciseLibrary({ initialMuscleFilter = [] }: ExerciseLibraryProps) {
   const [search, setSearch] = useState('');
-  const [selectedMuscles, setSelectedMuscles] = useState<MuscleGroup[]>([]);
+  const [selectedMuscles, setSelectedMuscles] = useState<MuscleGroup[]>(initialMuscleFilter);
   const [selectedDifficulty, setSelectedDifficulty] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedEquipment, setSelectedEquipment] = useState<string[]>([]);
@@ -20,6 +24,11 @@ export function ExerciseLibrary() {
   const [isLoading, setIsLoading] = useState(true);
 
   const { favorites, toggleFavorite, isFavorite } = useFavorites();
+
+  // Sync with external filter changes
+  useEffect(() => {
+    setSelectedMuscles(initialMuscleFilter);
+  }, [initialMuscleFilter]);
 
   // Simulate initial load
   useEffect(() => {
