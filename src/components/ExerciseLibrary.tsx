@@ -41,11 +41,7 @@ export function ExerciseLibrary({ initialMuscleFilter = [] }: ExerciseLibraryPro
       const matchesSearch = exercise.name.toLowerCase().includes(search.toLowerCase());
       const matchesMuscle =
         selectedMuscles.length === 0 ||
-        selectedMuscles.some(
-          (muscle) =>
-            exercise.primaryMuscles.includes(muscle) ||
-            exercise.secondaryMuscles.includes(muscle)
-        );
+        selectedMuscles.some((muscle) => exercise.primaryMuscles.includes(muscle));
       const matchesDifficulty =
         !selectedDifficulty || exercise.difficulty === selectedDifficulty;
       const matchesCategory =
