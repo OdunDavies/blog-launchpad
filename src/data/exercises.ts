@@ -24,6 +24,7 @@ export interface Exercise {
   videoUrl: string;
   instructions: string[];
   category: 'push' | 'pull' | 'legs' | 'core' | 'compound' | 'cardio' | 'stretching';
+  imageUrl?: string;
 }
 
 export const exercises: Exercise[] = [
@@ -42,7 +43,8 @@ export const exercises: Exercise[] = [
       'Lower the bar to your mid-chest',
       'Press up until arms are fully extended'
     ],
-    category: 'push'
+    category: 'push',
+    imageUrl: 'https://liftmanual.com/wp-content/uploads/2023/04/barbell-bench-press.jpg'
   },
   {
     id: 'incline-dumbbell-press',
@@ -58,7 +60,8 @@ export const exercises: Exercise[] = [
       'Press up and slightly inward',
       'Lower with control'
     ],
-    category: 'push'
+    category: 'push',
+    imageUrl: 'https://liftmanual.com/wp-content/uploads/2023/04/incline-dumbbell-press.jpg'
   },
   {
     id: 'push-ups',
@@ -74,7 +77,8 @@ export const exercises: Exercise[] = [
       'Keep core tight and body in straight line',
       'Push back up to starting position'
     ],
-    category: 'push'
+    category: 'push',
+    imageUrl: 'https://liftmanual.com/wp-content/uploads/2023/04/push-up.jpg'
   },
   {
     id: 'cable-flyes',
@@ -90,7 +94,8 @@ export const exercises: Exercise[] = [
       'Bring handles together in front of chest',
       'Squeeze and return with control'
     ],
-    category: 'push'
+    category: 'push',
+    imageUrl: 'https://liftmanual.com/wp-content/uploads/2023/04/cable-crossover.jpg'
   },
 
   // BACK
@@ -108,7 +113,8 @@ export const exercises: Exercise[] = [
       'Lower with control',
       'Avoid swinging'
     ],
-    category: 'pull'
+    category: 'pull',
+    imageUrl: 'https://liftmanual.com/wp-content/uploads/2023/04/pull-up.jpg'
   },
   {
     id: 'barbell-rows',
@@ -124,7 +130,8 @@ export const exercises: Exercise[] = [
       'Pull bar to lower chest',
       'Squeeze shoulder blades at top'
     ],
-    category: 'pull'
+    category: 'pull',
+    imageUrl: 'https://liftmanual.com/wp-content/uploads/2023/04/barbell-bent-over-row.jpg'
   },
   {
     id: 'lat-pulldown',
@@ -140,7 +147,8 @@ export const exercises: Exercise[] = [
       'Pull bar to upper chest',
       'Control the return'
     ],
-    category: 'pull'
+    category: 'pull',
+    imageUrl: 'https://liftmanual.com/wp-content/uploads/2023/04/cable-lat-pulldown.jpg'
   },
   {
     id: 'seated-cable-row',
@@ -156,7 +164,8 @@ export const exercises: Exercise[] = [
       'Keep back straight throughout',
       'Squeeze shoulder blades together'
     ],
-    category: 'pull'
+    category: 'pull',
+    imageUrl: 'https://liftmanual.com/wp-content/uploads/2023/04/cable-seated-row.jpg'
   },
 
   // SHOULDERS
@@ -174,7 +183,8 @@ export const exercises: Exercise[] = [
       'Keep core tight',
       'Lower with control'
     ],
-    category: 'push'
+    category: 'push',
+    imageUrl: 'https://liftmanual.com/wp-content/uploads/2023/04/barbell-overhead-press.jpg'
   },
   {
     id: 'lateral-raises',
@@ -190,7 +200,8 @@ export const exercises: Exercise[] = [
       'Slight bend in elbows',
       'Lower with control'
     ],
-    category: 'push'
+    category: 'push',
+    imageUrl: 'https://liftmanual.com/wp-content/uploads/2023/04/dumbbell-lateral-raise.jpg'
   },
   {
     id: 'face-pulls',
@@ -206,7 +217,8 @@ export const exercises: Exercise[] = [
       'Separate hands at end of movement',
       'Squeeze rear delts'
     ],
-    category: 'pull'
+    category: 'pull',
+    imageUrl: 'https://liftmanual.com/wp-content/uploads/2023/04/cable-face-pull.jpg'
   },
 
   // ARMS
@@ -224,7 +236,8 @@ export const exercises: Exercise[] = [
       'Squeeze at top',
       'Lower with control'
     ],
-    category: 'pull'
+    category: 'pull',
+    imageUrl: 'https://liftmanual.com/wp-content/uploads/2023/04/barbell-curl.jpg'
   },
   {
     id: 'tricep-pushdown',
@@ -240,7 +253,8 @@ export const exercises: Exercise[] = [
       'Push bar down until arms straight',
       'Control the return'
     ],
-    category: 'push'
+    category: 'push',
+    imageUrl: 'https://liftmanual.com/wp-content/uploads/2023/04/cable-pushdown.jpg'
   },
   {
     id: 'hammer-curls',
@@ -256,7 +270,8 @@ export const exercises: Exercise[] = [
       'Squeeze at top',
       'Lower with control'
     ],
-    category: 'pull'
+    category: 'pull',
+    imageUrl: 'https://liftmanual.com/wp-content/uploads/2023/04/dumbbell-hammer-curl.jpg'
   },
   {
     id: 'skull-crushers',
@@ -272,7 +287,8 @@ export const exercises: Exercise[] = [
       'Keep upper arms stationary',
       'Extend arms back up'
     ],
-    category: 'push'
+    category: 'push',
+    imageUrl: 'https://liftmanual.com/wp-content/uploads/2023/04/barbell-skull-crusher.jpg'
   },
 
   // LEGS
@@ -290,7 +306,8 @@ export const exercises: Exercise[] = [
       'Keep chest up and knees tracking toes',
       'Drive through heels to stand'
     ],
-    category: 'legs'
+    category: 'legs',
+    imageUrl: 'https://liftmanual.com/wp-content/uploads/2023/04/barbell-back-squat.jpg'
   },
   {
     id: 'deadlift',
@@ -306,7 +323,8 @@ export const exercises: Exercise[] = [
       'Keep back flat, drive through floor',
       'Stand tall, squeeze glutes at top'
     ],
-    category: 'compound'
+    category: 'compound',
+    imageUrl: 'https://liftmanual.com/wp-content/uploads/2023/04/barbell-conventional-deadlift.jpg'
   },
   {
     id: 'leg-press',
@@ -322,7 +340,8 @@ export const exercises: Exercise[] = [
       'Lower weight with control',
       'Press through heels'
     ],
-    category: 'legs'
+    category: 'legs',
+    imageUrl: 'https://liftmanual.com/wp-content/uploads/2023/04/sled-leg-press.jpg'
   },
   {
     id: 'romanian-deadlift',
@@ -338,7 +357,8 @@ export const exercises: Exercise[] = [
       'Lower until stretch in hamstrings',
       'Drive hips forward to stand'
     ],
-    category: 'legs'
+    category: 'legs',
+    imageUrl: 'https://liftmanual.com/wp-content/uploads/2023/04/barbell-romanian-deadlift.jpg'
   },
   {
     id: 'lunges',
@@ -354,7 +374,8 @@ export const exercises: Exercise[] = [
       'Drive through front heel',
       'Step forward with opposite leg'
     ],
-    category: 'legs'
+    category: 'legs',
+    imageUrl: 'https://liftmanual.com/wp-content/uploads/2023/04/dumbbell-lunge.jpg'
   },
   {
     id: 'leg-curl',
@@ -370,7 +391,8 @@ export const exercises: Exercise[] = [
       'Curl weight up by bending knees',
       'Lower with control'
     ],
-    category: 'legs'
+    category: 'legs',
+    imageUrl: 'https://liftmanual.com/wp-content/uploads/2023/04/lever-lying-leg-curl.jpg'
   },
   {
     id: 'calf-raises',
@@ -386,7 +408,8 @@ export const exercises: Exercise[] = [
       'Squeeze at top',
       'Lower heels below platform level'
     ],
-    category: 'legs'
+    category: 'legs',
+    imageUrl: 'https://liftmanual.com/wp-content/uploads/2023/04/lever-standing-calf-raise.jpg'
   },
   {
     id: 'hip-thrust',
@@ -403,7 +426,8 @@ export const exercises: Exercise[] = [
       'Pause at top with hips fully extended',
       'Lower with control, keeping core engaged'
     ],
-    category: 'legs'
+    category: 'legs',
+    imageUrl: 'https://liftmanual.com/wp-content/uploads/2023/04/barbell-hip-thrust.jpg'
   },
 
   // CORE
@@ -421,7 +445,8 @@ export const exercises: Exercise[] = [
       'Engage core throughout',
       'Hold for time'
     ],
-    category: 'core'
+    category: 'core',
+    imageUrl: 'https://liftmanual.com/wp-content/uploads/2023/04/front-plank.jpg'
   },
   {
     id: 'hanging-leg-raise',
@@ -437,7 +462,8 @@ export const exercises: Exercise[] = [
       'Control the descent',
       'Avoid swinging'
     ],
-    category: 'core'
+    category: 'core',
+    imageUrl: 'https://liftmanual.com/wp-content/uploads/2023/04/hanging-leg-raise.jpg'
   },
   {
     id: 'cable-woodchop',
@@ -453,7 +479,8 @@ export const exercises: Exercise[] = [
       'Keep arms relatively straight',
       'Control the return'
     ],
-    category: 'core'
+    category: 'core',
+    imageUrl: 'https://liftmanual.com/wp-content/uploads/2023/04/cable-wood-chop.jpg'
   },
   {
     id: 'russian-twist',
@@ -469,7 +496,8 @@ export const exercises: Exercise[] = [
       'Rotate side to side',
       'Keep core engaged'
     ],
-    category: 'core'
+    category: 'core',
+    imageUrl: 'https://liftmanual.com/wp-content/uploads/2023/04/weighted-russian-twist.jpg'
   },
 
   // CARDIO / HIIT
@@ -487,7 +515,8 @@ export const exercises: Exercise[] = [
       'Jump back to starting position',
       'Maintain a steady rhythm'
     ],
-    category: 'cardio'
+    category: 'cardio',
+    imageUrl: 'https://liftmanual.com/wp-content/uploads/2023/04/jumping-jack.jpg'
   },
   {
     id: 'burpees',
@@ -503,7 +532,8 @@ export const exercises: Exercise[] = [
       'Perform a push-up (optional)',
       'Jump feet forward and explode up with arms overhead'
     ],
-    category: 'cardio'
+    category: 'cardio',
+    imageUrl: 'https://liftmanual.com/wp-content/uploads/2023/04/burpee.jpg'
   },
   {
     id: 'mountain-climbers',
@@ -519,7 +549,8 @@ export const exercises: Exercise[] = [
       'Quickly switch legs in a running motion',
       'Keep hips low and core engaged'
     ],
-    category: 'cardio'
+    category: 'cardio',
+    imageUrl: 'https://liftmanual.com/wp-content/uploads/2023/04/mountain-climber.jpg'
   },
   {
     id: 'box-jumps',
@@ -535,7 +566,8 @@ export const exercises: Exercise[] = [
       'Explode up and land softly on box',
       'Step down and repeat'
     ],
-    category: 'cardio'
+    category: 'cardio',
+    imageUrl: 'https://liftmanual.com/wp-content/uploads/2023/04/box-jump.jpg'
   },
   {
     id: 'battle-ropes',
@@ -551,7 +583,8 @@ export const exercises: Exercise[] = [
       'Create alternating waves with arms',
       'Maintain intensity for timed intervals'
     ],
-    category: 'cardio'
+    category: 'cardio',
+    imageUrl: 'https://liftmanual.com/wp-content/uploads/2023/04/battle-rope.jpg'
   },
   {
     id: 'kettlebell-swings',
@@ -567,7 +600,8 @@ export const exercises: Exercise[] = [
       'Drive hips forward explosively to swing weight',
       'Let weight swing to chest height, control descent'
     ],
-    category: 'cardio'
+    category: 'cardio',
+    imageUrl: 'https://liftmanual.com/wp-content/uploads/2023/04/kettlebell-swing.jpg'
   },
   {
     id: 'jump-rope',
@@ -583,7 +617,8 @@ export const exercises: Exercise[] = [
       'Jump just high enough to clear rope',
       'Land softly on balls of feet'
     ],
-    category: 'cardio'
+    category: 'cardio',
+    imageUrl: 'https://liftmanual.com/wp-content/uploads/2023/04/jump-rope.jpg'
   },
   {
     id: 'rowing-machine',
@@ -599,7 +634,8 @@ export const exercises: Exercise[] = [
       'Lean back slightly at the finish',
       'Return by extending arms, then bending knees'
     ],
-    category: 'cardio'
+    category: 'cardio',
+    imageUrl: 'https://liftmanual.com/wp-content/uploads/2023/04/rowing-machine.jpg'
   },
 
   // STRETCHING - Dynamic Stretches (Pre-workout)
@@ -617,7 +653,8 @@ export const exercises: Exercise[] = [
       'Keep your core engaged and standing leg slightly bent',
       'Perform 10-15 swings per leg'
     ],
-    category: 'stretching'
+    category: 'stretching',
+    imageUrl: 'https://liftmanual.com/wp-content/uploads/2023/04/leg-swing.jpg'
   },
   {
     id: 'arm-circles',
@@ -633,7 +670,8 @@ export const exercises: Exercise[] = [
       'Make small circles, gradually increasing size',
       'Reverse direction after 15-20 circles'
     ],
-    category: 'stretching'
+    category: 'stretching',
+    imageUrl: 'https://liftmanual.com/wp-content/uploads/2023/04/arm-circle.jpg'
   },
   {
     id: 'hip-circles',
@@ -649,7 +687,8 @@ export const exercises: Exercise[] = [
       'Keep upper body stable',
       'Perform 10 circles in each direction'
     ],
-    category: 'stretching'
+    category: 'stretching',
+    imageUrl: 'https://liftmanual.com/wp-content/uploads/2023/04/hip-circle.jpg'
   },
   {
     id: 'walking-high-knees',
@@ -665,7 +704,8 @@ export const exercises: Exercise[] = [
       'Keep core engaged and back straight',
       'Continue for 20-30 steps'
     ],
-    category: 'stretching'
+    category: 'stretching',
+    imageUrl: 'https://liftmanual.com/wp-content/uploads/2023/04/high-knee.jpg'
   },
   {
     id: 'butt-kicks',
@@ -681,7 +721,8 @@ export const exercises: Exercise[] = [
       'Keep upper body upright',
       'Continue for 20-30 seconds'
     ],
-    category: 'stretching'
+    category: 'stretching',
+    imageUrl: 'https://liftmanual.com/wp-content/uploads/2023/04/butt-kick.jpg'
   },
   {
     id: 'torso-twists',
@@ -697,7 +738,8 @@ export const exercises: Exercise[] = [
       'Rotate torso side to side',
       'Keep hips facing forward'
     ],
-    category: 'stretching'
+    category: 'stretching',
+    imageUrl: 'https://liftmanual.com/wp-content/uploads/2023/04/torso-twist.jpg'
   },
 
   // STRETCHING - Static Stretches (Post-workout)
@@ -715,7 +757,8 @@ export const exercises: Exercise[] = [
       'Keep knees slightly bent if needed',
       'Hold for 20-30 seconds'
     ],
-    category: 'stretching'
+    category: 'stretching',
+    imageUrl: 'https://liftmanual.com/wp-content/uploads/2023/04/standing-hamstring-stretch.jpg'
   },
   {
     id: 'quad-stretch',
@@ -731,7 +774,8 @@ export const exercises: Exercise[] = [
       'Keep knees together and hips forward',
       'Hold for 20-30 seconds per leg'
     ],
-    category: 'stretching'
+    category: 'stretching',
+    imageUrl: 'https://liftmanual.com/wp-content/uploads/2023/04/standing-quad-stretch.jpg'
   },
   {
     id: 'pigeon-pose',
@@ -747,7 +791,8 @@ export const exercises: Exercise[] = [
       'Extend back leg straight behind you',
       'Lower torso over front leg and hold 30-60 seconds'
     ],
-    category: 'stretching'
+    category: 'stretching',
+    imageUrl: 'https://liftmanual.com/wp-content/uploads/2023/04/pigeon-pose.jpg'
   },
   {
     id: 'chest-doorway-stretch',
@@ -763,7 +808,8 @@ export const exercises: Exercise[] = [
       'Step forward to feel stretch in chest',
       'Hold for 20-30 seconds'
     ],
-    category: 'stretching'
+    category: 'stretching',
+    imageUrl: 'https://liftmanual.com/wp-content/uploads/2023/04/doorway-chest-stretch.jpg'
   },
   {
     id: 'tricep-stretch',
@@ -779,7 +825,8 @@ export const exercises: Exercise[] = [
       'Use other hand to gently push elbow back',
       'Hold for 20-30 seconds per arm'
     ],
-    category: 'stretching'
+    category: 'stretching',
+    imageUrl: 'https://liftmanual.com/wp-content/uploads/2023/04/tricep-stretch.jpg'
   },
   {
     id: 'child-pose',
@@ -795,7 +842,8 @@ export const exercises: Exercise[] = [
       'Lower forehead to floor',
       'Hold for 30-60 seconds, breathing deeply'
     ],
-    category: 'stretching'
+    category: 'stretching',
+    imageUrl: 'https://liftmanual.com/wp-content/uploads/2023/04/childs-pose.jpg'
   },
   {
     id: 'cat-cow-stretch',
@@ -811,7 +859,8 @@ export const exercises: Exercise[] = [
       'Exhale: round spine, tuck chin and tailbone (cat)',
       'Flow between positions for 10-15 reps'
     ],
-    category: 'stretching'
+    category: 'stretching',
+    imageUrl: 'https://liftmanual.com/wp-content/uploads/2023/04/cat-cow-stretch.jpg'
   },
   {
     id: 'seated-forward-fold',
@@ -827,7 +876,8 @@ export const exercises: Exercise[] = [
       'Keep spine long, avoid rounding back excessively',
       'Hold for 30-60 seconds'
     ],
-    category: 'stretching'
+    category: 'stretching',
+    imageUrl: 'https://liftmanual.com/wp-content/uploads/2023/04/seated-forward-fold.jpg'
   },
 
   // STRETCHING - Mobility Work
@@ -845,7 +895,8 @@ export const exercises: Exercise[] = [
       'Rotate torso and reach opposite arm to ceiling',
       'Hold briefly, then switch sides. Repeat 5-8 per side'
     ],
-    category: 'stretching'
+    category: 'stretching',
+    imageUrl: 'https://liftmanual.com/wp-content/uploads/2023/04/worlds-greatest-stretch.jpg'
   },
   {
     id: '90-90-hip-stretch',
@@ -861,7 +912,8 @@ export const exercises: Exercise[] = [
       'Lean forward over front leg for deeper stretch',
       'Hold for 30-60 seconds per side'
     ],
-    category: 'stretching'
+    category: 'stretching',
+    imageUrl: 'https://liftmanual.com/wp-content/uploads/2023/04/90-90-hip-stretch.jpg'
   }
 ];
 export const muscleGroups: { id: MuscleGroup; name: string; category: string }[] = [

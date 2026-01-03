@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Exercise } from '@/data/exercises';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -37,8 +38,8 @@ const difficultyColors = {
   advanced: 'bg-red-500/10 text-red-600 border-red-500/30',
 };
 
-// Map exercise to images based on category, equipment, then muscle group
-function getExerciseImage(exercise: Exercise): string {
+// Get fallback image based on equipment/muscle
+function getFallbackImage(exercise: Exercise): string {
   const equipment = exercise.equipment.toLowerCase();
   const name = exercise.name.toLowerCase();
   
@@ -46,10 +47,10 @@ function getExerciseImage(exercise: Exercise): string {
   if (exercise.category === 'cardio') {
     if (name.includes('jump') || name.includes('rope') || name.includes('battle')) return exerciseCardioRope;
     if (name.includes('rowing') || name.includes('row')) return exerciseCardioRowing;
-    return exerciseCardioHiit; // Default cardio image for burpees, mountain climbers, etc.
+    return exerciseCardioHiit;
   }
   
-  // Then, try to match by equipment for more variety
+  // Match by equipment
   if (equipment.includes('barbell')) return exerciseBarbell;
   if (equipment.includes('dumbbell')) return exerciseDumbbell;
   if (equipment.includes('cable')) return exerciseCable;
@@ -72,6 +73,14 @@ function getExerciseImage(exercise: Exercise): string {
   return exerciseBarbell;
 }
 
+// Get the primary image (prioritize imageUrl, fallback to equipment-based)
+function getExerciseImage(exercise: Exercise): string {
+  if (exercise.imageUrl) {
+    return exercise.imageUrl;
+  }
+  return getFallbackImage(exercise);
+}
+
 function getQuickStats(difficulty: string): { sets: string; reps: string } {
   switch (difficulty) {
     case 'beginner':
@@ -86,12 +95,20 @@ function getQuickStats(difficulty: string): { sets: string; reps: string } {
 }
 
 export function ExerciseCard({ exercise, isFavorite = false, onToggleFavorite }: ExerciseCardProps) {
+  const [imageSrc, setImageSrc] = useState(getExerciseImage(exercise));
+  const fallbackImage = getFallbackImage(exercise);
+  
+  const handleImageError = () => {
+    if (imageSrc !== fallbackImage) {
+      setImageSrc(fallbackImage);
+    }
+  };
+
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     onToggleFavorite?.(exercise.id);
   };
 
-  const exerciseImage = getExerciseImage(exercise);
   const quickStats = getQuickStats(exercise.difficulty);
 
   return (
@@ -101,9 +118,11 @@ export function ExerciseCard({ exercise, isFavorite = false, onToggleFavorite }:
           <Card className="cursor-pointer relative overflow-hidden border-border/50">
             {/* Image Header */}
             <div className="relative h-32 overflow-hidden">
-              <div 
-                className="absolute inset-0 bg-cover bg-center"
-                style={{ backgroundImage: `url(${exerciseImage})` }}
+              <img 
+                src={imageSrc}
+                alt={exercise.name}
+                onError={handleImageError}
+                className="absolute inset-0 w-full h-full object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
               
