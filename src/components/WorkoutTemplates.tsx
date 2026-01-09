@@ -7,6 +7,7 @@ import { workoutTemplates, WorkoutTemplate, TemplateExercise } from '@/data/work
 import { Calendar, Dumbbell, Target, ChevronRight, Download, X, Edit2, Plus, Trash2, Save, RotateCcw, Loader2 } from 'lucide-react';
 import { ExercisePickerModal } from './ExercisePickerModal';
 import { toast } from '@/hooks/use-toast';
+import { useAnalytics } from '@/hooks/useAnalytics';
 import { generateWorkoutPdf } from '@/utils/downloadHtml';
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
@@ -21,6 +22,7 @@ export function WorkoutTemplates() {
   const [editingDayIndex, setEditingDayIndex] = useState<number | null>(null);
   const [customTemplates, setCustomTemplates] = useState<WorkoutTemplate[]>([]);
   const [isDownloading, setIsDownloading] = useState(false);
+  const { trackPdfDownload } = useAnalytics();
 
   // DnD sensors
   const sensors = useSensors(
@@ -159,6 +161,8 @@ export function WorkoutTemplates() {
         goal: template.goal,
         schedule: template.schedule,
       });
+      
+      trackPdfDownload(template.name);
       
       toast({
         title: "PDF Downloaded",

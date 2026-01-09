@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useAnalytics } from '@/hooks/useAnalytics';
 import { WizardProgress } from './workout-wizard/WizardProgress';
 import { StepSchedule } from './workout-wizard/StepSchedule';
 import { StepProfile } from './workout-wizard/StepProfile';
@@ -74,6 +75,7 @@ export function WorkoutGenerator() {
   const [addingToDayIndex, setAddingToDayIndex] = useState<number | null>(null);
   const [isDownloading, setIsDownloading] = useState(false);
   const { toast } = useToast();
+  const { trackWorkoutGenerated, trackPdfDownload } = useAnalytics();
 
   // DnD sensors
   const sensors = useSensors(
@@ -295,6 +297,10 @@ export function WorkoutGenerator() {
         throw new Error(data.error);
       }
 
+      const totalExercises = data.schedule.reduce(
+        (sum: number, day: WorkoutDay) => sum + day.exercises.length, 0
+      );
+      
       setGeneratedPlan({
         splitDays: parseInt(splitDays),
         goal,
@@ -302,6 +308,8 @@ export function WorkoutGenerator() {
         targetMuscles: targetMuscles.length > 0 ? targetMuscles : ['All muscle groups'],
         schedule: data.schedule,
       });
+
+      trackWorkoutGenerated(`${splitDays}-day ${goal}`, totalExercises);
 
       toast({
         title: "Workout Plan Generated!",
@@ -324,15 +332,18 @@ export function WorkoutGenerator() {
     if (!generatedPlan || isDownloading) return;
     
     setIsDownloading(true);
+    const planName = `${generatedPlan.splitDays}-Day ${generatedPlan.goal.charAt(0).toUpperCase() + generatedPlan.goal.slice(1)} Workout Plan`;
     try {
       await generateWorkoutPdf({
-        name: `${generatedPlan.splitDays}-Day ${generatedPlan.goal.charAt(0).toUpperCase() + generatedPlan.goal.slice(1)} Workout Plan`,
+        name: planName,
         splitDays: generatedPlan.splitDays,
         goal: generatedPlan.goal,
         gender: generatedPlan.gender,
         targetMuscles: generatedPlan.targetMuscles,
         schedule: generatedPlan.schedule,
       });
+      
+      trackPdfDownload(planName);
       
       toast({
         title: "PDF Downloaded",
