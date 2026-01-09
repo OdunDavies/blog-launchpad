@@ -6,6 +6,7 @@ import { MuscleMap } from './MuscleMap';
 import { ExercisePreviewCard } from './ExercisePreviewCard';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Dumbbell, Heart } from 'lucide-react';
+import { useAnalytics } from '@/hooks/useAnalytics';
 
 import muscleChest from '@/assets/muscle-chest.jpg';
 import muscleBack from '@/assets/muscle-back.jpg';
@@ -97,6 +98,7 @@ function getQuickStats(difficulty: string): { sets: string; reps: string } {
 export function ExerciseCard({ exercise, isFavorite = false, onToggleFavorite }: ExerciseCardProps) {
   const [imageSrc, setImageSrc] = useState(getExerciseImage(exercise));
   const fallbackImage = getFallbackImage(exercise);
+  const { trackExerciseView } = useAnalytics();
   
   const handleImageError = () => {
     if (imageSrc !== fallbackImage) {
@@ -109,10 +111,16 @@ export function ExerciseCard({ exercise, isFavorite = false, onToggleFavorite }:
     onToggleFavorite?.(exercise.id);
   };
 
+  const handleDialogOpen = (open: boolean) => {
+    if (open) {
+      trackExerciseView(exercise.name, exercise.primaryMuscles[0] || 'unknown');
+    }
+  };
+
   const quickStats = getQuickStats(exercise.difficulty);
 
   return (
-    <Dialog>
+    <Dialog onOpenChange={handleDialogOpen}>
       <ExercisePreviewCard exercise={exercise}>
         <DialogTrigger asChild>
           <Card className="cursor-pointer relative overflow-hidden border-border/50">
