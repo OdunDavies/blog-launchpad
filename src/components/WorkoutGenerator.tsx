@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { MuscleGroup } from '@/data/exercises';
-import { Loader2, Download, Dumbbell, Calendar, Sparkles, Save, History, Trash2, Pencil, Check, X, ChevronLeft, ChevronRight, User, Target, Zap, Plus } from 'lucide-react';
+import { Loader2, Download, Dumbbell, Calendar, Sparkles, Save, History, Trash2, Pencil, Check, X, ChevronLeft, ChevronRight, User, Target, Zap, Plus, Share2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
@@ -16,6 +16,7 @@ import { StepMuscles } from './workout-wizard/StepMuscles';
 import { StepReview } from './workout-wizard/StepReview';
 import { ExercisePickerModal } from './ExercisePickerModal';
 import { generateWorkoutPdf } from '@/utils/downloadHtml';
+import { shareWorkout as shareWorkoutUtil, WorkoutForSharing } from '@/utils/shareWorkout';
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { SortableExerciseItem } from './SortableExerciseItem';
@@ -74,6 +75,7 @@ export function WorkoutGenerator() {
   const [exercisePickerOpen, setExercisePickerOpen] = useState(false);
   const [addingToDayIndex, setAddingToDayIndex] = useState<number | null>(null);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [isSharing, setIsSharing] = useState(false);
   const { toast } = useToast();
   const { trackWorkoutGenerated, trackPdfDownload } = useAnalytics();
 
@@ -361,6 +363,40 @@ export function WorkoutGenerator() {
     }
   };
 
+  const sharePlan = async () => {
+    if (!generatedPlan || isSharing) return;
+    
+    setIsSharing(true);
+    
+    const workoutToShare: WorkoutForSharing = {
+      name: `${generatedPlan.splitDays}-Day ${generatedPlan.goal.charAt(0).toUpperCase() + generatedPlan.goal.slice(1)} Plan`,
+      splitDays: generatedPlan.splitDays,
+      goal: generatedPlan.goal,
+      schedule: generatedPlan.schedule,
+    };
+    
+    await shareWorkoutUtil(
+      workoutToShare,
+      (method) => {
+        toast({
+          title: method === 'native' ? 'Shared!' : 'Link Copied!',
+          description: method === 'native' 
+            ? 'Workout shared successfully.' 
+            : 'Share link copied to clipboard.',
+        });
+      },
+      (error) => {
+        toast({
+          title: 'Share Failed',
+          description: error,
+          variant: 'destructive',
+        });
+      }
+    );
+    
+    setIsSharing(false);
+  };
+
   const startNewPlan = () => {
     setGeneratedPlan(null);
     setCurrentStep(1);
@@ -566,6 +602,14 @@ export function WorkoutGenerator() {
                 <Button onClick={savePlan} variant="outline" size="sm">
                   <Save className="w-4 h-4 mr-2" />
                   Save
+                </Button>
+                <Button onClick={sharePlan} variant="outline" size="sm" disabled={isSharing}>
+                  {isSharing ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Share2 className="w-4 h-4 mr-2" />
+                  )}
+                  {isSharing ? 'Sharing...' : 'Share'}
                 </Button>
                 <Button onClick={downloadPlan} variant="outline" size="sm" disabled={isDownloading}>
                   {isDownloading ? (

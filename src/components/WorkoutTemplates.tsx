@@ -4,11 +4,12 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { workoutTemplates, WorkoutTemplate, TemplateExercise } from '@/data/workoutTemplates';
-import { Calendar, Dumbbell, Target, ChevronRight, Download, X, Edit2, Plus, Trash2, Save, RotateCcw, Loader2 } from 'lucide-react';
+import { Calendar, Dumbbell, Target, ChevronRight, Download, X, Edit2, Plus, Trash2, Save, RotateCcw, Loader2, Share2 } from 'lucide-react';
 import { ExercisePickerModal } from './ExercisePickerModal';
 import { toast } from '@/hooks/use-toast';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import { generateWorkoutPdf } from '@/utils/downloadHtml';
+import { shareWorkout as shareWorkoutUtil, WorkoutForSharing } from '@/utils/shareWorkout';
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { SortableExerciseItem } from './SortableExerciseItem';
@@ -22,6 +23,7 @@ export function WorkoutTemplates() {
   const [editingDayIndex, setEditingDayIndex] = useState<number | null>(null);
   const [customTemplates, setCustomTemplates] = useState<WorkoutTemplate[]>([]);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [isSharing, setIsSharing] = useState(false);
   const { trackPdfDownload } = useAnalytics();
 
   // DnD sensors
@@ -178,6 +180,40 @@ export function WorkoutTemplates() {
     } finally {
       setIsDownloading(false);
     }
+  };
+
+  const shareTemplate = async (template: WorkoutTemplate) => {
+    if (isSharing) return;
+    
+    setIsSharing(true);
+    
+    const workoutToShare: WorkoutForSharing = {
+      name: template.name,
+      daysPerWeek: template.daysPerWeek,
+      goal: template.goal,
+      schedule: template.schedule,
+    };
+    
+    await shareWorkoutUtil(
+      workoutToShare,
+      (method) => {
+        toast({
+          title: method === 'native' ? 'Shared!' : 'Link Copied!',
+          description: method === 'native' 
+            ? 'Workout shared successfully.' 
+            : 'Share link copied to clipboard.',
+        });
+      },
+      (error) => {
+        toast({
+          title: 'Share Failed',
+          description: error,
+          variant: 'destructive',
+        });
+      }
+    );
+    
+    setIsSharing(false);
   };
 
   const displayTemplate = isEditing && editingTemplate ? editingTemplate : selectedTemplate;
@@ -356,6 +392,14 @@ export function WorkoutTemplates() {
                     <Button variant="outline" onClick={startEditing}>
                       <Edit2 className="w-4 h-4 mr-2" />
                       Edit
+                    </Button>
+                    <Button variant="outline" onClick={() => selectedTemplate && shareTemplate(selectedTemplate)} disabled={isSharing}>
+                      {isSharing ? (
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      ) : (
+                        <Share2 className="w-4 h-4 mr-2" />
+                      )}
+                      {isSharing ? 'Sharing...' : 'Share'}
                     </Button>
                     <Button onClick={() => selectedTemplate && downloadTemplate(selectedTemplate)} disabled={isDownloading}>
                       {isDownloading ? (
