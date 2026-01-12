@@ -202,29 +202,63 @@ export function generateLegacyShareUrl(workout: WorkoutForSharing): string {
 }
 
 /**
- * Copies text to clipboard with fallback for older browsers
+ * Fallback copy for older browsers and Safari quirks
+ */
+function fallbackCopy(text: string): boolean {
+  const textArea = document.createElement('textarea');
+  textArea.value = text;
+  
+  // Prevent scrolling and make invisible
+  textArea.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 2em;
+    height: 2em;
+    padding: 0;
+    border: none;
+    outline: none;
+    box-shadow: none;
+    background: transparent;
+  `;
+  
+  document.body.appendChild(textArea);
+  
+  // Safari-specific: focus is required
+  textArea.focus();
+  textArea.select();
+  
+  // Safari-specific: set selection range for iOS
+  textArea.setSelectionRange(0, text.length);
+  
+  let success = false;
+  try {
+    success = document.execCommand('copy');
+  } catch (err) {
+    console.error('execCommand copy failed:', err);
+  }
+  
+  document.body.removeChild(textArea);
+  return success;
+}
+
+/**
+ * Copies text to clipboard with improved Safari support
  */
 export async function copyToClipboard(text: string): Promise<boolean> {
   try {
+    // Try modern Clipboard API first (works in Safari 13.1+)
     if (navigator.clipboard && window.isSecureContext) {
       await navigator.clipboard.writeText(text);
       return true;
-    } else {
-      const textArea = document.createElement('textarea');
-      textArea.value = text;
-      textArea.style.position = 'fixed';
-      textArea.style.left = '-999999px';
-      textArea.style.top = '-999999px';
-      document.body.appendChild(textArea);
-      textArea.focus();
-      textArea.select();
-      const result = document.execCommand('copy');
-      document.body.removeChild(textArea);
-      return result;
     }
+    
+    // Fallback for older browsers
+    return fallbackCopy(text);
   } catch (error) {
-    console.error('Failed to copy to clipboard:', error);
-    return false;
+    console.error('Clipboard API failed, trying fallback:', error);
+    // Safari may throw even when clipboard API exists
+    return fallbackCopy(text);
   }
 }
 
