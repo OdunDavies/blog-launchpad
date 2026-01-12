@@ -100,7 +100,7 @@ export async function getSharedWorkout(id: string): Promise<DecodedWorkout | nul
     .from('shared_workouts')
     .select('workout_data')
     .eq('id', id)
-    .single();
+    .maybeSingle();
 
   if (error || !data) {
     console.error('Failed to fetch shared workout:', error);
