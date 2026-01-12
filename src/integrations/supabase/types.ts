@@ -14,7 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      shared_workouts: {
+        Row: {
+          created_at: string | null
+          id: string
+          views: number | null
+          workout_data: Json
+        }
+        Insert: {
+          created_at?: string | null
+          id: string
+          views?: number | null
+          workout_data: Json
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          views?: number | null
+          workout_data?: Json
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
