@@ -53,7 +53,12 @@ const socialPlatforms: SocialPlatform[] = [
     name: 'SMS',
     icon: <MessageSquare className="w-5 h-5" />,
     color: 'bg-muted hover:bg-muted/80 text-foreground',
-    getUrl: (url, title) => `sms:?body=${encodeURIComponent(`Check out this workout plan: ${title} ${url}`)}`,
+    getUrl: (url, title) => {
+      const message = encodeURIComponent(`Check out this workout plan: ${title} ${url}`);
+      // iOS uses & as separator, Android/others use ?
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+      return isIOS ? `sms:&body=${message}` : `sms:?body=${message}`;
+    },
   },
 ];
 
