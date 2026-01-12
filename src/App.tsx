@@ -35,6 +35,7 @@ const App = () => (
           <AnalyticsTracker />
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/shared/:id" element={<SharedWorkout />} />
             <Route path="/shared" element={<SharedWorkout />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

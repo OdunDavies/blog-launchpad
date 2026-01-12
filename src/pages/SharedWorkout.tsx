@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams, useNavigate, useParams } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { decodeWorkout, DecodedWorkout, generateShareUrl, copyToClipboard } from '@/utils/shareWorkout';
+import { decodeWorkout, DecodedWorkout, getSharedWorkout, copyToClipboard } from '@/utils/shareWorkout';
 import { generateWorkoutPdf } from '@/utils/downloadHtml';
 import { Calendar, Dumbbell, Target, Download, Save, Share2, Sparkles, AlertCircle, Loader2, ArrowLeft, Copy } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -13,6 +13,7 @@ import { ThemeToggle } from '@/components/ThemeToggle';
 const STORAGE_KEY = 'workout-planner-saved-plans';
 
 export default function SharedWorkout() {
+  const { id } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -25,25 +26,40 @@ export default function SharedWorkout() {
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    const planParam = searchParams.get('plan');
-    
-    if (!planParam) {
+    const loadWorkout = async () => {
+      // Try new short ID format first
+      if (id) {
+        const workoutData = await getSharedWorkout(id);
+        if (workoutData) {
+          setWorkout(workoutData);
+          setIsLoading(false);
+          return;
+        }
+        setError('Workout not found. The link may have expired or is invalid.');
+        setIsLoading(false);
+        return;
+      }
+
+      // Fall back to legacy base64 format
+      const planParam = searchParams.get('plan');
+      if (planParam) {
+        const decoded = decodeWorkout(planParam);
+        if (decoded) {
+          setWorkout(decoded);
+          setIsLoading(false);
+          return;
+        }
+        setError('Invalid or corrupted workout link. Please request a new link.');
+        setIsLoading(false);
+        return;
+      }
+
       setError('No workout plan found in the URL.');
       setIsLoading(false);
-      return;
-    }
+    };
 
-    const decoded = decodeWorkout(planParam);
-    
-    if (!decoded) {
-      setError('Invalid or corrupted workout link. Please request a new link.');
-      setIsLoading(false);
-      return;
-    }
-
-    setWorkout(decoded);
-    setIsLoading(false);
-  }, [searchParams]);
+    loadWorkout();
+  }, [id, searchParams]);
 
   const savePlan = () => {
     if (!workout || isSaving) return;

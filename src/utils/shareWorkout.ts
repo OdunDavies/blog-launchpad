@@ -1,3 +1,5 @@
+import { supabase } from '@/integrations/supabase/client';
+
 // Shareable workout data structure (compressed version for URLs)
 interface ShareableWorkout {
   n: string; // name
@@ -49,7 +51,67 @@ export interface DecodedWorkout {
 }
 
 /**
- * Encodes a workout plan to a URL-safe base64 string
+ * Generates a short unique ID for sharing
+ */
+function generateShortId(): string {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+  let result = '';
+  for (let i = 0; i < 8; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+}
+
+/**
+ * Saves a workout to the database and returns a short ID
+ */
+export async function saveSharedWorkout(workout: WorkoutForSharing): Promise<string> {
+  const id = generateShortId();
+  
+  const workoutData: DecodedWorkout = {
+    name: workout.name || `${workout.splitDays || workout.daysPerWeek}-Day ${workout.goal} Plan`,
+    daysPerWeek: workout.splitDays || workout.daysPerWeek || workout.schedule.length,
+    goal: workout.goal,
+    schedule: workout.schedule,
+  };
+
+  // Use type assertion since the table might not be in generated types yet
+  const { error } = await (supabase as any)
+    .from('shared_workouts')
+    .insert({
+      id,
+      workout_data: workoutData,
+    });
+
+  if (error) {
+    console.error('Failed to save shared workout:', error);
+    throw new Error('Failed to create share link');
+  }
+
+  return id;
+}
+
+/**
+ * Fetches a shared workout by ID
+ */
+export async function getSharedWorkout(id: string): Promise<DecodedWorkout | null> {
+  // Use type assertion since the table might not be in generated types yet
+  const { data, error } = await (supabase as any)
+    .from('shared_workouts')
+    .select('workout_data')
+    .eq('id', id)
+    .single();
+
+  if (error || !data) {
+    console.error('Failed to fetch shared workout:', error);
+    return null;
+  }
+
+  return data.workout_data as DecodedWorkout;
+}
+
+/**
+ * Encodes a workout plan to a URL-safe base64 string (legacy support)
  */
 export function encodeWorkout(workout: WorkoutForSharing): string {
   const compressed: ShareableWorkout = {
@@ -69,30 +131,25 @@ export function encodeWorkout(workout: WorkoutForSharing): string {
   };
 
   const jsonString = JSON.stringify(compressed);
-  // Use TextEncoder for proper UTF-8 handling, then base64 encode
   const bytes = new TextEncoder().encode(jsonString);
   let binary = '';
   for (let i = 0; i < bytes.length; i++) {
     binary += String.fromCharCode(bytes[i]);
   }
-  // Make base64 URL-safe by replacing + with - and / with _
   const base64 = btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   return base64;
 }
 
 /**
- * Decodes a base64 string back to a workout plan
+ * Decodes a base64 string back to a workout plan (legacy support)
  */
 export function decodeWorkout(encoded: string): DecodedWorkout | null {
   try {
-    // Restore base64 padding and convert URL-safe characters back
     let base64 = encoded.replace(/-/g, '+').replace(/_/g, '/');
-    // Add padding if needed
     while (base64.length % 4) {
       base64 += '=';
     }
     
-    // Decode base64 to binary, then use TextDecoder for UTF-8
     const binary = atob(base64);
     const bytes = new Uint8Array(binary.length);
     for (let i = 0; i < binary.length; i++) {
@@ -101,7 +158,6 @@ export function decodeWorkout(encoded: string): DecodedWorkout | null {
     const jsonString = new TextDecoder().decode(bytes);
     const compressed: ShareableWorkout = JSON.parse(jsonString);
 
-    // Validate required fields
     if (!compressed.s || !Array.isArray(compressed.s)) {
       return null;
     }
@@ -128,9 +184,18 @@ export function decodeWorkout(encoded: string): DecodedWorkout | null {
 }
 
 /**
- * Generates a shareable URL for a workout plan
+ * Generates a shareable URL for a workout plan (async - saves to DB)
  */
-export function generateShareUrl(workout: WorkoutForSharing): string {
+export async function generateShareUrl(workout: WorkoutForSharing): Promise<string> {
+  const id = await saveSharedWorkout(workout);
+  const baseUrl = window.location.origin;
+  return `${baseUrl}/shared/${id}`;
+}
+
+/**
+ * Generates a legacy shareable URL (base64 encoded, no DB)
+ */
+export function generateLegacyShareUrl(workout: WorkoutForSharing): string {
   const encoded = encodeWorkout(workout);
   const baseUrl = window.location.origin;
   return `${baseUrl}/shared?plan=${encoded}`;
@@ -145,7 +210,6 @@ export async function copyToClipboard(text: string): Promise<boolean> {
       await navigator.clipboard.writeText(text);
       return true;
     } else {
-      // Fallback for older browsers
       const textArea = document.createElement('textarea');
       textArea.value = text;
       textArea.style.position = 'fixed';
@@ -167,10 +231,7 @@ export async function copyToClipboard(text: string): Promise<boolean> {
 /**
  * Uses the native Web Share API to share a workout (mobile-friendly)
  */
-export async function shareNatively(workout: WorkoutForSharing): Promise<boolean> {
-  const url = generateShareUrl(workout);
-  const workoutName = workout.name || `${workout.splitDays || workout.daysPerWeek}-Day ${workout.goal} Plan`;
-
+export async function shareNatively(url: string, workoutName: string): Promise<boolean> {
   if (navigator.share) {
     try {
       await navigator.share({
@@ -180,7 +241,6 @@ export async function shareNatively(workout: WorkoutForSharing): Promise<boolean
       });
       return true;
     } catch (error) {
-      // User cancelled or share failed
       if ((error as Error).name !== 'AbortError') {
         console.error('Share failed:', error);
       }
@@ -198,22 +258,26 @@ export async function shareWorkout(
   onSuccess: (method: 'native' | 'clipboard') => void,
   onError: (error: string) => void
 ): Promise<void> {
-  // Try native share first (works on mobile and some desktop browsers)
-  if (navigator.share) {
-    const shared = await shareNatively(workout);
-    if (shared) {
-      onSuccess('native');
-      return;
+  try {
+    const url = await generateShareUrl(workout);
+    const workoutName = workout.name || `${workout.splitDays || workout.daysPerWeek}-Day ${workout.goal} Plan`;
+    
+    if (navigator.share) {
+      const shared = await shareNatively(url, workoutName);
+      if (shared) {
+        onSuccess('native');
+        return;
+      }
     }
-  }
 
-  // Fall back to clipboard
-  const url = generateShareUrl(workout);
-  const copied = await copyToClipboard(url);
-  
-  if (copied) {
-    onSuccess('clipboard');
-  } else {
-    onError('Failed to copy link to clipboard');
+    const copied = await copyToClipboard(url);
+    
+    if (copied) {
+      onSuccess('clipboard');
+    } else {
+      onError('Failed to copy link to clipboard');
+    }
+  } catch (error) {
+    onError('Failed to create share link');
   }
 }
