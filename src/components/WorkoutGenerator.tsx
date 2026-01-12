@@ -15,8 +15,9 @@ import { StepGoal } from './workout-wizard/StepGoal';
 import { StepMuscles } from './workout-wizard/StepMuscles';
 import { StepReview } from './workout-wizard/StepReview';
 import { ExercisePickerModal } from './ExercisePickerModal';
+import { ShareModal } from './ShareModal';
 import { generateWorkoutPdf } from '@/utils/downloadHtml';
-import { shareWorkout as shareWorkoutUtil, WorkoutForSharing } from '@/utils/shareWorkout';
+import { generateShareUrl, WorkoutForSharing } from '@/utils/shareWorkout';
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { SortableExerciseItem } from './SortableExerciseItem';
@@ -75,7 +76,9 @@ export function WorkoutGenerator() {
   const [exercisePickerOpen, setExercisePickerOpen] = useState(false);
   const [addingToDayIndex, setAddingToDayIndex] = useState<number | null>(null);
   const [isDownloading, setIsDownloading] = useState(false);
-  const [isSharing, setIsSharing] = useState(false);
+  const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [shareUrl, setShareUrl] = useState('');
+  const [shareTitle, setShareTitle] = useState('');
   const { toast } = useToast();
   const { trackWorkoutGenerated, trackPdfDownload } = useAnalytics();
 
@@ -363,10 +366,8 @@ export function WorkoutGenerator() {
     }
   };
 
-  const sharePlan = async () => {
-    if (!generatedPlan || isSharing) return;
-    
-    setIsSharing(true);
+  const sharePlan = () => {
+    if (!generatedPlan) return;
     
     const workoutToShare: WorkoutForSharing = {
       name: `${generatedPlan.splitDays}-Day ${generatedPlan.goal.charAt(0).toUpperCase() + generatedPlan.goal.slice(1)} Plan`,
@@ -375,26 +376,10 @@ export function WorkoutGenerator() {
       schedule: generatedPlan.schedule,
     };
     
-    await shareWorkoutUtil(
-      workoutToShare,
-      (method) => {
-        toast({
-          title: method === 'native' ? 'Shared!' : 'Link Copied!',
-          description: method === 'native' 
-            ? 'Workout shared successfully.' 
-            : 'Share link copied to clipboard.',
-        });
-      },
-      (error) => {
-        toast({
-          title: 'Share Failed',
-          description: error,
-          variant: 'destructive',
-        });
-      }
-    );
-    
-    setIsSharing(false);
+    const url = generateShareUrl(workoutToShare);
+    setShareUrl(url);
+    setShareTitle(workoutToShare.name || 'Workout Plan');
+    setShareModalOpen(true);
   };
 
   const startNewPlan = () => {
@@ -603,13 +588,9 @@ export function WorkoutGenerator() {
                   <Save className="w-4 h-4 mr-2" />
                   Save
                 </Button>
-                <Button onClick={sharePlan} variant="outline" size="sm" disabled={isSharing}>
-                  {isSharing ? (
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  ) : (
-                    <Share2 className="w-4 h-4 mr-2" />
-                  )}
-                  {isSharing ? 'Sharing...' : 'Share'}
+                <Button onClick={sharePlan} variant="outline" size="sm">
+                  <Share2 className="w-4 h-4 mr-2" />
+                  Share
                 </Button>
                 <Button onClick={downloadPlan} variant="outline" size="sm" disabled={isDownloading}>
                   {isDownloading ? (
@@ -718,6 +699,13 @@ export function WorkoutGenerator() {
           </CardContent>
         </Card>
       )}
+
+      <ShareModal
+        open={shareModalOpen}
+        onClose={() => setShareModalOpen(false)}
+        url={shareUrl}
+        title={shareTitle}
+      />
     </div>
   );
 }

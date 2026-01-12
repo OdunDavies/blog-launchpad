@@ -6,10 +6,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { workoutTemplates, WorkoutTemplate, TemplateExercise } from '@/data/workoutTemplates';
 import { Calendar, Dumbbell, Target, ChevronRight, Download, X, Edit2, Plus, Trash2, Save, RotateCcw, Loader2, Share2 } from 'lucide-react';
 import { ExercisePickerModal } from './ExercisePickerModal';
+import { ShareModal } from './ShareModal';
 import { toast } from '@/hooks/use-toast';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import { generateWorkoutPdf } from '@/utils/downloadHtml';
-import { shareWorkout as shareWorkoutUtil, WorkoutForSharing } from '@/utils/shareWorkout';
+import { generateShareUrl, WorkoutForSharing } from '@/utils/shareWorkout';
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { SortableExerciseItem } from './SortableExerciseItem';
@@ -23,7 +24,9 @@ export function WorkoutTemplates() {
   const [editingDayIndex, setEditingDayIndex] = useState<number | null>(null);
   const [customTemplates, setCustomTemplates] = useState<WorkoutTemplate[]>([]);
   const [isDownloading, setIsDownloading] = useState(false);
-  const [isSharing, setIsSharing] = useState(false);
+  const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [shareUrl, setShareUrl] = useState('');
+  const [shareTitle, setShareTitle] = useState('');
   const { trackPdfDownload } = useAnalytics();
 
   // DnD sensors
@@ -182,11 +185,7 @@ export function WorkoutTemplates() {
     }
   };
 
-  const shareTemplate = async (template: WorkoutTemplate) => {
-    if (isSharing) return;
-    
-    setIsSharing(true);
-    
+  const shareTemplate = (template: WorkoutTemplate) => {
     const workoutToShare: WorkoutForSharing = {
       name: template.name,
       daysPerWeek: template.daysPerWeek,
@@ -194,26 +193,10 @@ export function WorkoutTemplates() {
       schedule: template.schedule,
     };
     
-    await shareWorkoutUtil(
-      workoutToShare,
-      (method) => {
-        toast({
-          title: method === 'native' ? 'Shared!' : 'Link Copied!',
-          description: method === 'native' 
-            ? 'Workout shared successfully.' 
-            : 'Share link copied to clipboard.',
-        });
-      },
-      (error) => {
-        toast({
-          title: 'Share Failed',
-          description: error,
-          variant: 'destructive',
-        });
-      }
-    );
-    
-    setIsSharing(false);
+    const url = generateShareUrl(workoutToShare);
+    setShareUrl(url);
+    setShareTitle(template.name);
+    setShareModalOpen(true);
   };
 
   const displayTemplate = isEditing && editingTemplate ? editingTemplate : selectedTemplate;
@@ -393,13 +376,9 @@ export function WorkoutTemplates() {
                       <Edit2 className="w-4 h-4 mr-2" />
                       Edit
                     </Button>
-                    <Button variant="outline" onClick={() => selectedTemplate && shareTemplate(selectedTemplate)} disabled={isSharing}>
-                      {isSharing ? (
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      ) : (
-                        <Share2 className="w-4 h-4 mr-2" />
-                      )}
-                      {isSharing ? 'Sharing...' : 'Share'}
+                    <Button variant="outline" onClick={() => selectedTemplate && shareTemplate(selectedTemplate)}>
+                      <Share2 className="w-4 h-4 mr-2" />
+                      Share
                     </Button>
                     <Button onClick={() => selectedTemplate && downloadTemplate(selectedTemplate)} disabled={isDownloading}>
                       {isDownloading ? (
@@ -422,6 +401,13 @@ export function WorkoutTemplates() {
         onClose={() => setEditingDayIndex(null)}
         onSelectExercise={addExercise}
         dayFocus={editingDayIndex !== null && editingTemplate ? editingTemplate.schedule[editingDayIndex].focus : undefined}
+      />
+
+      <ShareModal
+        open={shareModalOpen}
+        onClose={() => setShareModalOpen(false)}
+        url={shareUrl}
+        title={shareTitle}
       />
     </div>
   );
