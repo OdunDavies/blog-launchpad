@@ -185,7 +185,7 @@ export function WorkoutTemplates() {
     }
   };
 
-  const shareTemplate = (template: WorkoutTemplate) => {
+  const shareTemplate = async (template: WorkoutTemplate) => {
     const workoutToShare: WorkoutForSharing = {
       name: template.name,
       daysPerWeek: template.daysPerWeek,
@@ -193,10 +193,18 @@ export function WorkoutTemplates() {
       schedule: template.schedule,
     };
     
-    const url = generateShareUrl(workoutToShare);
-    setShareUrl(url);
-    setShareTitle(template.name);
-    setShareModalOpen(true);
+    try {
+      const url = await generateShareUrl(workoutToShare);
+      setShareUrl(url);
+      setShareTitle(template.name);
+      setShareModalOpen(true);
+    } catch (error) {
+      toast({
+        title: 'Share Failed',
+        description: 'Could not create share link. Please try again.',
+        variant: 'destructive',
+      });
+    }
   };
 
   const displayTemplate = isEditing && editingTemplate ? editingTemplate : selectedTemplate;

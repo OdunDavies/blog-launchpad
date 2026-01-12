@@ -366,7 +366,7 @@ export function WorkoutGenerator() {
     }
   };
 
-  const sharePlan = () => {
+  const sharePlan = async () => {
     if (!generatedPlan) return;
     
     const workoutToShare: WorkoutForSharing = {
@@ -376,10 +376,18 @@ export function WorkoutGenerator() {
       schedule: generatedPlan.schedule,
     };
     
-    const url = generateShareUrl(workoutToShare);
-    setShareUrl(url);
-    setShareTitle(workoutToShare.name || 'Workout Plan');
-    setShareModalOpen(true);
+    try {
+      const url = await generateShareUrl(workoutToShare);
+      setShareUrl(url);
+      setShareTitle(workoutToShare.name || 'Workout Plan');
+      setShareModalOpen(true);
+    } catch (error) {
+      toast({
+        title: 'Share Failed',
+        description: 'Could not create share link. Please try again.',
+        variant: 'destructive',
+      });
+    }
   };
 
   const startNewPlan = () => {
