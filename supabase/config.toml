@@ -2,3 +2,6 @@ project_id = "lmmjlnqcjqxrpludrxxo"
 
 [functions.generate-workout]
 verify_jwt = false
+
+[functions.generate-diet]
+verify_jwt = false
