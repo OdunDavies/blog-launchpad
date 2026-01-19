@@ -1,0 +1,42 @@
+{
+  "name": "MuscleAtlas - Exercise Library & Workout Generator",
+  "short_name": "MuscleAtlas",
+  "description": "Free exercise library with video demos, AI workout generator, and diet planner. Build muscle and achieve your fitness goals.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#dc2626",
+  "orientation": "portrait-primary",
+  "categories": ["fitness", "health", "lifestyle", "sports"],
+  "lang": "en-US",
+  "dir": "ltr",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Exercise Library",
+      "short_name": "Exercises",
+      "description": "Browse 100+ exercises with video demos",
+      "url": "/?tab=library"
+    },
+    {
+      "name": "AI Workout Generator",
+      "short_name": "Generator",
+      "description": "Generate personalized workout plans",
+      "url": "/?tab=generator"
+    }
+  ]
+}
