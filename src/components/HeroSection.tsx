@@ -74,13 +74,13 @@ export function HeroSection({ onExploreClick, onGenerateClick }: HeroSectionProp
           </div>
           
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6">
-            Build Your
-            <span className="block text-primary">Perfect Workout</span>
+            Free Exercise Library &
+            <span className="block text-primary">AI Workout Generator</span>
           </h1>
           
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
-            Discover exercises, learn proper form with video demonstrations, 
-            and generate AI-powered workout plans tailored to your goals.
+            Build muscle, lose weight, and achieve your fitness goals. Browse 100+ exercises with video demos, 
+            generate personalized AI workout plans, and create custom diet plans — completely free.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
