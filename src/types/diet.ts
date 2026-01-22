@@ -22,12 +22,29 @@ export interface DayPlan {
   meals: Meal[];
 }
 
+export type FitnessGoal = 'muscle-gain' | 'fat-loss' | 'maintenance' | 'recomposition';
+
+export type ActivityLevel = 'sedentary' | 'light' | 'moderate' | 'active' | 'very-active';
+
+export interface UserProfile {
+  gender: 'male' | 'female' | 'other';
+  weight: number;
+  weightUnit: 'kg' | 'lbs';
+  height: number;
+  heightUnit: 'cm' | 'ft';
+  heightInches?: number; // Only used when heightUnit is 'ft'
+  age: number;
+  activityLevel: ActivityLevel;
+  trainingDays: number;
+}
+
 export interface DietPlan {
   calorieTarget: number;
   dietType: string;
   restrictions: string[];
   mealsPerDay: number;
-  goal: string;
+  goal: FitnessGoal | string;
+  profile?: UserProfile;
   gender: string;
   mealPlan: DayPlan[];
 }
