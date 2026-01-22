@@ -1,12 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, Download, Salad, Calendar, Sparkles, Save, History, Trash2, Pencil, Check, X, ChevronLeft, ChevronRight, Flame, AlertCircle, UtensilsCrossed } from 'lucide-react';
+import { Loader2, Download, Salad, Sparkles, Save, History, Trash2, Pencil, Check, X, ChevronLeft, ChevronRight, Flame, AlertCircle, UtensilsCrossed, Target, User } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { DietWizardProgress } from './diet-wizard/DietWizardProgress';
+import { StepGoal } from './diet-wizard/StepGoal';
+import { StepProfile } from './diet-wizard/StepProfile';
 import { StepCalories } from './diet-wizard/StepCalories';
 import { StepDietType } from './diet-wizard/StepDietType';
 import { StepRestrictions } from './diet-wizard/StepRestrictions';
@@ -15,12 +16,15 @@ import { StepDietReview } from './diet-wizard/StepDietReview';
 import { MealCard } from './MealCard';
 import { NutritionSummary } from './NutritionSummary';
 import { generateDietPdf } from '@/utils/downloadDietPdf';
-import { DietPlan, DayPlan, SavedDietPlan } from '@/types/diet';
+import { calculateTDEEWithRecommendations, TDEEResult } from '@/utils/tdeeCalculator';
+import { DietPlan, DayPlan, SavedDietPlan, FitnessGoal, UserProfile } from '@/types/diet';
 
 const STORAGE_KEY = 'diet-planner-saved-plans';
-const TOTAL_STEPS = 5;
+const TOTAL_STEPS = 7;
 
 const wizardSteps = [
+  { title: 'Goal', icon: <Target className="w-5 h-5" /> },
+  { title: 'Profile', icon: <User className="w-5 h-5" /> },
   { title: 'Calories', icon: <Flame className="w-5 h-5" /> },
   { title: 'Diet Type', icon: <Salad className="w-5 h-5" /> },
   { title: 'Restrictions', icon: <AlertCircle className="w-5 h-5" /> },
@@ -37,9 +41,29 @@ const dietTypeLabels: Record<string, string> = {
   vegan: 'Vegan',
 };
 
+const goalLabels: Record<FitnessGoal, string> = {
+  'muscle-gain': 'Muscle Gain',
+  'fat-loss': 'Fat Loss',
+  'maintenance': 'Maintenance',
+  'recomposition': 'Body Recomposition',
+};
+
+const defaultProfile: UserProfile = {
+  gender: 'male',
+  weight: 70,
+  weightUnit: 'kg',
+  height: 175,
+  heightUnit: 'cm',
+  age: 25,
+  activityLevel: 'moderate',
+  trainingDays: 3,
+};
+
 export function DietGenerator() {
   const [currentStep, setCurrentStep] = useState(1);
-  const [calorieTarget, setCalorieTarget] = useState<string>('2000');
+  const [goal, setGoal] = useState<FitnessGoal | ''>('');
+  const [profile, setProfile] = useState<UserProfile>(defaultProfile);
+  const [calorieTarget, setCalorieTarget] = useState<string>('');
   const [customCalories, setCustomCalories] = useState<string>('');
   const [dietType, setDietType] = useState<string>('balanced');
   const [restrictions, setRestrictions] = useState<string[]>([]);
@@ -53,6 +77,21 @@ export function DietGenerator() {
   const [selectedDayIndex, setSelectedDayIndex] = useState(0);
   const [isDownloading, setIsDownloading] = useState(false);
   const { toast } = useToast();
+
+  // Calculate TDEE when profile or goal changes
+  const tdeeResult = useMemo<TDEEResult | null>(() => {
+    if (!goal || !profile.weight || !profile.height || !profile.age) {
+      return null;
+    }
+    return calculateTDEEWithRecommendations(profile, goal as FitnessGoal);
+  }, [profile, goal]);
+
+  // Auto-set suggested calories when TDEE is calculated
+  useEffect(() => {
+    if (tdeeResult && !calorieTarget) {
+      setCalorieTarget('suggested');
+    }
+  }, [tdeeResult]);
 
   // Load saved plans from localStorage on mount
   useEffect(() => {
@@ -79,14 +118,25 @@ export function DietGenerator() {
     );
   };
 
+  const getEffectiveCalories = (): number => {
+    if (calorieTarget === 'suggested' && tdeeResult) {
+      return tdeeResult.suggestedCalories;
+    }
+    if (calorieTarget === 'custom') {
+      return parseInt(customCalories) || 2000;
+    }
+    return parseInt(calorieTarget) || 2000;
+  };
+
   const savePlan = () => {
     if (!generatedPlan) return;
 
-    const calories = calorieTarget === 'custom' ? customCalories : calorieTarget;
+    const calories = getEffectiveCalories();
+    const goalLabel = goal ? goalLabels[goal as FitnessGoal] : '';
     const newPlan: SavedDietPlan = {
       ...generatedPlan,
       id: crypto.randomUUID(),
-      name: `${calories} kcal ${dietTypeLabels[dietType]} Plan`,
+      name: `${goalLabel} - ${calories} kcal ${dietTypeLabels[dietType]}`,
       savedAt: new Date().toISOString(),
     };
 
@@ -143,19 +193,23 @@ export function DietGenerator() {
 
   const canProceed = () => {
     switch (currentStep) {
-      case 1:
+      case 1: // Goal
+        return !!goal;
+      case 2: // Profile
+        return profile.weight > 0 && profile.height > 0 && profile.age >= 15;
+      case 3: // Calories
         if (calorieTarget === 'custom') {
           const cal = parseInt(customCalories);
           return !isNaN(cal) && cal >= 1000 && cal <= 5000;
         }
         return !!calorieTarget;
-      case 2:
+      case 4: // Diet Type
         return !!dietType;
-      case 3:
-        return true; // Restrictions are optional
-      case 4:
+      case 5: // Restrictions
+        return true;
+      case 6: // Meals
         return !!mealsPerDay;
-      case 5:
+      case 7: // Review
         return true;
       default:
         return false;
@@ -177,9 +231,7 @@ export function DietGenerator() {
   const generateDietPlan = async () => {
     setIsGenerating(true);
     
-    const targetCalories = calorieTarget === 'custom' 
-      ? parseInt(customCalories) 
-      : parseInt(calorieTarget);
+    const targetCalories = getEffectiveCalories();
 
     try {
       const { data, error } = await supabase.functions.invoke('generate-diet', {
@@ -188,6 +240,8 @@ export function DietGenerator() {
           dietType,
           restrictions,
           mealsPerDay: parseInt(mealsPerDay),
+          goal,
+          profile,
         },
       });
 
@@ -204,8 +258,9 @@ export function DietGenerator() {
         dietType,
         restrictions,
         mealsPerDay: parseInt(mealsPerDay),
-        goal: '',
-        gender: '',
+        goal: goal || '',
+        profile,
+        gender: profile.gender,
         mealPlan: data.mealPlan,
       });
 
@@ -232,7 +287,8 @@ export function DietGenerator() {
     if (!generatedPlan || isDownloading) return;
     
     setIsDownloading(true);
-    const planName = `${generatedPlan.calorieTarget} kcal ${dietTypeLabels[generatedPlan.dietType]} Diet Plan`;
+    const goalLabel = goal ? goalLabels[goal as FitnessGoal] : '';
+    const planName = `${goalLabel} - ${generatedPlan.calorieTarget} kcal ${dietTypeLabels[generatedPlan.dietType]} Diet Plan`;
     
     try {
       await generateDietPdf({
@@ -242,6 +298,8 @@ export function DietGenerator() {
         mealsPerDay: generatedPlan.mealsPerDay,
         restrictions: generatedPlan.restrictions,
         mealPlan: generatedPlan.mealPlan,
+        goal: generatedPlan.goal,
+        profile: generatedPlan.profile,
       });
       
       toast({
@@ -264,26 +322,35 @@ export function DietGenerator() {
     setGeneratedPlan(null);
     setCurrentStep(1);
     setSelectedDayIndex(0);
+    setGoal('');
+    setCalorieTarget('');
+    setCustomCalories('');
   };
 
   const renderStep = () => {
     switch (currentStep) {
       case 1:
+        return <StepGoal goal={goal} setGoal={setGoal} />;
+      case 2:
+        return <StepProfile profile={profile} setProfile={setProfile} />;
+      case 3:
         return (
           <StepCalories 
             calorieTarget={calorieTarget} 
             setCalorieTarget={setCalorieTarget}
             customCalories={customCalories}
             setCustomCalories={setCustomCalories}
+            tdeeResult={tdeeResult}
+            goal={goal as FitnessGoal}
           />
         );
-      case 2:
-        return <StepDietType dietType={dietType} setDietType={setDietType} />;
-      case 3:
-        return <StepRestrictions restrictions={restrictions} toggleRestriction={toggleRestriction} />;
       case 4:
-        return <StepMeals mealsPerDay={mealsPerDay} setMealsPerDay={setMealsPerDay} />;
+        return <StepDietType dietType={dietType} setDietType={setDietType} />;
       case 5:
+        return <StepRestrictions restrictions={restrictions} toggleRestriction={toggleRestriction} />;
+      case 6:
+        return <StepMeals mealsPerDay={mealsPerDay} setMealsPerDay={setMealsPerDay} />;
+      case 7:
         return (
           <StepDietReview 
             calorieTarget={calorieTarget}
@@ -291,6 +358,9 @@ export function DietGenerator() {
             dietType={dietType}
             restrictions={restrictions}
             mealsPerDay={mealsPerDay}
+            goal={goal as FitnessGoal}
+            profile={profile}
+            tdeeResult={tdeeResult}
           />
         );
       default:
@@ -400,7 +470,7 @@ export function DietGenerator() {
               <div>
                 <CardTitle>AI Diet Plan Generator</CardTitle>
                 <CardDescription>
-                  Create your personalized 7-day meal plan
+                  Create your personalized 7-day meal plan for body growth
                 </CardDescription>
               </div>
             </div>
@@ -478,7 +548,7 @@ export function DietGenerator() {
                   <div>
                     <h2 className="text-xl font-bold">Your 7-Day Meal Plan</h2>
                     <p className="text-sm text-muted-foreground">
-                      {generatedPlan.calorieTarget} kcal • {dietTypeLabels[generatedPlan.dietType]} • {generatedPlan.mealsPerDay} meals/day
+                      {goal && goalLabels[goal as FitnessGoal]} • {generatedPlan.calorieTarget} kcal • {dietTypeLabels[generatedPlan.dietType]} • {generatedPlan.mealsPerDay} meals/day
                     </p>
                   </div>
                 </div>

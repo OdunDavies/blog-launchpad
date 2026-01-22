@@ -1,6 +1,6 @@
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-import { DietPlan, DayPlan, Meal, Food } from '@/types/diet';
+import { DayPlan, FitnessGoal, UserProfile } from '@/types/diet';
 
 interface DietPlanData {
   name: string;
@@ -9,6 +9,8 @@ interface DietPlanData {
   mealsPerDay: number;
   restrictions: string[];
   mealPlan: DayPlan[];
+  goal?: FitnessGoal | string;
+  profile?: UserProfile;
 }
 
 const dietTypeLabels: Record<string, string> = {
@@ -20,8 +22,45 @@ const dietTypeLabels: Record<string, string> = {
   vegan: 'Vegan',
 };
 
+const goalLabels: Record<string, string> = {
+  'muscle-gain': 'Muscle Gain',
+  'fat-loss': 'Fat Loss',
+  'maintenance': 'Maintenance',
+  'recomposition': 'Body Recomposition',
+};
+
+const activityLabels: Record<string, string> = {
+  sedentary: 'Sedentary',
+  light: 'Lightly Active',
+  moderate: 'Moderately Active',
+  active: 'Very Active',
+  'very-active': 'Extremely Active',
+};
+
+function getProfileSummary(profile?: UserProfile): string {
+  if (!profile) return '';
+  
+  const height = profile.heightUnit === 'ft' 
+    ? `${profile.height}'${profile.heightInches || 0}"`
+    : `${profile.height} cm`;
+  
+  return `${profile.age}y • ${profile.gender} • ${profile.weight}${profile.weightUnit} • ${height} • ${activityLabels[profile.activityLevel] || profile.activityLevel}`;
+}
+
+function calculateWeeklyTotals(mealPlan: DayPlan[]) {
+  return mealPlan.reduce((acc, day) => ({
+    calories: acc.calories + day.totalCalories,
+    protein: acc.protein + day.totalProtein,
+    carbs: acc.carbs + day.totalCarbs,
+    fat: acc.fat + day.totalFat,
+  }), { calories: 0, protein: 0, carbs: 0, fat: 0 });
+}
+
 export function generateDietHtml(plan: DietPlanData): string {
   const dietLabel = dietTypeLabels[plan.dietType] || plan.dietType;
+  const goalLabel = plan.goal ? (goalLabels[plan.goal] || plan.goal) : '';
+  const profileSummary = getProfileSummary(plan.profile);
+  const weeklyTotals = calculateWeeklyTotals(plan.mealPlan);
   
   return `<!DOCTYPE html>
 <html lang="en">
@@ -51,21 +90,37 @@ export function generateDietHtml(plan: DietPlanData): string {
       color: white; 
       padding: 40px; 
       border-radius: 20px; 
-      margin-bottom: 32px;
+      margin-bottom: 24px;
       text-align: center;
       box-shadow: 0 20px 40px rgba(0,0,0,0.15);
     }
     
     .header h1 { 
-      font-size: 32px; 
+      font-size: 28px; 
       margin-bottom: 12px; 
       font-weight: 700;
       letter-spacing: -0.5px;
     }
     
+    .goal-badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.2);
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+    
+    .profile-summary {
+      font-size: 13px;
+      opacity: 0.9;
+      margin-bottom: 16px;
+    }
+    
     .meta { 
       display: flex; 
-      gap: 16px; 
+      gap: 12px; 
       justify-content: center; 
       flex-wrap: wrap;
     }
@@ -73,11 +128,51 @@ export function generateDietHtml(plan: DietPlanData): string {
     .meta-item { 
       background: rgba(255,255,255,0.15);
       backdrop-filter: blur(10px);
-      padding: 10px 20px; 
+      padding: 8px 16px; 
       border-radius: 50px;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 500;
       border: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .weekly-summary {
+      background: white;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+    
+    .weekly-summary h2 {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: #166534;
+    }
+    
+    .weekly-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      text-align: center;
+    }
+    
+    .weekly-stat {
+      padding: 12px;
+      background: #f0fdf4;
+      border-radius: 12px;
+    }
+    
+    .weekly-stat-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: #166534;
+    }
+    
+    .weekly-stat-label {
+      font-size: 12px;
+      color: #64748b;
+      margin-top: 4px;
     }
     
     .days-grid {
@@ -115,7 +210,7 @@ export function generateDietHtml(plan: DietPlanData): string {
     
     .day-macros {
       display: flex;
-      gap: 12px;
+      gap: 8px;
       flex-wrap: wrap;
       margin-top: 8px;
     }
@@ -124,7 +219,7 @@ export function generateDietHtml(plan: DietPlanData): string {
       background: white;
       padding: 4px 10px;
       border-radius: 12px;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 500;
       border: 1px solid #bbf7d0;
     }
@@ -218,13 +313,38 @@ export function generateDietHtml(plan: DietPlanData): string {
 <body>
   <div class="container">
     <header class="header">
+      ${goalLabel ? `<span class="goal-badge">🎯 ${goalLabel}</span>` : ''}
       <h1>${plan.name}</h1>
+      ${profileSummary ? `<p class="profile-summary">${profileSummary}</p>` : ''}
       <div class="meta">
         <span class="meta-item">🔥 ${plan.calorieTarget} kcal/day</span>
         <span class="meta-item">🥗 ${dietLabel}</span>
         <span class="meta-item">🍽️ ${plan.mealsPerDay} meals/day</span>
+        ${plan.profile?.trainingDays ? `<span class="meta-item">💪 ${plan.profile.trainingDays} training days/week</span>` : ''}
       </div>
     </header>
+    
+    <div class="weekly-summary">
+      <h2>📊 Weekly Totals & Averages</h2>
+      <div class="weekly-grid">
+        <div class="weekly-stat">
+          <div class="weekly-stat-value">${Math.round(weeklyTotals.calories / 7).toLocaleString()}</div>
+          <div class="weekly-stat-label">Avg Daily Calories</div>
+        </div>
+        <div class="weekly-stat">
+          <div class="weekly-stat-value">${Math.round(weeklyTotals.protein / 7)}g</div>
+          <div class="weekly-stat-label">Avg Daily Protein</div>
+        </div>
+        <div class="weekly-stat">
+          <div class="weekly-stat-value">${Math.round(weeklyTotals.carbs / 7)}g</div>
+          <div class="weekly-stat-label">Avg Daily Carbs</div>
+        </div>
+        <div class="weekly-stat">
+          <div class="weekly-stat-value">${Math.round(weeklyTotals.fat / 7)}g</div>
+          <div class="weekly-stat-label">Avg Daily Fat</div>
+        </div>
+      </div>
+    </div>
     
     <div class="days-grid">
       ${plan.mealPlan.map(day => `
@@ -233,9 +353,9 @@ export function generateDietHtml(plan: DietPlanData): string {
             <span class="day-badge">${day.day}</span>
             <div class="day-macros">
               <span class="macro-badge">🔥 ${day.totalCalories} kcal</span>
-              <span class="macro-badge">🥩 ${day.totalProtein}g protein</span>
-              <span class="macro-badge">🍞 ${day.totalCarbs}g carbs</span>
-              <span class="macro-badge">🧈 ${day.totalFat}g fat</span>
+              <span class="macro-badge">🥩 ${day.totalProtein}g P</span>
+              <span class="macro-badge">🍞 ${day.totalCarbs}g C</span>
+              <span class="macro-badge">🧈 ${day.totalFat}g F</span>
             </div>
           </div>
           <div class="day-content">
