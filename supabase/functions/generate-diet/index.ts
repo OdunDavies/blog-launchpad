@@ -58,6 +58,54 @@ MEAL SCHEDULES:
 5 MEALS: Breakfast (7 AM), Snack (10 AM), Lunch (12:30 PM), Snack (4 PM), Dinner (7 PM)
 6 MEALS: Breakfast (7 AM), Snack (9:30 AM), Lunch (12 PM), Snack (3 PM), Dinner (6 PM), Snack (8:30 PM)
 
+=== MEAL-TYPE-SPECIFIC FOOD GUIDELINES ===
+
+BREAKFAST (Morning meals - Light to moderate portions):
+- Easy-to-digest, energizing foods to start the day
+- Include protein for satiety (15-30g)
+- International: eggs (scrambled, omelette, boiled), oatmeal with protein, Greek yogurt with granola, smoothies with protein powder, whole grain toast with eggs, pancakes with protein
+- Nigerian: Akamu/Pap with milk, Akara (bean fritters), Moi Moi, Yam with egg sauce, Bread with omelette, Boiled yam/plantain with fish
+- West African: Koose (bean cakes), Hausa Koko (millet porridge), Tom Brown porridge with groundnuts
+
+SNACKS (Between meals - Quick, portable, 150-300 calories):
+- Protein-rich for muscle support (10-20g protein)
+- Easy to prepare or grab-and-go
+- Smaller portions - NOT full meals
+- International: handful of nuts (30-50g), fresh fruit, protein bars, hard-boiled eggs (2-3), cheese cubes, rice cakes with nut butter, beef jerky, protein shake
+- Nigerian: Roasted groundnuts (50g), Beef Kilishi (dried meat), Boiled eggs (2-3), Roasted corn, Plantain chips (small portion), Tiger nut milk (Kunun Aya), Garden eggs with groundnut paste, Chin Chin (small portion), Single Moi Moi wrap, Fresh fruits (oranges, mangoes, pawpaw)
+- West African: Kofi (fried plantain chips), Roasted cashews, Kelewele (spiced fried plantain - small portion), Tigernuts
+
+LUNCH (Midday meal - Balanced and moderate portions):
+- Good mix of protein, carbs, and vegetables
+- Sustaining energy for afternoon (400-700 calories typically)
+- International: rice bowls with grilled protein, salads with chicken/fish, sandwiches with lean protein, pasta dishes with meat sauce, grain bowls with vegetables
+- Nigerian: Jollof rice with grilled chicken, Ofada rice with Ayamase, Rice and beans (Ewa) with fish, Fried rice with chicken, White rice with vegetable stew and fish
+- West African: Thieboudienne, Waakye with fish, Banku with tilapia
+
+DINNER (Evening meal - Can be larger, traditional portions):
+- Complete protein sources (30-50g protein)
+- Traditional full meals with sides
+- Larger portions if calorie budget allows
+- International: grilled steak/chicken with vegetables and potatoes, fish with rice and salad, stir-fry with protein and rice, stews with grains
+- Nigerian: Eba/Amala/Pounded Yam with soup (Egusi, Efo Riro, Ogbono) and assorted meat/fish, Fufu with Ofe Nsala and goat meat, Tuwo with Miyan Kuka
+- West African: Fufu with groundnut soup, Konkonte with palm nut soup, Omotuo with palm nut soup
+
+PRE-WORKOUT (1-2 hours before training):
+- Moderate protein (15-25g) + complex carbs
+- Easily digestible - avoid heavy fats that slow digestion
+- International: banana with nut butter, oatmeal with protein, rice cakes with honey, toast with eggs
+- Nigerian: Boiled yam (small portion), Moi Moi (1 wrap), Boiled plantain, Akamu/Pap with milk
+- West African: Kooko with bread, Boiled plantain with groundnuts
+
+POST-WORKOUT (Within 1 hour after training):
+- High protein (30-40g) + fast-acting carbs for recovery
+- Replenish glycogen stores
+- International: protein shake with banana, chicken with white rice, eggs with toast, Greek yogurt with fruit
+- Nigerian: Boiled yam with grilled fish/chicken, White rice with chicken, Ofada rice with egg sauce and fish
+- West African: Rice balls with groundnut soup, Jollof rice with grilled tilapia
+
+IMPORTANT: Match the meal type to appropriate foods. Snacks should be SMALL and QUICK, not full meals. Breakfast should be lighter than dinner.
+
 === DIETARY RESTRICTIONS HANDLING ===
 
 GLUTEN-FREE: Avoid wheat, barley, rye. Use rice, quinoa, potatoes.
