@@ -3,10 +3,5 @@ project_id = "lmmjlnqcjqxrpludrxxo"
 [functions.generate-workout]
 verify_jwt = false
 
- diet
-[functions.generate-diet]
-verify_jwt = false
-
 [functions.generate-og-image]
 verify_jwt = false
- main

@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { workoutTemplates, WorkoutTemplate, TemplateExercise } from '@/data/workoutTemplates';
-import { Calendar, Dumbbell, Target, ChevronRight, Download, X, Edit2, Plus, Trash2, Save, RotateCcw, Loader2, Share2, Play } from 'lucide-react';
+import { Calendar, Dumbbell, Target, ChevronRight, Download, X, Edit2, Plus, Trash2, Save, RotateCcw, Loader2, Share2 } from 'lucide-react';
 import { ExercisePickerModal } from './ExercisePickerModal';
 import { ShareModal } from './ShareModal';
 import { toast } from '@/hooks/use-toast';
@@ -14,15 +14,10 @@ import { generateShareUrl, WorkoutForSharing } from '@/utils/shareWorkout';
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { SortableExerciseItem } from './SortableExerciseItem';
-import { LoggedExercise, ACTIVE_WORKOUT_KEY } from '@/types/workout-tracker';
 
 const CUSTOM_TEMPLATES_KEY = 'musclepedia-custom-templates';
 
-interface WorkoutTemplatesProps {
-  onStartWorkout?: () => void;
-}
-
-export function WorkoutTemplates({ onStartWorkout }: WorkoutTemplatesProps) {
+export function WorkoutTemplates() {
   const [selectedTemplate, setSelectedTemplate] = useState<WorkoutTemplate | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<WorkoutTemplate | null>(null);
@@ -212,41 +207,6 @@ export function WorkoutTemplates({ onStartWorkout }: WorkoutTemplatesProps) {
     }
   };
 
-  const startWorkoutFromTemplate = (template: WorkoutTemplate) => {
-    // Create exercise list from the first day
-    const exercises: LoggedExercise[] = template.schedule[0]?.exercises.map(e => ({
-      exerciseId: e.name.toLowerCase().replace(/\s+/g, '-'),
-      exerciseName: e.name,
-      sets: [{
-        setNumber: 1,
-        weight: 0,
-        weightUnit: 'kg',
-        reps: 0,
-        completed: false,
-      }],
-    })) || [];
-
-    // Save active workout to localStorage
-    const activeWorkout = {
-      id: crypto.randomUUID(),
-      startTime: new Date().toISOString(),
-      workoutName: template.name,
-      templateId: template.id,
-      exercises,
-    };
-    localStorage.setItem(ACTIVE_WORKOUT_KEY, JSON.stringify(activeWorkout));
-
-    // Navigate to tracker
-    if (onStartWorkout) {
-      onStartWorkout();
-    }
-    setSelectedTemplate(null);
-    toast({
-      title: 'Workout Started!',
-      description: `Starting ${template.name}. Head to the Tracker tab to log your sets.`,
-    });
-  };
-
   const displayTemplate = isEditing && editingTemplate ? editingTemplate : selectedTemplate;
 
   return (
@@ -428,17 +388,13 @@ export function WorkoutTemplates({ onStartWorkout }: WorkoutTemplatesProps) {
                       <Share2 className="w-4 h-4 mr-2" />
                       Share
                     </Button>
-                    <Button variant="outline" onClick={() => selectedTemplate && downloadTemplate(selectedTemplate)} disabled={isDownloading}>
+                    <Button onClick={() => selectedTemplate && downloadTemplate(selectedTemplate)} disabled={isDownloading}>
                       {isDownloading ? (
                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                       ) : (
                         <Download className="w-4 h-4 mr-2" />
                       )}
                       {isDownloading ? 'Generating...' : 'Download PDF'}
-                    </Button>
-                    <Button onClick={() => selectedTemplate && startWorkoutFromTemplate(selectedTemplate)}>
-                      <Play className="w-4 h-4 mr-2" />
-                      Start Workout
                     </Button>
                   </>
                 )}

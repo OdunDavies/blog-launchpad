@@ -22,7 +22,6 @@ interface WorkoutPlanData {
   splitDays?: number;
   goal: string;
   gender?: string;
-  userName?: string;
   targetMuscles?: string[];
   schedule: WorkoutDay[];
 }
@@ -33,14 +32,13 @@ export function generateWorkoutHtml(plan: WorkoutPlanData): string {
     ? plan.difficulty.charAt(0).toUpperCase() + plan.difficulty.slice(1) 
     : '';
   const goalCapitalized = plan.goal.charAt(0).toUpperCase() + plan.goal.slice(1);
-  const personalizedName = plan.userName ? `${plan.userName}'s ${plan.name}` : plan.name;
   
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${personalizedName} - Workout Plan</title>
+  <title>${plan.name} - Workout Plan</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     
@@ -245,7 +243,7 @@ export function generateWorkoutHtml(plan: WorkoutPlanData): string {
 <body>
   <div class="container">
     <header class="header">
-      <h1>${personalizedName}</h1>
+      <h1>${plan.name}</h1>
       ${plan.description ? `<p>${plan.description}</p>` : ''}
       <div class="meta">
         ${difficultyCapitalized ? `<span class="meta-item">📊 ${difficultyCapitalized}</span>` : ''}

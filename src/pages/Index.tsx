@@ -3,14 +3,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ExerciseLibrary } from '@/components/ExerciseLibrary';
 import { WorkoutGenerator } from '@/components/WorkoutGenerator';
 import { WorkoutTemplates } from '@/components/WorkoutTemplates';
-import { DietGenerator } from '@/components/DietGenerator';
-import { WorkoutTracker } from '@/components/WorkoutTracker';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { HeroSection } from '@/components/HeroSection';
-import { ProfileStatusBadge } from '@/components/ProfileStatusBadge';
 
 import { Button } from '@/components/ui/button';
-import { Dumbbell, Library, Sparkles, LayoutTemplate, ArrowUp, Utensils, ClipboardList } from 'lucide-react';
+import { Dumbbell, Library, Sparkles, LayoutTemplate, ArrowUp } from 'lucide-react';
 import { MuscleGroup } from '@/data/exercises';
 
 const Index = () => {
@@ -49,10 +46,7 @@ const Index = () => {
                 <p className="text-xs text-muted-foreground hidden sm:block">Navigate your fitness journey</p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <ProfileStatusBadge />
-              <ThemeToggle />
-            </div>
+            <ThemeToggle />
           </div>
         </nav>
       </header>
@@ -66,9 +60,7 @@ const Index = () => {
       {/* Main Content */}
       <main id="main-content" className="container max-w-6xl mx-auto px-4 py-8" role="main" aria-label="Main content">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-diet
-          <TabsList className="grid w-full max-w-3xl grid-cols-5">
-          <TabsList className="grid w-full max-w-xl grid-cols-3" aria-label="Content sections"> main
+          <TabsList className="grid w-full max-w-xl grid-cols-3" aria-label="Content sections">
             <TabsTrigger value="library" className="flex items-center gap-2">
               <Library className="w-4 h-4" aria-hidden="true" />
               <span className="hidden sm:inline">Exercise</span> Library
@@ -78,20 +70,8 @@ diet
               Templates
             </TabsTrigger>
             <TabsTrigger value="generator" className="flex items-center gap-2">
- diet
-              <Sparkles className="w-4 h-4" />
-              <span className="hidden sm:inline">AI</span> Workout
-            </TabsTrigger>
-            <TabsTrigger value="diet" className="flex items-center gap-2">
-              <Utensils className="w-4 h-4" />
-              <span className="hidden sm:inline">AI</span> Diet
-            </TabsTrigger>
-            <TabsTrigger value="tracker" className="flex items-center gap-2">
-              <ClipboardList className="w-4 h-4" />
-              Tracker
-
               <Sparkles className="w-4 h-4" aria-hidden="true" />
-              <span className="hidden sm:inline">AI</span> Generator main
+              <span className="hidden sm:inline">AI</span> Generator
             </TabsTrigger>
           </TabsList>
 
@@ -129,26 +109,6 @@ diet
               </header>
               <WorkoutGenerator />
             </article>
-          </TabsContent>
-
-          <TabsContent value="diet" className="mt-6">
-            <div className="mb-6">
-              <h2 className="text-2xl font-bold mb-2">AI Diet Planner</h2>
-              <p className="text-muted-foreground">
-                Generate a personalized 7-day meal plan based on your calorie goals and dietary preferences.
-              </p>
-            </div>
-            <DietGenerator />
-          </TabsContent>
-
-          <TabsContent value="tracker" className="mt-6">
-            <div className="mb-6">
-              <h2 className="text-2xl font-bold mb-2">Workout Tracker</h2>
-              <p className="text-muted-foreground">
-                Log your workouts, track progress, and celebrate personal records.
-              </p>
-            </div>
-            <WorkoutTracker />
           </TabsContent>
         </Tabs>
       </main>
