@@ -2,16 +2,15 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { MuscleGroup } from '@/data/exercises';
-import { Loader2, Download, Dumbbell, Calendar, Sparkles, Save, History, Trash2, Pencil, Check, X, ChevronLeft, ChevronRight, User, Target, Zap, Plus, Share2, Play } from 'lucide-react';
+import { Loader2, Download, Dumbbell, Calendar, Sparkles, Save, History, Trash2, Pencil, Check, X, ChevronLeft, ChevronRight, User, Target, Zap, Plus, Share2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAnalytics } from '@/hooks/useAnalytics';
-import { useProfile } from '@/hooks/useProfile';
 import { WizardProgress } from './workout-wizard/WizardProgress';
 import { StepSchedule } from './workout-wizard/StepSchedule';
+import { StepProfile } from './workout-wizard/StepProfile';
 import { StepGoal } from './workout-wizard/StepGoal';
 import { StepMuscles } from './workout-wizard/StepMuscles';
 import { StepReview } from './workout-wizard/StepReview';
@@ -51,21 +50,20 @@ interface SavedPlan extends GeneratedPlan {
 }
 
 const STORAGE_KEY = 'workout-planner-saved-plans';
-const TOTAL_STEPS = 4;
+const TOTAL_STEPS = 5;
 
 const wizardSteps = [
   { title: 'Schedule', icon: <Calendar className="w-5 h-5" /> },
+  { title: 'Profile', icon: <User className="w-5 h-5" /> },
   { title: 'Goal', icon: <Target className="w-5 h-5" /> },
   { title: 'Muscles', icon: <Zap className="w-5 h-5" /> },
   { title: 'Review', icon: <Sparkles className="w-5 h-5" /> },
 ];
 
 export function WorkoutGenerator() {
-  // Get profile from context
-  const { profile, isProfileComplete, gender } = useProfile();
-  
   const [currentStep, setCurrentStep] = useState(1);
   const [splitDays, setSplitDays] = useState<string>('4');
+  const [gender, setGender] = useState<string>('');
   const [goal, setGoal] = useState<string>('strength');
   const [targetMuscles, setTargetMuscles] = useState<MuscleGroup[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -250,10 +248,12 @@ export function WorkoutGenerator() {
       case 1:
         return !!splitDays;
       case 2:
-        return !!goal;
+        return !!gender;
       case 3:
-        return true;
+        return !!goal;
       case 4:
+        return true;
+      case 5:
         return true;
       default:
         return false;
@@ -273,8 +273,14 @@ export function WorkoutGenerator() {
   };
 
   const generateWorkoutPlan = async () => {
-    // Use saved gender or default to 'male' if not set
-    const genderToUse = gender || 'male';
+    if (!gender) {
+      toast({
+        title: "Gender Required",
+        description: "Please select your gender to generate a personalized plan.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     setIsGenerating(true);
     
@@ -282,10 +288,9 @@ export function WorkoutGenerator() {
       const { data, error } = await supabase.functions.invoke('generate-workout', {
         body: {
           splitDays: parseInt(splitDays),
-          gender: genderToUse,
+          gender,
           goal,
           targetMuscles,
-          profile: isProfileComplete ? profile : undefined,
         },
       });
 
@@ -304,7 +309,7 @@ export function WorkoutGenerator() {
       setGeneratedPlan({
         splitDays: parseInt(splitDays),
         goal,
-        gender: genderToUse,
+        gender,
         targetMuscles: targetMuscles.length > 0 ? targetMuscles : ['All muscle groups'],
         schedule: data.schedule,
       });
@@ -396,11 +401,13 @@ export function WorkoutGenerator() {
       case 1:
         return <StepSchedule splitDays={splitDays} setSplitDays={setSplitDays} />;
       case 2:
-        return <StepGoal goal={goal} setGoal={setGoal} />;
+        return <StepProfile gender={gender} setGender={setGender} />;
       case 3:
-        return <StepMuscles targetMuscles={targetMuscles} toggleMuscle={toggleMuscle} />;
+        return <StepGoal goal={goal} setGoal={setGoal} />;
       case 4:
-        return <StepReview splitDays={splitDays} gender={gender || 'male'} goal={goal} targetMuscles={targetMuscles} />;
+        return <StepMuscles targetMuscles={targetMuscles} toggleMuscle={toggleMuscle} />;
+      case 5:
+        return <StepReview splitDays={splitDays} gender={gender} goal={goal} targetMuscles={targetMuscles} />;
       default:
         return null;
     }
@@ -521,16 +528,6 @@ export function WorkoutGenerator() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-8">
-            {/* Profile Warning */}
-            {!isProfileComplete && (
-              <Alert>
-                <User className="h-4 w-4" />
-                <AlertDescription>
-                  Set up your profile in the header for personalized workout recommendations based on your physiology.
-                </AlertDescription>
-              </Alert>
-            )}
-
             {/* Progress Indicator */}
             <WizardProgress 
               currentStep={currentStep} 
@@ -609,11 +606,7 @@ export function WorkoutGenerator() {
                   ) : (
                     <Download className="w-4 h-4 mr-2" />
                   )}
-                  {isDownloading ? 'Generating...' : 'PDF'}
-                </Button>
-                <Button size="sm">
-                  <Play className="w-4 h-4 mr-2" />
-                  Start
+                  {isDownloading ? 'Generating...' : 'Download PDF'}
                 </Button>
               </div>
             </div>
