@@ -22,13 +22,13 @@ import {
 import { Target, Flame, ChevronLeft, ChevronRight, Sparkles, Save, Trash2, RotateCcw, Download, Loader2, UtensilsCrossed } from 'lucide-react';
 
 const wizardSteps = [
-  { title: 'Goal', icon: Target },
-  { title: 'Calories', icon: Flame },
-  { title: 'Diet Type', icon: UtensilsCrossed },
-  { title: 'Restrictions', icon: UtensilsCrossed },
-  { title: 'Meals', icon: UtensilsCrossed },
-  { title: 'Cuisine', icon: UtensilsCrossed },
-  { title: 'Review', icon: Sparkles },
+  { title: 'Goal', icon: <Target className="w-5 h-5" /> },
+  { title: 'Calories', icon: <Flame className="w-5 h-5" /> },
+  { title: 'Diet Type', icon: <UtensilsCrossed className="w-5 h-5" /> },
+  { title: 'Restrictions', icon: <UtensilsCrossed className="w-5 h-5" /> },
+  { title: 'Meals', icon: <UtensilsCrossed className="w-5 h-5" /> },
+  { title: 'Cuisine', icon: <UtensilsCrossed className="w-5 h-5" /> },
+  { title: 'Review', icon: <Sparkles className="w-5 h-5" /> },
 ];
 
 export function DietGenerator() {

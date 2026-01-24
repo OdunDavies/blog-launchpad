@@ -7,7 +7,6 @@ import { DietGenerator } from '@/components/DietGenerator';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { ProfileStatusBadge } from '@/components/ProfileStatusBadge';
 import { HeroSection } from '@/components/HeroSection';
-
 import { Button } from '@/components/ui/button';
 import { Dumbbell, Library, Sparkles, LayoutTemplate, ArrowUp, Salad } from 'lucide-react';
 import { MuscleGroup } from '@/data/exercises';
@@ -48,7 +47,10 @@ const Index = () => {
                 <p className="text-xs text-muted-foreground hidden sm:block">Navigate your fitness journey</p>
               </div>
             </div>
-            <ThemeToggle />
+            <div className="flex items-center gap-2">
+              <ProfileStatusBadge />
+              <ThemeToggle />
+            </div>
           </div>
         </nav>
       </header>
@@ -62,7 +64,7 @@ const Index = () => {
       {/* Main Content */}
       <main id="main-content" className="container max-w-6xl mx-auto px-4 py-8" role="main" aria-label="Main content">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full max-w-xl grid-cols-3" aria-label="Content sections">
+          <TabsList className="grid w-full max-w-2xl grid-cols-4" aria-label="Content sections">
             <TabsTrigger value="library" className="flex items-center gap-2">
               <Library className="w-4 h-4" aria-hidden="true" />
               <span className="hidden sm:inline">Exercise</span> Library
@@ -73,7 +75,11 @@ const Index = () => {
             </TabsTrigger>
             <TabsTrigger value="generator" className="flex items-center gap-2">
               <Sparkles className="w-4 h-4" aria-hidden="true" />
-              <span className="hidden sm:inline">AI</span> Generator
+              <span className="hidden sm:inline">AI</span> Workout
+            </TabsTrigger>
+            <TabsTrigger value="diet" className="flex items-center gap-2">
+              <Salad className="w-4 h-4" aria-hidden="true" />
+              <span className="hidden sm:inline">AI</span> Diet
             </TabsTrigger>
           </TabsList>
 
@@ -110,6 +116,18 @@ const Index = () => {
                 </p>
               </header>
               <WorkoutGenerator />
+            </article>
+          </TabsContent>
+
+          <TabsContent value="diet" className="mt-6">
+            <article>
+              <header className="mb-6">
+                <h2 className="text-2xl font-bold mb-2">AI Diet Generator</h2>
+                <p className="text-muted-foreground">
+                  Get a personalized 7-day meal plan based on your goals, preferences, and cuisine.
+                </p>
+              </header>
+              <DietGenerator />
             </article>
           </TabsContent>
         </Tabs>
