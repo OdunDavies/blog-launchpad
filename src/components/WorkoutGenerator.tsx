@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { MuscleGroup } from '@/data/exercises';
-import { Loader2, Download, Dumbbell, Calendar, Sparkles, Save, History, Trash2, Pencil, Check, X, ChevronLeft, ChevronRight, User, Target, Zap, Plus, Share2 } from 'lucide-react';
+import { Loader2, Download, Dumbbell, Calendar, Sparkles, Save, History, Trash2, Pencil, Check, X, ChevronLeft, ChevronRight, User, Target, Zap, Plus, Share2, Play } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
@@ -606,7 +606,11 @@ export function WorkoutGenerator() {
                   ) : (
                     <Download className="w-4 h-4 mr-2" />
                   )}
-                  {isDownloading ? 'Generating...' : 'Download PDF'}
+                  {isDownloading ? 'Generating...' : 'PDF'}
+                </Button>
+                <Button size="sm">
+                  <Play className="w-4 h-4 mr-2" />
+                  Start
                 </Button>
               </div>
             </div>
