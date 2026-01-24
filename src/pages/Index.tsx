@@ -3,12 +3,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ExerciseLibrary } from '@/components/ExerciseLibrary';
 import { WorkoutGenerator } from '@/components/WorkoutGenerator';
 import { WorkoutTemplates } from '@/components/WorkoutTemplates';
+import { WorkoutTracker } from '@/components/WorkoutTracker';
 import { DietGenerator } from '@/components/DietGenerator';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { ProfileStatusBadge } from '@/components/ProfileStatusBadge';
 import { HeroSection } from '@/components/HeroSection';
 import { Button } from '@/components/ui/button';
-import { Dumbbell, Library, Sparkles, LayoutTemplate, ArrowUp, Salad } from 'lucide-react';
+import { Dumbbell, Library, Sparkles, LayoutTemplate, ArrowUp, Salad, ClipboardList } from 'lucide-react';
 import { MuscleGroup } from '@/data/exercises';
 
 const Index = () => {
@@ -64,7 +65,7 @@ const Index = () => {
       {/* Main Content */}
       <main id="main-content" className="container max-w-6xl mx-auto px-4 py-8" role="main" aria-label="Main content">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full max-w-2xl grid-cols-4" aria-label="Content sections">
+          <TabsList className="grid w-full max-w-3xl grid-cols-5" aria-label="Content sections">
             <TabsTrigger value="library" className="flex items-center gap-2">
               <Library className="w-4 h-4" aria-hidden="true" />
               <span className="hidden sm:inline">Exercise</span> Library
@@ -80,6 +81,10 @@ const Index = () => {
             <TabsTrigger value="diet" className="flex items-center gap-2">
               <Salad className="w-4 h-4" aria-hidden="true" />
               <span className="hidden sm:inline">AI</span> Diet
+            </TabsTrigger>
+            <TabsTrigger value="tracker" className="flex items-center gap-2">
+              <ClipboardList className="w-4 h-4" aria-hidden="true" />
+              Tracker
             </TabsTrigger>
           </TabsList>
 
@@ -128,6 +133,18 @@ const Index = () => {
                 </p>
               </header>
               <DietGenerator />
+            </article>
+          </TabsContent>
+
+          <TabsContent value="tracker" className="mt-6">
+            <article>
+              <header className="mb-6">
+                <h2 className="text-2xl font-bold mb-2">Workout Tracker</h2>
+                <p className="text-muted-foreground">
+                  Log your workouts, track your progress, and celebrate your personal records.
+                </p>
+              </header>
+              <WorkoutTracker />
             </article>
           </TabsContent>
         </Tabs>
