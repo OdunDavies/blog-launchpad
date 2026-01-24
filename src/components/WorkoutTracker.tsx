@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Play, History, BarChart3, Settings } from 'lucide-react';
+import { Play, History, BarChart3 } from 'lucide-react';
 import { useWorkoutTracker } from '@/hooks/useWorkoutTracker';
 import { ActiveWorkout } from './tracker/ActiveWorkout';
 import { WorkoutHistory } from './tracker/WorkoutHistory';
@@ -13,9 +13,27 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import { LoggedExercise, WeightUnit } from '@/types/workout-tracker';
 
+const SAVED_PLANS_STORAGE_KEY = 'workout-planner-saved-plans';
+
+interface SavedPlan {
+  id: string;
+  name: string;
+  savedAt: string;
+  splitDays: number;
+  goal: string;
+  gender: string;
+  targetMuscles: string[];
+  schedule: Array<{
+    day: string;
+    focus: string;
+    exercises: Array<{ name: string; sets: number; reps: string; rest: string }>;
+  }>;
+}
+
 export function WorkoutTracker() {
   const [startModalOpen, setStartModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'active' | 'history' | 'stats'>('active');
+  const [savedPlans, setSavedPlans] = useState<SavedPlan[]>([]);
   
   const {
     workoutLogs,
@@ -37,6 +55,18 @@ export function WorkoutTracker() {
   } = useWorkoutTracker();
 
   const stats = getStats();
+
+  // Load saved plans from localStorage
+  useEffect(() => {
+    const stored = localStorage.getItem(SAVED_PLANS_STORAGE_KEY);
+    if (stored) {
+      try {
+        setSavedPlans(JSON.parse(stored));
+      } catch (e) {
+        console.error('Failed to parse saved plans:', e);
+      }
+    }
+  }, [startModalOpen]); // Re-check when modal opens in case plans were added
 
   const handleStartBlank = (name?: string) => {
     startWorkout(name);
@@ -173,6 +203,7 @@ export function WorkoutTracker() {
         onClose={() => setStartModalOpen(false)}
         onStartBlank={handleStartBlank}
         onStartFromTemplate={handleStartFromTemplate}
+        savedPlans={savedPlans}
       />
     </div>
   );
