@@ -1,115 +1,213 @@
 
+# Create Standalone Profile Feature
 
-# Enhance AI Prompt with Meal-Type-Specific Food Suggestions
-
-## Problem
-The current AI prompt tells the model *when* to eat (timing) and *what foods exist* (databases), but doesn't provide clear guidance on **what types of foods are appropriate for each meal type**. This can result in:
-- Snacks that look like full meals
-- Breakfast suggestions that are more appropriate for dinner
-- Generic meal suggestions that don't feel natural
-
-## Solution
-Add explicit **meal-type-specific food recommendations** to the AI prompt that guide the model on what foods/combinations are culturally appropriate for:
-- **Breakfast** - lighter, morning-appropriate foods
-- **Snacks** - quick, portable, smaller portions
-- **Lunch** - moderate, balanced meals
-- **Dinner** - typically larger, more substantial
-- **Pre/Post-Workout** - performance-focused nutrition
+## Overview
+Extract the profile input from the AI Diet Plan Generator and create a reusable, standalone User Profile feature that persists in localStorage and can be used across both the Workout Generator and Diet Generator.
 
 ---
 
-## Implementation
-
-### File to Modify
-
-| File | Changes |
-|------|---------|
-| `supabase/functions/generate-diet/index.ts` | Add meal-type-specific food guidance section to the system prompt |
-
-### New Prompt Section to Add
+## Current Architecture
 
 ```text
-=== MEAL-TYPE-SPECIFIC FOOD GUIDELINES ===
-
-BREAKFAST (Morning meals):
-- Light to moderate portions to start the day
-- Easy-to-digest foods
-- Include protein for satiety
-- Examples: eggs, oatmeal, yogurt, smoothies, toast with protein
-- Nigerian: Akamu/Pap, Akara, Moi Moi, Yam with egg sauce, bread with omelette
-
-SNACKS (Between meals):
-- Quick, portable, smaller portions (150-300 calories)
-- Protein-rich for muscle support
-- Easy to prepare or grab-and-go
-- Examples: nuts, fruit, protein bars, hard-boiled eggs, cheese
-- Nigerian: Roasted groundnuts, Kilishi, boiled eggs, Chin Chin, roasted plantain, Tiger nut milk
-
-LUNCH (Midday meal):
-- Balanced and moderate portions
-- Good mix of protein, carbs, and vegetables
-- Sustaining energy for afternoon
-- Examples: rice bowls, salads with protein, sandwiches, pasta dishes
-- Nigerian: Jollof rice with chicken, Ofada rice with Ayamase, rice and beans with fish
-
-DINNER (Evening meal):
-- Can be larger portions if calorie budget allows
-- Complete protein sources
-- Traditional full meals with sides
-- Examples: grilled proteins with vegetables, stews with grains
-- Nigerian: Eba/Amala with soup and assorted meat, Pounded yam with Egusi
-
-PRE-WORKOUT (1-2 hours before training):
-- Moderate protein + complex carbs
-- Easily digestible
-- Avoid heavy fats that slow digestion
-- Examples: banana with nut butter, oatmeal, rice cakes
-- Nigerian: Boiled yam, Moi Moi, Plantain
-
-POST-WORKOUT (Within 1 hour after training):
-- High protein (30-40g) + fast-acting carbs
-- Recovery-focused nutrition
-- Replenish glycogen stores
-- Examples: protein shake with fruit, chicken with rice
-- Nigerian: Boiled yam with grilled fish, Rice with chicken
+┌─────────────────────────────────┐    ┌─────────────────────────────────┐
+│      Diet Generator             │    │      Workout Generator          │
+│  ┌───────────────────────────┐  │    │  ┌───────────────────────────┐  │
+│  │ StepProfile (Full)        │  │    │  │ StepProfile (Gender only) │  │
+│  │ - Gender                  │  │    │  │ - Gender                  │  │
+│  │ - Weight/Height/Age       │  │    │  └───────────────────────────┘  │
+│  │ - Activity Level          │  │    │                                 │
+│  │ - Training Days           │  │    └─────────────────────────────────┘
+│  └───────────────────────────┘  │
+└─────────────────────────────────┘
 ```
 
-### Enhanced Snack Examples by Cuisine
+## Proposed Architecture
 
-For Nigerian cuisine specifically, add more snack variety:
-- Roasted groundnuts (50g)
-- Beef Kilishi (dried meat)
-- Boiled eggs (2-3)
-- Roasted corn
-- Plantain chips (small portion)
-- Tiger nut milk (Kunun Aya)
-- Garden eggs with groundnut paste
-- Chin Chin (small portion)
-- Moi Moi (single wrap)
-- Fresh fruits (oranges, mangoes, pawpaw)
-
-### Changes Summary
-
-1. Add new `=== MEAL-TYPE-SPECIFIC FOOD GUIDELINES ===` section to the system prompt
-2. Include examples for each meal type (breakfast, snack, lunch, dinner, pre/post workout)
-3. Add cuisine-specific examples within each meal type
-4. Update Nigerian cuisine section with explicit snack examples
-5. Add guidance on portion sizes appropriate for snacks vs main meals
+```text
+┌───────────────────────────────────────────────────────────────────┐
+│                    Standalone Profile Manager                      │
+│  ┌─────────────────────────────────────────────────────────────┐  │
+│  │ Accessible from Header or dedicated Profile section          │  │
+│  │ - Gender, Weight, Height, Age, Activity Level, Training Days │  │
+│  │ - Persisted to localStorage (user-fitness-profile)           │  │
+│  │ - Auto-loads when app starts                                 │  │
+│  └─────────────────────────────────────────────────────────────┘  │
+└───────────────────────────────────────────────────────────────────┘
+                              │
+                              │ Consumed by
+                              ▼
+┌─────────────────────────────────┐    ┌─────────────────────────────────┐
+│      Diet Generator             │    │      Workout Generator          │
+│  • Reads from saved profile     │    │  • Reads gender from profile    │
+│  • No profile step in wizard    │    │  • No profile step in wizard    │
+│  • 7 steps (was 8)              │    │  • 4 steps (was 5)              │
+└─────────────────────────────────┘    └─────────────────────────────────┘
+```
 
 ---
 
-## Expected Outcome
+## Implementation Plan
 
-After this update, generated meal plans will have:
-- **Breakfast**: Light, morning-appropriate foods (not full dinner-style meals)
-- **Snacks**: Quick, portable options with smaller portions (150-300 cal)
-- **Lunch**: Balanced midday meals
-- **Dinner**: Traditional, complete meals
-- **Pre/Post-workout**: Performance-optimized nutrition
+### Phase 1: Create Profile Context & Hook
+
+**New File: `src/contexts/ProfileContext.tsx`**
+
+Create a React Context to manage the user's fitness profile globally:
+- Store profile in localStorage under key `user-fitness-profile`
+- Provide `profile`, `setProfile`, `isProfileComplete` values
+- Auto-load on app initialization
+
+**New File: `src/hooks/useProfile.ts`**
+
+Convenience hook that:
+- Accesses the profile context
+- Provides helper functions like `updateProfile()`, `clearProfile()`
+- Calculates TDEE on-the-fly when profile is available
+
+### Phase 2: Create Profile Editor Component
+
+**New File: `src/components/ProfileEditor.tsx`**
+
+A standalone UI component for editing the profile:
+- Full form with all profile fields (gender, weight, height, age, activity level, training days)
+- Can be displayed in a modal/dialog or as a dedicated section
+- Shows calculated BMR/TDEE preview when data is complete
+- Save button persists to localStorage via context
+
+**New File: `src/components/ProfileStatusBadge.tsx`**
+
+A small badge/button for the header:
+- Shows "Set up profile" if incomplete
+- Shows user's weight/goal summary if complete
+- Clicking opens the ProfileEditor modal
+
+### Phase 3: Update Diet Generator
+
+**Modify: `src/components/DietGenerator.tsx`**
+
+| Change | Details |
+|--------|---------|
+| Remove Step 2 (Profile) | Delete `StepProfile` import and rendering |
+| Update step count | `TOTAL_STEPS = 7` (was 8) |
+| Update `wizardSteps` array | Remove Profile entry |
+| Use profile from context | Import `useProfile` hook and read saved profile |
+| Update `canProceed` logic | Remove case 2 validation |
+| Adjust step numbers | Shift all steps after Profile down by 1 |
+| Show profile warning | If profile is incomplete, show a banner prompting user to set it up |
+
+### Phase 4: Update Workout Generator
+
+**Modify: `src/components/WorkoutGenerator.tsx`**
+
+| Change | Details |
+|--------|---------|
+| Remove Step 2 (Profile) | Delete `StepProfile` import |
+| Update step count | `TOTAL_STEPS = 4` (was 5) |
+| Update `wizardSteps` array | Remove Profile entry |
+| Use gender from context | Import `useProfile` hook |
+| Update `canProceed` logic | Remove gender check in step navigation |
+| Adjust step numbers | Shift Muscles and Review steps |
+| Show profile warning | If gender not set, prompt user |
+
+### Phase 5: Integrate into App
+
+**Modify: `src/App.tsx`**
+
+- Wrap the app with `ProfileProvider` context
+
+**Modify: `src/pages/Index.tsx`**
+
+- Add ProfileStatusBadge to header
+- Optionally add a "Profile" tab or section in the main tabs
+
+### Phase 6: Update Edge Functions
+
+**Modify: `supabase/functions/generate-workout/index.ts`**
+
+- Accept full profile object (not just gender)
+- Use profile data in AI prompt for better personalization (optional enhancement)
+
+---
+
+## File Changes Summary
+
+| File | Action | Description |
+|------|--------|-------------|
+| `src/contexts/ProfileContext.tsx` | **Create** | Profile context with localStorage persistence |
+| `src/hooks/useProfile.ts` | **Create** | Hook for accessing profile + TDEE calculations |
+| `src/components/ProfileEditor.tsx` | **Create** | Full profile editing form |
+| `src/components/ProfileStatusBadge.tsx` | **Create** | Header badge showing profile status |
+| `src/App.tsx` | **Modify** | Wrap with ProfileProvider |
+| `src/pages/Index.tsx` | **Modify** | Add profile badge to header |
+| `src/components/DietGenerator.tsx` | **Modify** | Remove profile step, use context, reduce to 7 steps |
+| `src/components/WorkoutGenerator.tsx` | **Modify** | Remove profile step, use context, reduce to 4 steps |
+| `src/components/diet-wizard/StepProfile.tsx` | **Delete** | No longer needed (moved to standalone) |
+| `src/components/workout-wizard/StepProfile.tsx` | **Delete** | No longer needed |
+
+---
+
+## User Experience Flow
+
+### Before (Current)
+1. User goes to Diet Generator
+2. Fills out Goal
+3. **Fills out Profile (again)**
+4. Fills out Calories, Diet Type, Restrictions, Meals, Cuisine
+5. Reviews and generates
+
+### After (Proposed)
+1. **First visit**: User sees "Set up profile" badge in header
+2. User clicks badge, enters profile once
+3. User goes to Diet Generator
+4. Fills out Goal, Calories, Diet Type, Restrictions, Meals, Cuisine (no profile step!)
+5. Reviews and generates - profile is auto-included
 
 ---
 
 ## Technical Details
 
-The changes will be made to the `systemPrompt` variable in the edge function, adding the new meal-type guidelines section between the existing "MEAL TIMING" and "DIETARY RESTRICTIONS" sections.
+### Profile Data Structure
+```typescript
+interface UserProfile {
+  gender: 'male' | 'female' | 'other';
+  weight: number;
+  weightUnit: 'kg' | 'lbs';
+  height: number;
+  heightUnit: 'cm' | 'ft';
+  heightInches?: number;
+  age: number;
+  activityLevel: ActivityLevel;
+  trainingDays: number;
+}
+```
 
+### localStorage Key
+```
+user-fitness-profile
+```
+
+### Profile Completeness Check
+```typescript
+const isProfileComplete = (profile: UserProfile) => 
+  profile.gender && 
+  profile.weight > 0 && 
+  profile.height > 0 && 
+  profile.age >= 15;
+```
+
+### Fallback Behavior
+If profile is not set when generating a plan:
+- Diet Generator: Show warning banner, can still proceed with defaults
+- Workout Generator: Show warning banner, can still proceed with defaults
+- TDEE calculation: Return null, show "Set profile for personalized recommendations"
+
+---
+
+## Benefits
+
+1. **Single source of truth** - Profile entered once, used everywhere
+2. **Shorter wizards** - Diet wizard goes from 8 to 7 steps, Workout from 5 to 4
+3. **Better UX** - Users don't re-enter the same data multiple times
+4. **Persistence** - Profile survives page refreshes and returns
+5. **Extensibility** - Future features (meal tracker, progress tracking) can use the same profile
+6. **Consistent personalization** - Same profile used for both workout and diet AI generation
