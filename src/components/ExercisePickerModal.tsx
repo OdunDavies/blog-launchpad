@@ -69,7 +69,7 @@ export function ExercisePickerModal({ open, onClose, onSelectExercise, dayFocus 
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col overflow-hidden">
+      <DialogContent className="max-w-2xl h-[80vh] flex flex-col">
         <DialogHeader className="flex-shrink-0">
           <DialogTitle>Add Exercise{dayFocus && ` to ${dayFocus}`}</DialogTitle>
         </DialogHeader>
@@ -101,7 +101,7 @@ export function ExercisePickerModal({ open, onClose, onSelectExercise, dayFocus 
         </div>
         
         {/* Exercise List */}
-        <ScrollArea className="flex-1 min-h-0 -mx-6 px-6">
+        <ScrollArea className="flex-1 -mx-6 px-6">
           <div className="space-y-2 pb-4">
             {filteredExercises.length === 0 ? (
               <p className="text-center text-muted-foreground py-8">No exercises found</p>
