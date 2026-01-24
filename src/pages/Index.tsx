@@ -7,6 +7,7 @@ import { DietGenerator } from '@/components/DietGenerator';
 import { WorkoutTracker } from '@/components/WorkoutTracker';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { HeroSection } from '@/components/HeroSection';
+import { ProfileStatusBadge } from '@/components/ProfileStatusBadge';
 
 import { Button } from '@/components/ui/button';
 import { Dumbbell, Library, Sparkles, LayoutTemplate, ArrowUp, Utensils, ClipboardList } from 'lucide-react';
@@ -48,7 +49,10 @@ const Index = () => {
                 <p className="text-xs text-muted-foreground hidden sm:block">Navigate your fitness journey</p>
               </div>
             </div>
-            <ThemeToggle />
+            <div className="flex items-center gap-2">
+              <ProfileStatusBadge />
+              <ThemeToggle />
+            </div>
           </div>
         </div>
       </header>

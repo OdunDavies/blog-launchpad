@@ -1,16 +1,13 @@
-import { User, Activity } from 'lucide-react';
+import { User, Activity, Trash2 } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { UserProfile, ActivityLevel } from '@/types/diet';
-
-interface StepProfileProps {
-  profile: UserProfile;
-  setProfile: (profile: UserProfile) => void;
-}
+import { useProfile } from '@/hooks/useProfile';
+import { ActivityLevel } from '@/types/diet';
+import { calculateTDEEWithRecommendations } from '@/utils/tdeeCalculator';
 
 const activityLevels: { value: ActivityLevel; label: string; description: string }[] = [
   { value: 'sedentary', label: 'Sedentary', description: 'Little to no exercise' },
@@ -20,10 +17,18 @@ const activityLevels: { value: ActivityLevel; label: string; description: string
   { value: 'very-active', label: 'Extremely Active', description: 'Athlete/physical job' },
 ];
 
-export function StepProfile({ profile, setProfile }: StepProfileProps) {
-  const updateProfile = (updates: Partial<UserProfile>) => {
-    setProfile({ ...profile, ...updates });
-  };
+interface ProfileEditorProps {
+  onSave?: () => void;
+  showClearButton?: boolean;
+}
+
+export function ProfileEditor({ onSave, showClearButton = false }: ProfileEditorProps) {
+  const { profile, updateProfile, clearProfile, isProfileComplete } = useProfile();
+
+  // Calculate TDEE preview when profile is complete
+  const tdeePreview = isProfileComplete 
+    ? calculateTDEEWithRecommendations(profile, 'maintenance')
+    : null;
 
   return (
     <div className="space-y-6">
@@ -33,8 +38,8 @@ export function StepProfile({ profile, setProfile }: StepProfileProps) {
             <User className="w-8 h-8 text-primary" />
           </div>
         </div>
-        <h3 className="text-xl font-semibold">Tell us about yourself</h3>
-        <p className="text-muted-foreground">We'll use this to calculate your ideal calorie target</p>
+        <h3 className="text-xl font-semibold">Your Fitness Profile</h3>
+        <p className="text-muted-foreground">This helps us personalize your workout and diet plans</p>
       </div>
 
       <div className="grid gap-6 max-w-md mx-auto">
@@ -193,6 +198,38 @@ export function StepProfile({ profile, setProfile }: StepProfileProps) {
               ))}
             </SelectContent>
           </Select>
+        </div>
+
+        {/* TDEE Preview */}
+        {tdeePreview && (
+          <div className="p-4 rounded-lg bg-primary/5 border border-primary/20 space-y-2">
+            <p className="text-sm font-medium text-primary">Your Stats</p>
+            <div className="grid grid-cols-2 gap-2 text-sm">
+              <div>
+                <span className="text-muted-foreground">BMR: </span>
+                <span className="font-medium">{Math.round(tdeePreview.bmr)} kcal</span>
+              </div>
+              <div>
+                <span className="text-muted-foreground">TDEE: </span>
+                <span className="font-medium">{Math.round(tdeePreview.tdee)} kcal</span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Action Buttons */}
+        <div className="flex gap-3 justify-end pt-4">
+          {showClearButton && (
+            <Button variant="outline" onClick={clearProfile} className="gap-2">
+              <Trash2 className="w-4 h-4" />
+              Clear
+            </Button>
+          )}
+          {onSave && (
+            <Button onClick={onSave} disabled={!isProfileComplete}>
+              Save Profile
+            </Button>
+          )}
         </div>
       </div>
     </div>

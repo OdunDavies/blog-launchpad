@@ -1,13 +1,14 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, Download, Salad, Sparkles, Save, History, Trash2, Pencil, Check, X, ChevronLeft, ChevronRight, Flame, AlertCircle, UtensilsCrossed, Target, User, Globe } from 'lucide-react';
+import { Loader2, Download, Salad, Sparkles, Save, History, Trash2, Pencil, Check, X, ChevronLeft, ChevronRight, Flame, AlertCircle, UtensilsCrossed, Target, Globe, User } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useProfile } from '@/hooks/useProfile';
 import { DietWizardProgress } from './diet-wizard/DietWizardProgress';
 import { StepGoal } from './diet-wizard/StepGoal';
-import { StepProfile } from './diet-wizard/StepProfile';
 import { StepCalories } from './diet-wizard/StepCalories';
 import { StepDietType } from './diet-wizard/StepDietType';
 import { StepRestrictions } from './diet-wizard/StepRestrictions';
@@ -21,11 +22,10 @@ import { calculateTDEEWithRecommendations, TDEEResult } from '@/utils/tdeeCalcul
 import { DietPlan, DayPlan, SavedDietPlan, FitnessGoal, UserProfile, CuisineType } from '@/types/diet';
 
 const STORAGE_KEY = 'diet-planner-saved-plans';
-const TOTAL_STEPS = 8;
+const TOTAL_STEPS = 7;
 
 const wizardSteps = [
   { title: 'Goal', icon: <Target className="w-5 h-5" /> },
-  { title: 'Profile', icon: <User className="w-5 h-5" /> },
   { title: 'Calories', icon: <Flame className="w-5 h-5" /> },
   { title: 'Diet Type', icon: <Salad className="w-5 h-5" /> },
   { title: 'Restrictions', icon: <AlertCircle className="w-5 h-5" /> },
@@ -68,9 +68,12 @@ const defaultProfile: UserProfile = {
 };
 
 export function DietGenerator() {
+  // Get profile from context
+  const { profile: savedProfile, isProfileComplete } = useProfile();
+  // Use saved profile if complete, otherwise fallback to defaults
+  const profile = isProfileComplete ? savedProfile : defaultProfile;
   const [currentStep, setCurrentStep] = useState(1);
   const [goal, setGoal] = useState<FitnessGoal | ''>('');
-  const [profile, setProfile] = useState<UserProfile>(defaultProfile);
   const [calorieTarget, setCalorieTarget] = useState<string>('');
   const [customCalories, setCustomCalories] = useState<string>('');
   const [dietType, setDietType] = useState<string>('balanced');
@@ -205,23 +208,21 @@ export function DietGenerator() {
     switch (currentStep) {
       case 1: // Goal
         return !!goal;
-      case 2: // Profile
-        return profile.weight > 0 && profile.height > 0 && profile.age >= 15;
-      case 3: // Calories
+      case 2: // Calories
         if (calorieTarget === 'custom') {
           const cal = parseInt(customCalories);
           return !isNaN(cal) && cal >= 1000 && cal <= 5000;
         }
         return !!calorieTarget;
-      case 4: // Diet Type
+      case 3: // Diet Type
         return !!dietType;
-      case 5: // Restrictions
+      case 4: // Restrictions
         return true;
-      case 6: // Meals
+      case 5: // Meals
         return !!mealsPerDay;
-      case 7: // Cuisine
+      case 6: // Cuisine
         return !!cuisine;
-      case 8: // Review
+      case 7: // Review
         return true;
       default:
         return false;
@@ -348,8 +349,6 @@ export function DietGenerator() {
       case 1:
         return <StepGoal goal={goal} setGoal={setGoal} />;
       case 2:
-        return <StepProfile profile={profile} setProfile={setProfile} />;
-      case 3:
         return (
           <StepCalories 
             calorieTarget={calorieTarget} 
@@ -360,15 +359,15 @@ export function DietGenerator() {
             goal={goal as FitnessGoal}
           />
         );
-      case 4:
+      case 3:
         return <StepDietType dietType={dietType} setDietType={setDietType} />;
-      case 5:
+      case 4:
         return <StepRestrictions restrictions={restrictions} toggleRestriction={toggleRestriction} />;
-      case 6:
+      case 5:
         return <StepMeals mealsPerDay={mealsPerDay} setMealsPerDay={setMealsPerDay} />;
-      case 7:
+      case 6:
         return <StepCuisine cuisine={cuisine} setCuisine={setCuisine} />;
-      case 8:
+      case 7:
         return (
           <StepDietReview 
             calorieTarget={calorieTarget}
@@ -496,6 +495,16 @@ export function DietGenerator() {
           </CardHeader>
 
           <CardContent className="pt-6">
+            {/* Profile Warning */}
+            {!isProfileComplete && (
+              <Alert className="mb-6">
+                <User className="h-4 w-4" />
+                <AlertDescription>
+                  Set up your profile in the header for personalized calorie recommendations based on your body metrics.
+                </AlertDescription>
+              </Alert>
+            )}
+
             {/* Progress */}
             <div className="mb-8">
               <DietWizardProgress 
