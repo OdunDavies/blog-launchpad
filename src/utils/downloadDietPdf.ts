@@ -11,6 +11,7 @@ interface DietPlanData {
   mealPlan: DayPlan[];
   goal?: FitnessGoal | string;
   profile?: UserProfile;
+  cuisine?: string;
 }
 
 const dietTypeLabels: Record<string, string> = {
@@ -20,6 +21,12 @@ const dietTypeLabels: Record<string, string> = {
   mediterranean: 'Mediterranean',
   vegetarian: 'Vegetarian',
   vegan: 'Vegan',
+};
+
+const cuisineLabels: Record<string, string> = {
+  international: 'International Mix',
+  nigerian: 'Nigerian',
+  'west-african': 'West African',
 };
 
 const goalLabels: Record<string, string> = {
@@ -59,6 +66,7 @@ function calculateWeeklyTotals(mealPlan: DayPlan[]) {
 export function generateDietHtml(plan: DietPlanData): string {
   const dietLabel = dietTypeLabels[plan.dietType] || plan.dietType;
   const goalLabel = plan.goal ? (goalLabels[plan.goal] || plan.goal) : '';
+  const cuisineLabel = plan.cuisine ? (cuisineLabels[plan.cuisine] || plan.cuisine) : '';
   const profileSummary = getProfileSummary(plan.profile);
   const weeklyTotals = calculateWeeklyTotals(plan.mealPlan);
   
@@ -319,6 +327,7 @@ export function generateDietHtml(plan: DietPlanData): string {
       <div class="meta">
         <span class="meta-item">🔥 ${plan.calorieTarget} kcal/day</span>
         <span class="meta-item">🥗 ${dietLabel}</span>
+        ${cuisineLabel ? `<span class="meta-item">🍲 ${cuisineLabel}</span>` : ''}
         <span class="meta-item">🍽️ ${plan.mealsPerDay} meals/day</span>
         ${plan.profile?.trainingDays ? `<span class="meta-item">💪 ${plan.profile.trainingDays} training days/week</span>` : ''}
       </div>

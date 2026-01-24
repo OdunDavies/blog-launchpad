@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, Download, Salad, Sparkles, Save, History, Trash2, Pencil, Check, X, ChevronLeft, ChevronRight, Flame, AlertCircle, UtensilsCrossed, Target, User } from 'lucide-react';
+import { Loader2, Download, Salad, Sparkles, Save, History, Trash2, Pencil, Check, X, ChevronLeft, ChevronRight, Flame, AlertCircle, UtensilsCrossed, Target, User, Globe } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -12,15 +12,16 @@ import { StepCalories } from './diet-wizard/StepCalories';
 import { StepDietType } from './diet-wizard/StepDietType';
 import { StepRestrictions } from './diet-wizard/StepRestrictions';
 import { StepMeals } from './diet-wizard/StepMeals';
+import { StepCuisine } from './diet-wizard/StepCuisine';
 import { StepDietReview } from './diet-wizard/StepDietReview';
 import { MealCard } from './MealCard';
 import { NutritionSummary } from './NutritionSummary';
 import { generateDietPdf } from '@/utils/downloadDietPdf';
 import { calculateTDEEWithRecommendations, TDEEResult } from '@/utils/tdeeCalculator';
-import { DietPlan, DayPlan, SavedDietPlan, FitnessGoal, UserProfile } from '@/types/diet';
+import { DietPlan, DayPlan, SavedDietPlan, FitnessGoal, UserProfile, CuisineType } from '@/types/diet';
 
 const STORAGE_KEY = 'diet-planner-saved-plans';
-const TOTAL_STEPS = 7;
+const TOTAL_STEPS = 8;
 
 const wizardSteps = [
   { title: 'Goal', icon: <Target className="w-5 h-5" /> },
@@ -29,6 +30,7 @@ const wizardSteps = [
   { title: 'Diet Type', icon: <Salad className="w-5 h-5" /> },
   { title: 'Restrictions', icon: <AlertCircle className="w-5 h-5" /> },
   { title: 'Meals', icon: <UtensilsCrossed className="w-5 h-5" /> },
+  { title: 'Cuisine', icon: <Globe className="w-5 h-5" /> },
   { title: 'Review', icon: <Sparkles className="w-5 h-5" /> },
 ];
 
@@ -46,6 +48,12 @@ const goalLabels: Record<FitnessGoal, string> = {
   'fat-loss': 'Fat Loss',
   'maintenance': 'Maintenance',
   'recomposition': 'Body Recomposition',
+};
+
+const cuisineLabels: Record<CuisineType, string> = {
+  'international': 'International',
+  'nigerian': 'Nigerian',
+  'west-african': 'West African',
 };
 
 const defaultProfile: UserProfile = {
@@ -68,6 +76,7 @@ export function DietGenerator() {
   const [dietType, setDietType] = useState<string>('balanced');
   const [restrictions, setRestrictions] = useState<string[]>([]);
   const [mealsPerDay, setMealsPerDay] = useState<string>('3');
+  const [cuisine, setCuisine] = useState<CuisineType>('international');
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedPlan, setGeneratedPlan] = useState<DietPlan | null>(null);
   const [savedPlans, setSavedPlans] = useState<SavedDietPlan[]>([]);
@@ -133,10 +142,11 @@ export function DietGenerator() {
 
     const calories = getEffectiveCalories();
     const goalLabel = goal ? goalLabels[goal as FitnessGoal] : '';
+    const cuisineLabel = cuisineLabels[cuisine];
     const newPlan: SavedDietPlan = {
       ...generatedPlan,
       id: crypto.randomUUID(),
-      name: `${goalLabel} - ${calories} kcal ${dietTypeLabels[dietType]}`,
+      name: `${goalLabel} - ${calories} kcal ${dietTypeLabels[dietType]} (${cuisineLabel})`,
       savedAt: new Date().toISOString(),
     };
 
@@ -209,7 +219,9 @@ export function DietGenerator() {
         return true;
       case 6: // Meals
         return !!mealsPerDay;
-      case 7: // Review
+      case 7: // Cuisine
+        return !!cuisine;
+      case 8: // Review
         return true;
       default:
         return false;
@@ -242,6 +254,7 @@ export function DietGenerator() {
           mealsPerDay: parseInt(mealsPerDay),
           goal,
           profile,
+          cuisine,
         },
       });
 
@@ -261,6 +274,7 @@ export function DietGenerator() {
         goal: goal || '',
         profile,
         gender: profile.gender,
+        cuisine,
         mealPlan: data.mealPlan,
       });
 
@@ -300,6 +314,7 @@ export function DietGenerator() {
         mealPlan: generatedPlan.mealPlan,
         goal: generatedPlan.goal,
         profile: generatedPlan.profile,
+        cuisine: generatedPlan.cuisine,
       });
       
       toast({
@@ -325,6 +340,7 @@ export function DietGenerator() {
     setGoal('');
     setCalorieTarget('');
     setCustomCalories('');
+    setCuisine('international');
   };
 
   const renderStep = () => {
@@ -351,6 +367,8 @@ export function DietGenerator() {
       case 6:
         return <StepMeals mealsPerDay={mealsPerDay} setMealsPerDay={setMealsPerDay} />;
       case 7:
+        return <StepCuisine cuisine={cuisine} setCuisine={setCuisine} />;
+      case 8:
         return (
           <StepDietReview 
             calorieTarget={calorieTarget}
@@ -361,6 +379,7 @@ export function DietGenerator() {
             goal={goal as FitnessGoal}
             profile={profile}
             tdeeResult={tdeeResult}
+            cuisine={cuisine}
           />
         );
       default:
