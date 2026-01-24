@@ -126,6 +126,10 @@ Example adaptations:
 - Hypertrophy: 3-4 sets, 8-15 reps, 60-90 sec rest
 - Endurance: 2-3 sets, 15-25 reps, 30-45 sec rest
 - Weight Loss: 3-4 sets, 12-20 reps, 30-60 sec rest (keep heart rate elevated)
+- General Fitness: Mixed rep ranges for well-rounded development
+  • Primary compound exercises: 4 sets, 6-10 reps, 90-120 sec rest
+  • Accessory exercises: 3 sets, 10-15 reps, 60-90 sec rest
+  • Finisher/conditioning exercises: 2-3 sets, 15-20 reps, 45-60 sec rest
 
 === GENDER-SPECIFIC CONSIDERATIONS ===
 
