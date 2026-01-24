@@ -38,6 +38,8 @@ export interface UserProfile {
   trainingDays: number;
 }
 
+export type CuisineType = 'international' | 'nigerian' | 'west-african';
+
 export interface DietPlan {
   calorieTarget: number;
   dietType: string;
@@ -46,6 +48,7 @@ export interface DietPlan {
   goal: FitnessGoal | string;
   profile?: UserProfile;
   gender: string;
+  cuisine?: CuisineType;
   mealPlan: DayPlan[];
 }
 

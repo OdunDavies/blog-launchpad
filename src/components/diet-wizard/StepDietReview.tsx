@@ -1,7 +1,7 @@
-import { ClipboardList, Target, User, Flame, Salad, AlertCircle, UtensilsCrossed, Activity } from 'lucide-react';
+import { ClipboardList, Target, User, Flame, Salad, AlertCircle, UtensilsCrossed, Activity, Globe } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { FitnessGoal, UserProfile } from '@/types/diet';
+import { FitnessGoal, UserProfile, CuisineType } from '@/types/diet';
 import { TDEEResult } from '@/utils/tdeeCalculator';
 
 interface StepDietReviewProps {
@@ -13,6 +13,7 @@ interface StepDietReviewProps {
   goal?: FitnessGoal;
   profile?: UserProfile;
   tdeeResult?: TDEEResult | null;
+  cuisine?: CuisineType;
 }
 
 const dietTypeLabels: Record<string, string> = {
@@ -50,6 +51,12 @@ const activityLabels: Record<string, string> = {
   'very-active': 'Extremely Active',
 };
 
+const cuisineLabels: Record<CuisineType, string> = {
+  'international': 'International Mix',
+  'nigerian': 'Nigerian',
+  'west-african': 'West African',
+};
+
 export function StepDietReview({ 
   calorieTarget, 
   customCalories, 
@@ -58,7 +65,8 @@ export function StepDietReview({
   mealsPerDay,
   goal,
   profile,
-  tdeeResult
+  tdeeResult,
+  cuisine
 }: StepDietReviewProps) {
   const getDisplayCalories = () => {
     if (calorieTarget === 'suggested' && tdeeResult) {
@@ -162,6 +170,18 @@ export function StepDietReview({
             </div>
           </CardContent>
         </Card>
+
+        {cuisine && (
+          <Card>
+            <CardContent className="flex items-center gap-4 py-4">
+              <div className="p-2 rounded-lg bg-primary/10"><Globe className="w-5 h-5 text-primary" /></div>
+              <div className="flex-1">
+                <p className="text-sm text-muted-foreground">Cuisine Preference</p>
+                <p className="font-semibold">{cuisineLabels[cuisine]}</p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {restrictions.length > 0 && (
           <Card>
