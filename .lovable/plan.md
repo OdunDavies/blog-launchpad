@@ -1,232 +1,171 @@
 
-# Workout Tracker Implementation Plan
+# Day Selection Flow for Workout Tracker
 
 ## Overview
-Add a comprehensive workout tracking feature that allows users to log their workouts, track exercise progress (weight, reps, sets), view workout history, and analyze performance trends over time.
-
-## Current State Analysis
-- **Existing workout system**: Workout Generator and Templates create/manage workout plans
-- **Data storage pattern**: Currently uses `localStorage` for saved plans (similar pattern in `useFavorites.ts`)
-- **Database**: Supabase with `shared_workouts` table for sharing; no user-specific data storage
-- **No authentication**: App is currently public/anonymous
-
-## Feature Scope
-
-### Core Tracking Features
-1. **Log Workouts** - Record completed workout sessions
-2. **Track Exercise Performance** - Weight, sets, reps for each exercise
-3. **Workout History** - View past workout sessions
-4. **Progress Charts** - Visualize strength gains over time
-5. **Personal Records (PRs)** - Track and celebrate new PRs
-
-## Architecture Decision
-
-Since the app currently has no authentication and uses localStorage for saved workout plans, this implementation will follow the same pattern:
-- **Local Storage** for workout logs (immediate, offline-capable)
-- Data structure designed for future database migration if authentication is added
+Enhance the "Start Workout" flow to let users select which specific day they want to track from a multi-day template or personalized plan, instead of always defaulting to Day 1.
 
 ---
 
-## Implementation Details
+## Current Problem
+- Templates like "Push Pull Legs" have 6 different days (Push, Pull, Legs x2)
+- The current code only uses `template.schedule[0]` (first day)
+- Users cannot track Day 2, Day 3, etc.
 
-### 1. Create Type Definitions
-**New File:** `src/types/workout-tracker.ts`
+---
 
-```typescript
-interface WorkoutSet {
-  setNumber: number;
-  weight: number;
-  weightUnit: 'kg' | 'lbs';
-  reps: number;
-  rpe?: number; // Rate of Perceived Exertion (1-10)
-  isWarmup?: boolean;
-  isPR?: boolean;
-}
-
-interface LoggedExercise {
-  exerciseId: string;
-  exerciseName: string;
-  sets: WorkoutSet[];
-  notes?: string;
-}
-
-interface WorkoutLog {
-  id: string;
-  date: string; // ISO date
-  startTime: string;
-  endTime?: string;
-  duration?: number; // minutes
-  workoutName?: string;
-  templateId?: string; // If started from a template
-  exercises: LoggedExercise[];
-  notes?: string;
-  mood?: 'great' | 'good' | 'okay' | 'tired' | 'exhausted';
-}
-
-interface ExerciseHistory {
-  exerciseId: string;
-  logs: Array<{
-    date: string;
-    bestSet: WorkoutSet; // Heaviest weight with good reps
-  }>;
-  personalRecord: {
-    weight: number;
-    reps: number;
-    date: string;
-  };
-}
-```
-
-### 2. Create Workout Tracker Hook
-**New File:** `src/hooks/useWorkoutTracker.ts`
-
-Features:
-- Load/save workout logs from localStorage
-- Start new workout session (blank or from template)
-- Add/update/remove exercises and sets
-- Calculate duration
-- Detect and mark Personal Records
-- Get exercise history for a specific exercise
-
-### 3. Create Workout Tracker Components
-
-**New Files:**
-
-| File | Purpose |
-|------|---------|
-| `src/components/WorkoutTracker.tsx` | Main container with tabs for Active/History/Stats |
-| `src/components/tracker/ActiveWorkout.tsx` | Current workout session UI |
-| `src/components/tracker/WorkoutHistory.tsx` | List of past workouts with filters |
-| `src/components/tracker/WorkoutStats.tsx` | Progress charts and PR board |
-| `src/components/tracker/ExerciseLogger.tsx` | Set-by-set input for each exercise |
-| `src/components/tracker/SetRow.tsx` | Individual set input (weight/reps) |
-| `src/components/tracker/WorkoutSummary.tsx` | Post-workout summary modal |
-| `src/components/tracker/StartWorkoutModal.tsx` | Choose blank or from template |
-
-### 4. Update Index Page
-**File:** `src/pages/Index.tsx`
-
-Add new tab "Tracker" alongside existing Library, Templates, Workout, Diet tabs.
-
-```text
-[Library] [Templates] [AI Workout] [AI Diet] [Tracker] <-- NEW
-```
-
-### 5. Active Workout UI Flow
+## Proposed User Flow
 
 ```text
 +----------------------------------+
-|  Active Workout                  |
-|  Started: 2:30 PM | Duration: 45m|
+|  Start Workout                   |
 +----------------------------------+
 |                                  |
-|  [Bench Press]              [PR] |
-|  +----+--------+------+-------+  |
-|  |Set | Weight | Reps | Check |  |
-|  +----+--------+------+-------+  |
-|  | W  | 45 kg  |  10  |  [x]  |  |
-|  | 1  | 80 kg  |   8  |  [x]  |  |
-|  | 2  | 85 kg  |   6  |  [ ]  |  |
-|  +----+--------+------+-------+  |
-|  [+ Add Set]                     |
-|  Last: 80kg x 8 on Jan 20        |
+|  [Empty Workout] - Add exercises |
 |                                  |
-|  [Incline Dumbbell Press]        |
+|  [From Template] - Pre-made      |
+|                                  |
+|  [From My Plans] - AI generated  |
+|                                  |
++----------------------------------+
+
+         ↓ (select Template)
+
++----------------------------------+
+|  ← Back                          |
+|  Select Template                 |
++----------------------------------+
+|  [Push Pull Legs]                |
+|  [Upper/Lower Split]             |
+|  [Beginner Full Body]            |
 |  ...                             |
-|                                  |
-|  [+ Add Exercise]                |
-|                                  |
 +----------------------------------+
-| [Cancel]          [Finish] |
+
+         ↓ (select PPL)
+
 +----------------------------------+
+|  ← Back                          |
+|  Push Pull Legs - Choose Day     |
++----------------------------------+
+|  [Day 1: Push]                   |
+|     Bench Press, OHP, ...        |
+|                                  |
+|  [Day 2: Pull]                   |
+|     Deadlift, Pull-ups, ...      |
+|                                  |
+|  [Day 3: Legs]                   |
+|     Squats, RDL, ...             |
+|  ...                             |
++----------------------------------+
+
+         ↓ (select Day 2)
+
+→ Workout starts with Day 2 exercises
 ```
-
-### 6. History View
-
-- Calendar heat map showing workout frequency
-- List view with filters (date range, exercise, muscle group)
-- Click to view full workout details
-- Option to repeat a past workout
-
-### 7. Stats/Progress View
-
-- **Exercise Progress Charts** using Recharts (already installed)
-  - Line chart showing weight progression over time
-  - Volume chart (total weight lifted per session)
-- **Personal Records Board**
-  - Grid of exercises with current PR weight/reps
-  - Celebration animation when new PR is set
-- **Weekly/Monthly summaries**
-  - Total workouts
-  - Total volume
-  - Most trained muscle groups
-
-### 8. Integration with Existing Features
-
-| Feature | Integration |
-|---------|-------------|
-| **Workout Templates** | "Start Workout" button pre-fills tracker with template exercises |
-| **Generated Workouts** | Same "Start Workout" button |
-| **Exercise Library** | Show exercise history when viewing an exercise |
-| **Exercise Picker** | Reuse existing modal for adding exercises to workout |
 
 ---
 
-## File Changes Summary
+## Implementation Plan
 
-### New Files
-| Path | Description |
-|------|-------------|
-| `src/types/workout-tracker.ts` | Type definitions |
-| `src/hooks/useWorkoutTracker.ts` | State management hook |
-| `src/components/WorkoutTracker.tsx` | Main tracker component |
-| `src/components/tracker/ActiveWorkout.tsx` | Active session UI |
-| `src/components/tracker/WorkoutHistory.tsx` | History list |
-| `src/components/tracker/WorkoutStats.tsx` | Charts and PRs |
-| `src/components/tracker/ExerciseLogger.tsx` | Exercise set logging |
-| `src/components/tracker/SetRow.tsx` | Individual set input |
-| `src/components/tracker/WorkoutSummary.tsx` | Finish workout modal |
-| `src/components/tracker/StartWorkoutModal.tsx` | Start options |
+### 1. Update StartWorkoutModal.tsx
 
-### Modified Files
-| Path | Changes |
+Add a new step state: `'choose' | 'source' | 'template' | 'day' | 'saved-plans' | 'saved-day'`
+
+**New Flow:**
+1. `choose` - Empty workout or From Template/My Plans
+2. `template` - List of available templates
+3. `day` - List of days in selected template
+4. `saved-plans` - List of user's saved AI-generated plans  
+5. `saved-day` - List of days in selected saved plan
+
+**State Changes:**
+- Add `selectedTemplate: WorkoutTemplate | null`
+- Add `selectedSavedPlan: SavedPlan | null`
+- Add `step` states for the new navigation
+
+### 2. Create Day Selection UI Component
+
+**New Component:** `DaySelector` (inline in modal or separate)
+
+Display each day as a card showing:
+- Day number and focus (e.g., "Day 1 - Push")
+- Exercise count
+- List of first 3-4 exercises as preview
+- Click to select and start
+
+### 3. Update Props Interface
+
+```typescript
+interface StartWorkoutModalProps {
+  open: boolean;
+  onClose: () => void;
+  onStartBlank: (name?: string) => void;
+  onStartFromTemplate: (
+    templateId: string, 
+    name: string, 
+    dayName: string, // NEW: which day
+    exercises: Array<{ exerciseId: string; exerciseName: string }>
+  ) => void;
+  savedPlans?: SavedPlan[]; // NEW: pass user's AI-generated plans
+}
+```
+
+### 4. Update WorkoutTracker.tsx
+
+Pass `savedPlans` from localStorage to the modal so users can also start from their personalized AI-generated plans.
+
+### 5. Update WorkoutTemplates.tsx
+
+Change `startWorkoutFromTemplate` to show a day picker dialog instead of immediately starting Day 1.
+
+**Option A:** Open a sub-dialog for day selection
+**Option B:** Add day selection inline in the template detail view
+
+### 6. Update WorkoutGenerator.tsx
+
+Same change - when clicking "Start Workout" on a generated plan, show day selection.
+
+---
+
+## UI/UX Details
+
+### Day Card Design
+Each day shown as a selectable card:
+```text
+┌─────────────────────────────────┐
+│ Day 2                    6 exer │
+│ Pull (Back, Biceps)             │
+│ ─────────────────────────────── │
+│ • Deadlift                      │
+│ • Pull-Ups                      │
+│ • Bent-Over Rows                │
+│ • +3 more                       │
+└─────────────────────────────────┘
+```
+
+### Back Navigation
+Clear "← Back" button at each step to navigate back through the selection flow.
+
+### Workout Name Auto-fill
+Auto-generate workout name from selection:
+- "Push Pull Legs - Day 2: Pull"
+- Can still be overridden by user
+
+---
+
+## Files to Modify
+
+| File | Changes |
 |------|---------|
-| `src/pages/Index.tsx` | Add Tracker tab |
-| `src/components/WorkoutTemplates.tsx` | Add "Start Workout" button |
-| `src/components/WorkoutGenerator.tsx` | Add "Start Workout" button for generated plans |
-
----
-
-## Technical Implementation Notes
-
-### localStorage Keys
-```typescript
-const WORKOUT_LOGS_KEY = 'muscleatlas-workout-logs';
-const ACTIVE_WORKOUT_KEY = 'muscleatlas-active-workout';
-const EXERCISE_PRS_KEY = 'muscleatlas-exercise-prs';
-```
-
-### PR Detection Logic
-When a set is logged:
-1. Compare weight x reps to stored PR for that exercise
-2. If higher (using estimated 1RM formula), mark as PR
-3. Show celebration toast with confetti animation
-
-### Estimated 1RM Formula
-```typescript
-// Brzycki Formula
-const estimated1RM = weight / (1.0278 - 0.0278 * reps);
-```
-
-### Unit Preferences
-Store user's preferred weight unit (kg/lbs) in localStorage and persist across sessions.
+| `src/components/tracker/StartWorkoutModal.tsx` | Add multi-step flow with day selection |
+| `src/components/WorkoutTracker.tsx` | Pass saved plans to modal, update handler |
+| `src/components/WorkoutTemplates.tsx` | Add day picker before starting workout |
+| `src/components/WorkoutGenerator.tsx` | Add day picker for generated plans |
 
 ---
 
 ## Benefits
-- Track workout progress over time
-- Celebrate personal records
-- See exercise history when planning workouts
-- Works offline with localStorage
-- No account required (follows existing app pattern)
-- Future-ready for database migration with auth
+
+1. **Full template utilization** - Users can track any day of their program
+2. **Progress continuity** - Track Day 2 on Tuesday, Day 3 on Wednesday, etc.
+3. **Unified experience** - Same flow for templates and personalized plans
+4. **Better workout names** - Auto-named with day info for clearer history
