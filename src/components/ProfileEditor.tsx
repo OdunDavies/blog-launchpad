@@ -43,6 +43,20 @@ export function ProfileEditor({ onSave, showClearButton = false }: ProfileEditor
       </div>
 
       <div className="grid gap-6 max-w-md mx-auto">
+        {/* Name */}
+        <div className="space-y-2">
+          <Label htmlFor="name" className="text-sm font-medium">Name (optional)</Label>
+          <Input
+            id="name"
+            type="text"
+            placeholder="Enter your name"
+            value={profile.name || ''}
+            onChange={(e) => updateProfile({ name: e.target.value })}
+            className="max-w-[280px]"
+          />
+          <p className="text-xs text-muted-foreground">Used to personalize your plans</p>
+        </div>
+
         {/* Gender */}
         <div className="space-y-3">
           <Label className="text-sm font-medium">Gender</Label>
@@ -200,18 +214,38 @@ export function ProfileEditor({ onSave, showClearButton = false }: ProfileEditor
           </Select>
         </div>
 
-        {/* TDEE Preview */}
+        {/* TDEE Preview with Plain Language Explanations */}
         {tdeePreview && (
-          <div className="p-4 rounded-lg bg-primary/5 border border-primary/20 space-y-2">
-            <p className="text-sm font-medium text-primary">Your Stats</p>
-            <div className="grid grid-cols-2 gap-2 text-sm">
-              <div>
-                <span className="text-muted-foreground">BMR: </span>
-                <span className="font-medium">{Math.round(tdeePreview.bmr)} kcal</span>
+          <div className="p-5 rounded-lg bg-primary/5 border border-primary/20 space-y-4">
+            <p className="text-sm font-semibold text-primary flex items-center gap-2">
+              📊 Your Daily Energy Stats
+            </p>
+            
+            <div className="space-y-3">
+              {/* BMR */}
+              <div className="space-y-1">
+                <div className="flex items-baseline gap-2">
+                  <span className="text-sm font-medium">BMR (Basal Metabolic Rate)</span>
+                </div>
+                <p className="text-2xl font-bold text-foreground">
+                  {Math.round(tdeePreview.bmr).toLocaleString()} <span className="text-base font-normal text-muted-foreground">kcal</span>
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Calories your body burns at rest just to stay alive — breathing, heartbeat, brain function
+                </p>
               </div>
-              <div>
-                <span className="text-muted-foreground">TDEE: </span>
-                <span className="font-medium">{Math.round(tdeePreview.tdee)} kcal</span>
+
+              {/* TDEE */}
+              <div className="space-y-1 pt-2 border-t border-primary/10">
+                <div className="flex items-baseline gap-2">
+                  <span className="text-sm font-medium">TDEE (Total Daily Energy Expenditure)</span>
+                </div>
+                <p className="text-2xl font-bold text-primary">
+                  {Math.round(tdeePreview.tdee).toLocaleString()} <span className="text-base font-normal text-muted-foreground">kcal</span>
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Total calories you burn each day including all your daily activities and exercise
+                </p>
               </div>
             </div>
           </div>

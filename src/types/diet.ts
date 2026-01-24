@@ -27,6 +27,7 @@ export type FitnessGoal = 'muscle-gain' | 'fat-loss' | 'maintenance' | 'recompos
 export type ActivityLevel = 'sedentary' | 'light' | 'moderate' | 'active' | 'very-active';
 
 export interface UserProfile {
+  name?: string;
   gender: 'male' | 'female' | 'other';
   weight: number;
   weightUnit: 'kg' | 'lbs';
