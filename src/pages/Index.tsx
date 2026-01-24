@@ -3,11 +3,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ExerciseLibrary } from '@/components/ExerciseLibrary';
 import { WorkoutGenerator } from '@/components/WorkoutGenerator';
 import { WorkoutTemplates } from '@/components/WorkoutTemplates';
+import { DietGenerator } from '@/components/DietGenerator';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { ProfileStatusBadge } from '@/components/ProfileStatusBadge';
 import { HeroSection } from '@/components/HeroSection';
 
 import { Button } from '@/components/ui/button';
-import { Dumbbell, Library, Sparkles, LayoutTemplate, ArrowUp } from 'lucide-react';
+import { Dumbbell, Library, Sparkles, LayoutTemplate, ArrowUp, Salad } from 'lucide-react';
 import { MuscleGroup } from '@/data/exercises';
 
 const Index = () => {
