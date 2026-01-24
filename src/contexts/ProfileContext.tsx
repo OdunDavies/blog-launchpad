@@ -5,6 +5,7 @@ import { calculateTDEEWithRecommendations, TDEEResult } from '@/utils/tdeeCalcul
 const STORAGE_KEY = 'user-fitness-profile';
 
 const defaultProfile: UserProfile = {
+  name: '',
   gender: 'male',
   weight: 0,
   weightUnit: 'kg',

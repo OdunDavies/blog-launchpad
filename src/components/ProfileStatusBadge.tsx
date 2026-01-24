@@ -25,7 +25,7 @@ export function ProfileStatusBadge() {
         {isProfileComplete ? (
           <>
             <span className="hidden sm:inline">
-              {profile.weight}{profile.weightUnit}, {profile.age}yo
+              {profile.name ? `${profile.name}, ` : ''}{profile.weight}{profile.weightUnit}, {profile.age}yo
             </span>
             <Check className="w-3 h-3 text-primary" />
           </>

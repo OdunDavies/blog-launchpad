@@ -51,7 +51,15 @@ function getProfileSummary(profile?: UserProfile): string {
     ? `${profile.height}'${profile.heightInches || 0}"`
     : `${profile.height} cm`;
   
-  return `${profile.age}y • ${profile.gender} • ${profile.weight}${profile.weightUnit} • ${height} • ${activityLabels[profile.activityLevel] || profile.activityLevel}`;
+  const namePart = profile.name ? `${profile.name} • ` : '';
+  return `${namePart}${profile.age}y • ${profile.gender} • ${profile.weight}${profile.weightUnit} • ${height} • ${activityLabels[profile.activityLevel] || profile.activityLevel}`;
+}
+
+function getPersonalizedPlanName(baseName: string, profile?: UserProfile): string {
+  if (profile?.name) {
+    return `${profile.name}'s ${baseName}`;
+  }
+  return baseName;
 }
 
 function calculateWeeklyTotals(mealPlan: DayPlan[]) {
@@ -69,13 +77,14 @@ export function generateDietHtml(plan: DietPlanData): string {
   const cuisineLabel = plan.cuisine ? (cuisineLabels[plan.cuisine] || plan.cuisine) : '';
   const profileSummary = getProfileSummary(plan.profile);
   const weeklyTotals = calculateWeeklyTotals(plan.mealPlan);
+  const personalizedName = getPersonalizedPlanName(plan.name, plan.profile);
   
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${plan.name} - Diet Plan</title>
+  <title>${personalizedName} - Diet Plan</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     
@@ -322,7 +331,7 @@ export function generateDietHtml(plan: DietPlanData): string {
   <div class="container">
     <header class="header">
       ${goalLabel ? `<span class="goal-badge">🎯 ${goalLabel}</span>` : ''}
-      <h1>${plan.name}</h1>
+      <h1>${personalizedName}</h1>
       ${profileSummary ? `<p class="profile-summary">${profileSummary}</p>` : ''}
       <div class="meta">
         <span class="meta-item">🔥 ${plan.calorieTarget} kcal/day</span>
