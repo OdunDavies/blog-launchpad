@@ -1,128 +1,161 @@
 
-# Fix Pop-up Scrolling on Mobile Devices
+# Fix Mobile Pop-up Overflow Issues
 
 ## Problem Summary
 
-The **Add Food** and **Add Exercise** popups don't scroll on mobile/tablet when you try to swipe. Touch scrolling simply does nothing - the content stays frozen.
+Pop-ups (dialogs) stretch beyond the screen edges on mobile devices because:
+1. They use `w-full max-w-lg` without horizontal margins on mobile
+2. They lack proper mobile-specific height constraints
+3. Some modals use fixed height values (like `h-[80vh]`) that don't account for mobile viewport quirks
 
 ## Root Cause Analysis
 
-The issue stems from multiple factors:
+Looking at the current dialog implementations:
 
-1. **ScrollArea Viewport Missing `overflow-y: auto`**
-   The Radix `ScrollAreaPrimitive.Viewport` in `src/components/ui/scroll-area.tsx` doesn't explicitly set `overflow-y: auto`, which can cause issues on touch devices.
+**dialog.tsx (base component):**
+```css
+w-full max-w-lg ... p-6
+```
+- No horizontal margins means dialog touches screen edges
+- No maximum height means content can overflow vertically
+- Fixed `p-6` padding takes up too much space on small screens
 
-2. **DialogContent Height Constraints**
-   The dialog content uses `max-h-[85vh]` but the internal layout doesn't properly cascade fixed heights to the ScrollArea, so the ScrollArea has no bounded container to overflow within.
+**AddFoodModal.tsx:**
+```css
+max-w-md max-h-[85vh]
+```
+- Missing horizontal margin/inset
+- Large padding consumes valuable mobile space
 
-3. **Global CSS Override Conflict**
-   The global CSS in `src/index.css` forces `overflow-y: scroll !important` on html/body, which can interfere with touch gesture handling inside overlays on mobile.
-
-4. **Missing Touch Scroll Styles**
-   Mobile touch scrolling works best with explicit `-webkit-overflow-scrolling: touch` and `overscroll-behavior` properties.
-
----
+**ExercisePickerModal.tsx:**
+```css
+max-w-2xl h-[80vh]
+```
+- Fixed height can cause issues with mobile dynamic viewport
+- No responsive width adjustments
 
 ## Solution
 
-### File 1: `src/components/ui/scroll-area.tsx`
+### Strategy
+Use mobile-first responsive classes to:
+1. Add horizontal margins on mobile (using `inset-x-4` or margins)
+2. Use safe viewport height (`dvh` or fallback with margins)
+3. Reduce padding on mobile devices
+4. Convert Dialog to Drawer on mobile for better UX (following existing pattern in StartWorkoutModal)
 
-Add explicit overflow and touch-friendly scrolling to the Viewport component:
+---
 
-**Change (line 11):**
+## File Changes
+
+### 1. `src/components/ui/dialog.tsx`
+
+Update DialogContent base styles to be mobile-responsive:
+
+**Line 39 - Update className:**
 ```text
 Before:
-<ScrollAreaPrimitive.Viewport className="h-full w-full rounded-[inherit]">
+"fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg overflow-hidden duration-200 ..."
 
 After:
-<ScrollAreaPrimitive.Viewport className="h-full w-full rounded-[inherit] overflow-y-auto overscroll-contain">
+"fixed left-[50%] top-[50%] z-50 grid w-[calc(100%-2rem)] max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-4 sm:p-6 shadow-lg overflow-hidden max-h-[calc(100dvh-2rem)] duration-200 ..."
+```
+
+Key changes:
+- `w-[calc(100%-2rem)]` - 16px margin on each side for mobile
+- `p-4 sm:p-6` - Reduced padding on mobile
+- `max-h-[calc(100dvh-2rem)]` - Prevent vertical overflow using dynamic viewport height
+
+---
+
+### 2. `src/components/ui/alert-dialog.tsx`
+
+Update AlertDialogContent to match dialog mobile constraints:
+
+**Line 37 - Update className:**
+```text
+Before:
+"fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 ..."
+
+After:
+"fixed left-[50%] top-[50%] z-50 grid w-[calc(100%-2rem)] max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-4 sm:p-6 shadow-lg overflow-hidden max-h-[calc(100dvh-2rem)] duration-200 ..."
 ```
 
 ---
 
-### File 2: `src/components/AddFoodModal.tsx`
+### 3. `src/components/AddFoodModal.tsx`
 
-Fix the dialog and ScrollArea container structure:
+Convert to use Drawer on mobile (like StartWorkoutModal does):
 
-**Change DialogContent (line 103):**
-```text
-Before:
-<DialogContent className="max-w-md max-h-[85vh] flex flex-col">
-
-After:
-<DialogContent className="max-w-md max-h-[85vh] flex flex-col overflow-hidden">
+**Add imports and hook:**
+```typescript
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
+import { useIsMobile } from '@/hooks/use-mobile';
 ```
 
-**Change ScrollArea container (line 143):**
-```text
-Before:
-<ScrollArea className="flex-1 -mx-4 px-4">
-
-After:
-<ScrollArea className="flex-1 -mx-4 px-4 min-h-0">
+**Use hook in component:**
+```typescript
+const isMobile = useIsMobile();
 ```
+
+**Render Drawer on mobile, Dialog on desktop:**
+- Extract content into a shared component
+- Return Drawer for mobile, Dialog for desktop
 
 ---
 
-### File 3: `src/components/ExercisePickerModal.tsx`
+### 4. `src/components/ExercisePickerModal.tsx`
 
-Fix the dialog container structure:
+Convert to use Drawer on mobile:
 
-**Change DialogContent (line 72):**
+**Add imports and hook:**
+```typescript
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
+import { useIsMobile } from '@/hooks/use-mobile';
+```
+
+**Update DialogContent:**
 ```text
 Before:
-<DialogContent className="max-w-2xl max-h-[80vh] flex flex-col overflow-hidden">
-
-After:
 <DialogContent className="max-w-2xl h-[80vh] flex flex-col overflow-hidden">
+
+After (for desktop):
+<DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
 ```
 
-This changes `max-h` to fixed `h` so the ScrollArea inside has a definite height to work with.
+**Render Drawer on mobile:**
+```typescript
+if (isMobile) {
+  return (
+    <Drawer open={open} onOpenChange={onClose}>
+      <DrawerContent className="max-h-[85vh]">
+        <DrawerHeader>
+          <DrawerTitle>Add Exercise{dayFocus && ` to ${dayFocus}`}</DrawerTitle>
+        </DrawerHeader>
+        <div className="px-4 pb-6 flex flex-col flex-1 min-h-0">
+          {/* Search, filter, and exercise list content */}
+        </div>
+      </DrawerContent>
+    </Drawer>
+  );
+}
+```
 
 ---
 
-### File 4: `src/index.css`
+### 5. `src/components/ui/drawer.tsx`
 
-Add mobile-friendly scroll styles and fix the global override:
+Add safe area and overflow handling to DrawerContent:
 
-**Replace lines 216-218:**
+**Line 34 - Update className:**
 ```text
 Before:
-html:not(.modal-open),
-html:not(.modal-open) body {
-  overflow-y: scroll !important;
-}
+"fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto flex-col rounded-t-[10px] border bg-background"
 
 After:
-/* Mobile-friendly scrolling for modals and scroll areas */
-[data-radix-scroll-area-viewport] {
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
-}
-
-/* Ensure dialogs don't block touch scrolling */
-[data-radix-dialog-content] {
-  overscroll-behavior: contain;
-  -webkit-overflow-scrolling: touch;
-}
+"fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto max-h-[90dvh] flex-col rounded-t-[10px] border bg-background overflow-hidden"
 ```
 
-This removes the aggressive `!important` override and instead adds touch-friendly styles specifically to Radix scroll areas and dialogs.
-
----
-
-### File 5: `src/components/ui/dialog.tsx`
-
-Add `overflow-hidden` to prevent double scrollbars and ensure content stays contained:
-
-**Change DialogContent (line 39):**
-```text
-Before:
-"fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg ..."
-
-After:
-"fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg overflow-hidden ..."
-```
+This ensures drawers don't exceed viewport height on any device.
 
 ---
 
@@ -130,18 +163,19 @@ After:
 
 | File | Change |
 |------|--------|
-| `src/components/ui/scroll-area.tsx` | Add `overflow-y-auto overscroll-contain` to Viewport |
-| `src/components/AddFoodModal.tsx` | Add `overflow-hidden` to DialogContent, add `min-h-0` to ScrollArea |
-| `src/components/ExercisePickerModal.tsx` | Change `max-h-[80vh]` to `h-[80vh]` for fixed height |
-| `src/index.css` | Replace aggressive override with touch-friendly Radix-specific styles |
-| `src/components/ui/dialog.tsx` | Add `overflow-hidden` to DialogContent base styles |
+| `src/components/ui/dialog.tsx` | Add mobile width margins, responsive padding, max-height constraint |
+| `src/components/ui/alert-dialog.tsx` | Same mobile-responsive constraints as dialog |
+| `src/components/AddFoodModal.tsx` | Convert to Drawer on mobile using `useIsMobile` hook |
+| `src/components/ExercisePickerModal.tsx` | Convert to Drawer on mobile using `useIsMobile` hook |
+| `src/components/ui/drawer.tsx` | Add `max-h-[90dvh]` and `overflow-hidden` to prevent overflow |
 
 ---
 
-## Expected Result
+## Expected Results
 
 After these changes:
-- Touch scrolling will work inside the Add Food and Add Exercise popups on mobile
-- The scroll indicator will appear when content overflows
-- Swiping inside the popup will scroll the content, not the background page
-- Desktop scrolling will continue to work normally
+- Dialogs will have 16px margins on mobile screens (won't touch edges)
+- Maximum height will be constrained to viewport minus safe margins
+- Padding will be reduced on mobile for more content space
+- Add Food and Add Exercise modals will use bottom sheet (Drawer) on mobile for better touch UX
+- Vertical overflow will be handled properly with internal scrolling
