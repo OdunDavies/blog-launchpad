@@ -109,31 +109,31 @@ export function ActiveWorkout({
 
   return (
     <div className="space-y-4">
-      {/* Header with timer */}
+      {/* Header with timer - Mobile optimized */}
       <Card className="bg-primary/5 border-primary/20">
-        <CardContent className="p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="font-semibold text-lg">{session.name}</h3>
-              <p className="text-sm text-muted-foreground">
-                {new Date(session.startTime).toLocaleDateString()}
-              </p>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2 text-xl font-mono">
-                <Timer className="w-5 h-5 text-primary" />
+        <CardContent className="p-3 sm:p-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="flex items-center justify-between sm:justify-start gap-4">
+              <div>
+                <h3 className="font-semibold text-base sm:text-lg">{session.name}</h3>
+                <p className="text-xs sm:text-sm text-muted-foreground">
+                  {new Date(session.startTime).toLocaleDateString()}
+                </p>
+              </div>
+              <div className="flex items-center gap-2 text-lg sm:text-xl font-mono sm:ml-4">
+                <Timer className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                 {formatTime(elapsedTime)}
               </div>
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm" onClick={onCancel}>
-                  <X className="w-4 h-4 mr-1" />
-                  Cancel
-                </Button>
-                <Button size="sm" onClick={handleFinish}>
-                  <Check className="w-4 h-4 mr-1" />
-                  Finish
-                </Button>
-              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={onCancel} className="flex-1 sm:flex-none">
+                <X className="w-4 h-4 sm:mr-1" />
+                <span className="hidden sm:inline">Cancel</span>
+              </Button>
+              <Button size="sm" onClick={handleFinish} className="flex-1 sm:flex-none">
+                <Check className="w-4 h-4 sm:mr-1" />
+                <span className="hidden sm:inline">Finish</span>
+              </Button>
             </div>
           </div>
         </CardContent>
@@ -149,15 +149,15 @@ export function ActiveWorkout({
           >
             <Card>
               <CollapsibleTrigger asChild>
-                <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors py-3">
+                <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors py-3 px-3 sm:px-6">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <CardTitle className="text-base">{exercise.name}</CardTitle>
+                      <CardTitle className="text-sm sm:text-base">{exercise.name}</CardTitle>
                       <Badge variant="secondary" className="text-xs">
                         {exercise.sets.length} sets
                       </Badge>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1 sm:gap-2">
                       <Button
                         variant="ghost"
                         size="icon"
@@ -179,9 +179,9 @@ export function ActiveWorkout({
                 </CardHeader>
               </CollapsibleTrigger>
               <CollapsibleContent>
-                <CardContent className="pt-0">
-                  {/* Sets header */}
-                  <div className="grid grid-cols-[40px_1fr_1fr_1fr_40px] gap-2 text-xs text-muted-foreground mb-2 px-1">
+                <CardContent className="pt-0 px-3 sm:px-6">
+                  {/* Sets header - hidden on mobile */}
+                  <div className="hidden sm:grid grid-cols-[40px_1fr_1fr_1fr_40px] gap-2 text-xs text-muted-foreground mb-2 px-1">
                     <span>Set</span>
                     <span>Weight (kg)</span>
                     <span>Reps</span>
@@ -189,42 +189,68 @@ export function ActiveWorkout({
                     <span></span>
                   </div>
 
-                  {/* Sets */}
+                  {/* Sets - responsive layout */}
                   <div className="space-y-2">
                     {exercise.sets.map((set) => (
                       <div
                         key={set.setNumber}
-                        className="grid grid-cols-[40px_1fr_1fr_1fr_40px] gap-2 items-center"
+                        className="flex flex-col sm:grid sm:grid-cols-[40px_1fr_1fr_1fr_40px] gap-2 p-3 sm:p-0 bg-muted/30 sm:bg-transparent rounded-lg sm:rounded-none"
                       >
-                        <span className="text-sm font-medium text-center">
+                        {/* Mobile: Set number and delete in row */}
+                        <div className="flex items-center justify-between sm:hidden">
+                          <span className="text-sm font-medium">Set {set.setNumber}</span>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => onRemoveSet(exercise.id, set.setNumber)}
+                          >
+                            <X className="w-4 h-4" />
+                          </Button>
+                        </div>
+                        
+                        {/* Desktop: Set number */}
+                        <span className="hidden sm:flex text-sm font-medium text-center items-center justify-center">
                           {set.setNumber}
                         </span>
-                        <Input
-                          type="number"
-                          value={set.weight || ''}
-                          onChange={(e) =>
-                            onUpdateSet(exercise.id, set.setNumber, {
-                              weight: parseFloat(e.target.value) || 0,
-                            })
-                          }
-                          className="h-9"
-                          placeholder="0"
-                        />
-                        <Input
-                          type="number"
-                          value={set.reps || ''}
-                          onChange={(e) =>
-                            onUpdateSet(exercise.id, set.setNumber, {
-                              reps: parseInt(e.target.value) || 0,
-                            })
-                          }
-                          className="h-9"
-                          placeholder="0"
-                        />
+                        
+                        {/* Weight input */}
+                        <div className="flex items-center gap-2 sm:block">
+                          <span className="text-xs text-muted-foreground sm:hidden w-16">Weight</span>
+                          <Input
+                            type="number"
+                            value={set.weight || ''}
+                            onChange={(e) =>
+                              onUpdateSet(exercise.id, set.setNumber, {
+                                weight: parseFloat(e.target.value) || 0,
+                              })
+                            }
+                            className="h-10 flex-1"
+                            placeholder="kg"
+                          />
+                        </div>
+                        
+                        {/* Reps input */}
+                        <div className="flex items-center gap-2 sm:block">
+                          <span className="text-xs text-muted-foreground sm:hidden w-16">Reps</span>
+                          <Input
+                            type="number"
+                            value={set.reps || ''}
+                            onChange={(e) =>
+                              onUpdateSet(exercise.id, set.setNumber, {
+                                reps: parseInt(e.target.value) || 0,
+                              })
+                            }
+                            className="h-10 flex-1"
+                            placeholder="reps"
+                          />
+                        </div>
+                        
+                        {/* Type toggle */}
                         <Button
                           variant={set.isWarmup ? 'secondary' : 'outline'}
                           size="sm"
-                          className="h-9"
+                          className="h-10 w-full sm:w-auto"
                           onClick={() =>
                             onUpdateSet(exercise.id, set.setNumber, {
                               isWarmup: !set.isWarmup,
@@ -233,10 +259,12 @@ export function ActiveWorkout({
                         >
                           {set.isWarmup ? 'Warmup' : 'Working'}
                         </Button>
+                        
+                        {/* Desktop delete button */}
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-9 w-9"
+                          className="hidden sm:flex h-10 w-10"
                           onClick={() => onRemoveSet(exercise.id, set.setNumber)}
                         >
                           <X className="w-4 h-4" />
@@ -265,18 +293,21 @@ export function ActiveWorkout({
       {/* Add exercise */}
       {showAddExercise ? (
         <Card>
-          <CardContent className="p-4">
-            <div className="flex gap-2">
+          <CardContent className="p-3 sm:p-4">
+            <div className="flex flex-col sm:flex-row gap-2">
               <Input
                 value={newExerciseName}
                 onChange={(e) => setNewExerciseName(e.target.value)}
                 placeholder="Exercise name..."
                 onKeyDown={(e) => e.key === 'Enter' && handleAddExercise()}
+                className="flex-1"
               />
-              <Button onClick={handleAddExercise}>Add</Button>
-              <Button variant="outline" onClick={() => setShowAddExercise(false)}>
-                Cancel
-              </Button>
+              <div className="flex gap-2">
+                <Button onClick={handleAddExercise} className="flex-1 sm:flex-none">Add</Button>
+                <Button variant="outline" onClick={() => setShowAddExercise(false)} className="flex-1 sm:flex-none">
+                  Cancel
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -293,10 +324,10 @@ export function ActiveWorkout({
 
       {/* Notes */}
       <Card>
-        <CardHeader className="py-3">
+        <CardHeader className="py-3 px-3 sm:px-6">
           <CardTitle className="text-sm">Workout Notes</CardTitle>
         </CardHeader>
-        <CardContent className="pt-0">
+        <CardContent className="pt-0 px-3 sm:px-6">
           <Textarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}

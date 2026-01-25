@@ -56,38 +56,38 @@ export function StepReview({
   const macros = getMacros();
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 sm:space-y-4">
       <div>
-        <h3 className="text-lg font-semibold">Review your diet plan settings</h3>
-        <p className="text-sm text-muted-foreground">
+        <h3 className="text-base sm:text-lg font-semibold">Review your diet plan settings</h3>
+        <p className="text-xs sm:text-sm text-muted-foreground">
           Confirm everything looks good before generating
         </p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-3 sm:gap-4 grid-cols-2">
         {/* Goal */}
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Target className="w-4 h-4" />
+          <CardHeader className="pb-1 sm:pb-2 p-3 sm:p-6">
+            <CardTitle className="text-xs sm:text-sm font-medium flex items-center gap-1 sm:gap-2">
+              <Target className="w-3 h-3 sm:w-4 sm:h-4" />
               Goal
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-lg font-bold">{goal ? GOAL_LABELS[goal] : 'Not set'}</p>
+          <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
+            <p className="text-sm sm:text-lg font-bold">{goal ? GOAL_LABELS[goal] : 'Not set'}</p>
           </CardContent>
         </Card>
 
         {/* Calories */}
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Flame className="w-4 h-4" />
-              Daily Calories
+          <CardHeader className="pb-1 sm:pb-2 p-3 sm:p-6">
+            <CardTitle className="text-xs sm:text-sm font-medium flex items-center gap-1 sm:gap-2">
+              <Flame className="w-3 h-3 sm:w-4 sm:h-4" />
+              Calories
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-lg font-bold">{dailyCalories.toLocaleString()} kcal</p>
+          <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
+            <p className="text-sm sm:text-lg font-bold">{dailyCalories.toLocaleString()}</p>
             {tdee && (
               <p className="text-xs text-muted-foreground">
                 {dailyCalories < tdee ? `${Math.round((1 - dailyCalories/tdee) * 100)}% below` : dailyCalories > tdee ? `${Math.round((dailyCalories/tdee - 1) * 100)}% above` : 'At'} TDEE
@@ -98,27 +98,27 @@ export function StepReview({
 
         {/* Diet Type */}
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Utensils className="w-4 h-4" />
+          <CardHeader className="pb-1 sm:pb-2 p-3 sm:p-6">
+            <CardTitle className="text-xs sm:text-sm font-medium flex items-center gap-1 sm:gap-2">
+              <Utensils className="w-3 h-3 sm:w-4 sm:h-4" />
               Diet Type
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-lg font-bold">{dietType ? DIET_TYPE_LABELS[dietType] : 'Not set'}</p>
+          <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
+            <p className="text-sm sm:text-lg font-bold">{dietType ? DIET_TYPE_LABELS[dietType] : 'Not set'}</p>
           </CardContent>
         </Card>
 
         {/* Cuisine */}
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Globe className="w-4 h-4" />
+          <CardHeader className="pb-1 sm:pb-2 p-3 sm:p-6">
+            <CardTitle className="text-xs sm:text-sm font-medium flex items-center gap-1 sm:gap-2">
+              <Globe className="w-3 h-3 sm:w-4 sm:h-4" />
               Cuisine
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-lg font-bold">{cuisine ? CUISINE_LABELS[cuisine] : 'Not set'}</p>
+          <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
+            <p className="text-sm sm:text-lg font-bold">{cuisine ? CUISINE_LABELS[cuisine] : 'Not set'}</p>
           </CardContent>
         </Card>
       </div>
@@ -126,19 +126,19 @@ export function StepReview({
       {/* Macros Summary */}
       {macros && (
         <Card className="bg-primary/5 border-primary">
-          <CardContent className="pt-4">
-            <p className="font-medium mb-3">Daily Macro Targets</p>
-            <div className="grid grid-cols-3 gap-4 text-center">
+          <CardContent className="pt-3 sm:pt-4 p-3 sm:p-6">
+            <p className="font-medium text-sm mb-2 sm:mb-3">Daily Macro Targets</p>
+            <div className="grid grid-cols-3 gap-2 sm:gap-4 text-center">
               <div>
-                <p className="text-2xl font-bold">{macros.protein}g</p>
+                <p className="text-lg sm:text-2xl font-bold">{macros.protein}g</p>
                 <p className="text-xs text-muted-foreground">Protein</p>
               </div>
               <div>
-                <p className="text-2xl font-bold">{macros.carbs}g</p>
+                <p className="text-lg sm:text-2xl font-bold">{macros.carbs}g</p>
                 <p className="text-xs text-muted-foreground">Carbs</p>
               </div>
               <div>
-                <p className="text-2xl font-bold">{macros.fats}g</p>
+                <p className="text-lg sm:text-2xl font-bold">{macros.fats}g</p>
                 <p className="text-xs text-muted-foreground">Fats</p>
               </div>
             </div>
@@ -148,16 +148,16 @@ export function StepReview({
 
       {/* Meals */}
       <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium flex items-center gap-2">
-            <UtensilsCrossed className="w-4 h-4" />
+        <CardHeader className="pb-1 sm:pb-2 p-3 sm:p-6">
+          <CardTitle className="text-xs sm:text-sm font-medium flex items-center gap-1 sm:gap-2">
+            <UtensilsCrossed className="w-3 h-3 sm:w-4 sm:h-4" />
             Meals Per Day ({mealTypes.length})
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
           <div className="flex flex-wrap gap-1">
             {mealTypes.map((meal) => (
-              <Badge key={meal} variant="secondary">
+              <Badge key={meal} variant="secondary" className="text-xs">
                 {MEAL_TYPE_LABELS[meal]}
               </Badge>
             ))}
@@ -168,16 +168,16 @@ export function StepReview({
       {/* Restrictions */}
       {restrictions.length > 0 && (
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4" />
-              Dietary Restrictions
+          <CardHeader className="pb-1 sm:pb-2 p-3 sm:p-6">
+            <CardTitle className="text-xs sm:text-sm font-medium flex items-center gap-1 sm:gap-2">
+              <AlertTriangle className="w-3 h-3 sm:w-4 sm:h-4" />
+              Restrictions
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
             <div className="flex flex-wrap gap-1">
               {restrictions.map((restriction) => (
-                <Badge key={restriction} variant="outline">
+                <Badge key={restriction} variant="outline" className="text-xs">
                   {RESTRICTION_LABELS[restriction]}
                 </Badge>
               ))}
@@ -189,11 +189,11 @@ export function StepReview({
       {/* Profile Info */}
       {profile.name && (
         <Card className="bg-muted/50">
-          <CardContent className="flex items-center gap-3 pt-4">
-            <User className="w-5 h-5 text-muted-foreground" />
-            <div>
-              <p className="font-medium">{profile.name}'s Diet Plan</p>
-              <p className="text-sm text-muted-foreground">
+          <CardContent className="flex items-center gap-2 sm:gap-3 p-3 sm:pt-4 sm:p-6">
+            <User className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground shrink-0" />
+            <div className="min-w-0">
+              <p className="font-medium text-sm">{profile.name}'s Diet Plan</p>
+              <p className="text-xs sm:text-sm text-muted-foreground">
                 Personalized for your profile
               </p>
             </div>

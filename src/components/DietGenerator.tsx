@@ -22,13 +22,13 @@ import {
 import { Target, Flame, ChevronLeft, ChevronRight, Sparkles, Save, Trash2, RotateCcw, Download, Loader2, UtensilsCrossed } from 'lucide-react';
 
 const wizardSteps = [
-  { title: 'Goal', icon: <Target className="w-5 h-5" /> },
-  { title: 'Calories', icon: <Flame className="w-5 h-5" /> },
-  { title: 'Diet Type', icon: <UtensilsCrossed className="w-5 h-5" /> },
-  { title: 'Restrictions', icon: <UtensilsCrossed className="w-5 h-5" /> },
-  { title: 'Meals', icon: <UtensilsCrossed className="w-5 h-5" /> },
-  { title: 'Cuisine', icon: <UtensilsCrossed className="w-5 h-5" /> },
-  { title: 'Review', icon: <Sparkles className="w-5 h-5" /> },
+  { title: 'Goal', icon: <Target className="w-4 h-4 sm:w-5 sm:h-5" /> },
+  { title: 'Calories', icon: <Flame className="w-4 h-4 sm:w-5 sm:h-5" /> },
+  { title: 'Diet', icon: <UtensilsCrossed className="w-4 h-4 sm:w-5 sm:h-5" /> },
+  { title: 'Restrict', icon: <UtensilsCrossed className="w-4 h-4 sm:w-5 sm:h-5" /> },
+  { title: 'Meals', icon: <UtensilsCrossed className="w-4 h-4 sm:w-5 sm:h-5" /> },
+  { title: 'Cuisine', icon: <UtensilsCrossed className="w-4 h-4 sm:w-5 sm:h-5" /> },
+  { title: 'Review', icon: <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" /> },
 ];
 
 export function DietGenerator() {
@@ -161,45 +161,47 @@ export function DietGenerator() {
 
   if (generatedPlan) {
     return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h3 className="text-xl font-bold">Your 7-Day Diet Plan</h3>
+      <div className="space-y-4 sm:space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <h3 className="text-lg sm:text-xl font-bold">Your 7-Day Diet Plan</h3>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={startNewPlan}>
-              <RotateCcw className="w-4 h-4 mr-1" /> New Plan
+            <Button variant="outline" size="sm" onClick={startNewPlan} className="flex-1 sm:flex-none">
+              <RotateCcw className="w-4 h-4 sm:mr-1" />
+              <span className="hidden sm:inline">New Plan</span>
             </Button>
-            <Button variant="outline" size="sm" onClick={savePlan}>
-              <Save className="w-4 h-4 mr-1" /> Save
+            <Button variant="outline" size="sm" onClick={savePlan} className="flex-1 sm:flex-none">
+              <Save className="w-4 h-4 sm:mr-1" />
+              <span className="hidden sm:inline">Save</span>
             </Button>
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-2 text-sm">
+        <div className="flex flex-wrap gap-1 sm:gap-2 text-xs sm:text-sm">
           <Badge>{GOAL_LABELS[generatedPlan.goal]}</Badge>
-          <Badge variant="secondary">{generatedPlan.dailyCalories} kcal/day</Badge>
+          <Badge variant="secondary">{generatedPlan.dailyCalories} kcal</Badge>
           <Badge variant="secondary">{DIET_TYPE_LABELS[generatedPlan.dietType]}</Badge>
           <Badge variant="secondary">{CUISINE_LABELS[generatedPlan.cuisine]}</Badge>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           {generatedPlan.schedule.map((day: DietDay, idx: number) => (
             <Card key={idx}>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-lg flex justify-between">
+              <CardHeader className="pb-2 px-3 sm:px-6 py-3 sm:py-4">
+                <CardTitle className="text-base sm:text-lg flex justify-between">
                   <span>{day.day}</span>
-                  <span className="text-sm font-normal text-muted-foreground">{day.totalCalories} kcal</span>
+                  <span className="text-xs sm:text-sm font-normal text-muted-foreground">{day.totalCalories} kcal</span>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3">
+              <CardContent className="space-y-2 sm:space-y-3 px-3 sm:px-6">
                 {day.meals.map((meal, mIdx) => (
-                  <div key={mIdx} className="p-3 bg-muted/50 rounded-lg">
+                  <div key={mIdx} className="p-2 sm:p-3 bg-muted/50 rounded-lg">
                     <div className="flex justify-between items-start mb-1">
-                      <span className="font-medium">{MEAL_TYPE_LABELS[meal.mealType as MealType] || meal.mealType}</span>
+                      <span className="font-medium text-xs sm:text-sm">{MEAL_TYPE_LABELS[meal.mealType as MealType] || meal.mealType}</span>
                       <span className="text-xs text-muted-foreground">{meal.calories} kcal</span>
                     </div>
-                    <p className="text-sm font-medium text-primary">{meal.name}</p>
-                    <p className="text-xs text-muted-foreground">{meal.foods.join(', ')}</p>
-                    <div className="flex gap-3 mt-1 text-xs">
+                    <p className="text-xs sm:text-sm font-medium text-primary">{meal.name}</p>
+                    <p className="text-xs text-muted-foreground line-clamp-2">{meal.foods.join(', ')}</p>
+                    <div className="flex gap-2 sm:gap-3 mt-1 text-xs">
                       <span>P: {meal.protein}g</span>
                       <span>C: {meal.carbs}g</span>
                       <span>F: {meal.fats}g</span>
@@ -215,18 +217,20 @@ export function DietGenerator() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {savedPlans.length > 0 && (
         <Card>
-          <CardHeader><CardTitle className="text-lg">Saved Diet Plans</CardTitle></CardHeader>
-          <CardContent className="space-y-2">
+          <CardHeader className="py-3 px-3 sm:px-6">
+            <CardTitle className="text-base sm:text-lg">Saved Diet Plans</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2 px-3 sm:px-6">
             {savedPlans.slice(0, 3).map(plan => (
-              <div key={plan.id} className="flex items-center justify-between p-2 bg-muted/50 rounded">
-                <button onClick={() => loadPlan(plan)} className="text-left flex-1">
-                  <p className="font-medium text-sm">{plan.name}</p>
+              <div key={plan.id} className="flex items-center justify-between p-2 bg-muted/50 rounded gap-2">
+                <button onClick={() => loadPlan(plan)} className="text-left flex-1 min-w-0">
+                  <p className="font-medium text-xs sm:text-sm truncate">{plan.name}</p>
                   <p className="text-xs text-muted-foreground">{new Date(plan.savedAt).toLocaleDateString()}</p>
                 </button>
-                <Button variant="ghost" size="icon" onClick={() => deletePlan(plan.id)}>
+                <Button variant="ghost" size="icon" onClick={() => deletePlan(plan.id)} className="shrink-0">
                   <Trash2 className="w-4 h-4" />
                 </Button>
               </div>
@@ -235,23 +239,25 @@ export function DietGenerator() {
         </Card>
       )}
 
-      <WizardProgress currentStep={currentStep} totalSteps={wizardSteps.length} steps={wizardSteps} />
+      <WizardProgress currentStep={currentStep + 1} totalSteps={wizardSteps.length} steps={wizardSteps} />
 
       <Card>
-        <CardContent className="pt-6">{renderStep()}</CardContent>
+        <CardContent className="pt-4 sm:pt-6 px-3 sm:px-6">{renderStep()}</CardContent>
       </Card>
 
-      <div className="flex justify-between">
-        <Button variant="outline" onClick={() => setCurrentStep(s => s - 1)} disabled={currentStep === 0}>
-          <ChevronLeft className="w-4 h-4 mr-1" /> Back
+      <div className="flex justify-between gap-2">
+        <Button variant="outline" onClick={() => setCurrentStep(s => s - 1)} disabled={currentStep === 0} className="flex-1 sm:flex-none">
+          <ChevronLeft className="w-4 h-4 sm:mr-1" />
+          <span className="hidden sm:inline">Back</span>
         </Button>
         {currentStep < 6 ? (
-          <Button onClick={() => setCurrentStep(s => s + 1)} disabled={!canProceed()}>
-            Next <ChevronRight className="w-4 h-4 ml-1" />
+          <Button onClick={() => setCurrentStep(s => s + 1)} disabled={!canProceed()} className="flex-1 sm:flex-none">
+            <span className="hidden sm:inline">Next</span>
+            <ChevronRight className="w-4 h-4 sm:ml-1" />
           </Button>
         ) : (
-          <Button onClick={generateDietPlan} disabled={isGenerating}>
-            {isGenerating ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Generating...</> : <><Sparkles className="w-4 h-4 mr-2" /> Generate Plan</>}
+          <Button onClick={generateDietPlan} disabled={isGenerating} className="flex-1 sm:flex-none">
+            {isGenerating ? <><Loader2 className="w-4 h-4 mr-1 sm:mr-2 animate-spin" /> <span className="hidden sm:inline">Generating...</span></> : <><Sparkles className="w-4 h-4 mr-1 sm:mr-2" /> <span className="hidden sm:inline">Generate Plan</span></>}
           </Button>
         )}
       </div>

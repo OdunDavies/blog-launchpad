@@ -32,10 +32,10 @@ const cuisineOptions: { value: CuisinePreference; label: string; description: st
 
 export function StepCuisine({ cuisine, setCuisine }: StepCuisineProps) {
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 sm:space-y-4">
       <div>
-        <h3 className="text-lg font-semibold">Choose your cuisine preference</h3>
-        <p className="text-sm text-muted-foreground">
+        <h3 className="text-base sm:text-lg font-semibold">Choose your cuisine preference</h3>
+        <p className="text-xs sm:text-sm text-muted-foreground">
           Your meals will feature foods from this cuisine
         </p>
       </div>
@@ -43,7 +43,7 @@ export function StepCuisine({ cuisine, setCuisine }: StepCuisineProps) {
       <RadioGroup
         value={cuisine}
         onValueChange={(value) => setCuisine(value as CuisinePreference)}
-        className="grid gap-3"
+        className="grid gap-2 sm:gap-3"
       >
         {cuisineOptions.map((option) => (
           <Label
@@ -56,21 +56,21 @@ export function StepCuisine({ cuisine, setCuisine }: StepCuisineProps) {
                 cuisine === option.value ? 'border-primary bg-primary/5 ring-1 ring-primary' : ''
               }`}
             >
-              <CardContent className="p-4">
-                <div className="flex items-start gap-4">
+              <CardContent className="p-3 sm:p-4">
+                <div className="flex items-start gap-3 sm:gap-4">
                   <RadioGroupItem value={option.value} id={`cuisine-${option.value}`} className="sr-only" />
-                  <div className={`p-2 rounded-lg shrink-0 ${cuisine === option.value ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
+                  <div className={`p-1.5 sm:p-2 rounded-lg shrink-0 ${cuisine === option.value ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
                     {option.value === 'international' ? (
-                      <Globe className="w-5 h-5" />
+                      <Globe className="w-4 h-4 sm:w-5 sm:h-5" />
                     ) : (
-                      <MapPin className="w-5 h-5" />
+                      <MapPin className="w-4 h-4 sm:w-5 sm:h-5" />
                     )}
                   </div>
-                  <div className="flex-1">
-                    <p className="font-medium">{option.label}</p>
-                    <p className="text-sm text-muted-foreground">{option.description}</p>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm sm:text-base">{option.label}</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground">{option.description}</p>
                     <div className="flex flex-wrap gap-1 mt-2">
-                      {option.examples.map((food) => (
+                      {option.examples.slice(0, 3).map((food) => (
                         <span
                           key={food}
                           className="text-xs px-2 py-0.5 bg-muted rounded-full"
@@ -78,6 +78,9 @@ export function StepCuisine({ cuisine, setCuisine }: StepCuisineProps) {
                           {food}
                         </span>
                       ))}
+                      <span className="text-xs px-2 py-0.5 bg-muted rounded-full hidden sm:inline">
+                        {option.examples[3]}
+                      </span>
                     </div>
                   </div>
                 </div>

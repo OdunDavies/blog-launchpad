@@ -105,36 +105,39 @@ export function WorkoutHistory({ sessions, onDeleteSession }: WorkoutHistoryProp
           >
             <Card>
               <CollapsibleTrigger asChild>
-                <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors py-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <CardTitle className="text-base">{session.name}</CardTitle>
+                <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors py-3 px-3 sm:px-6">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        <CardTitle className="text-sm sm:text-base truncate">{session.name}</CardTitle>
                         {hasPRs && (
-                          <Badge variant="default" className="text-xs gap-1">
+                          <Badge variant="default" className="text-xs gap-1 shrink-0">
                             <Trophy className="w-3 h-3" />
                             PR
                           </Badge>
                         )}
                       </div>
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                      {/* Mobile: Stack metadata vertically */}
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
                         <span className="flex items-center gap-1">
-                          <Calendar className="w-4 h-4" />
+                          <Calendar className="w-3 h-3 sm:w-4 sm:h-4" />
                           {formatDate(session.date)}
                         </span>
-                        {session.duration && (
+                        <div className="flex items-center gap-3 sm:gap-4">
+                          {session.duration && (
+                            <span className="flex items-center gap-1">
+                              <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
+                              {formatDuration(session.duration)}
+                            </span>
+                          )}
                           <span className="flex items-center gap-1">
-                            <Clock className="w-4 h-4" />
-                            {formatDuration(session.duration)}
+                            <Dumbbell className="w-3 h-3 sm:w-4 sm:h-4" />
+                            {(volume / 1000).toFixed(1)}k kg
                           </span>
-                        )}
-                        <span className="flex items-center gap-1">
-                          <Dumbbell className="w-4 h-4" />
-                          {(volume / 1000).toFixed(1)}k kg
-                        </span>
+                        </div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1 sm:gap-2 shrink-0">
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
                           <Button
@@ -146,18 +149,18 @@ export function WorkoutHistory({ sessions, onDeleteSession }: WorkoutHistoryProp
                             <Trash2 className="w-4 h-4" />
                           </Button>
                         </AlertDialogTrigger>
-                        <AlertDialogContent>
+                        <AlertDialogContent className="mx-4 sm:mx-auto max-w-md">
                           <AlertDialogHeader>
                             <AlertDialogTitle>Delete Workout?</AlertDialogTitle>
                             <AlertDialogDescription>
                               This will permanently delete this workout session. This action cannot be undone.
                             </AlertDialogDescription>
                           </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+                            <AlertDialogCancel className="w-full sm:w-auto">Cancel</AlertDialogCancel>
                             <AlertDialogAction 
                               onClick={() => onDeleteSession(session.id)}
-                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              className="w-full sm:w-auto bg-destructive text-destructive-foreground hover:bg-destructive/90"
                             >
                               Delete
                             </AlertDialogAction>
@@ -174,7 +177,7 @@ export function WorkoutHistory({ sessions, onDeleteSession }: WorkoutHistoryProp
                 </CardHeader>
               </CollapsibleTrigger>
               <CollapsibleContent>
-                <CardContent className="pt-0 space-y-4">
+                <CardContent className="pt-0 px-3 sm:px-6 space-y-4">
                   {session.exercises.map((exercise) => (
                     <div key={exercise.id} className="space-y-2">
                       <h4 className="font-medium text-sm">{exercise.name}</h4>
@@ -182,9 +185,9 @@ export function WorkoutHistory({ sessions, onDeleteSession }: WorkoutHistoryProp
                         {exercise.sets.map((set) => (
                           <div
                             key={set.setNumber}
-                            className="flex items-center gap-3 text-sm bg-muted/50 rounded px-3 py-1.5"
+                            className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm bg-muted/50 rounded px-2 sm:px-3 py-1.5"
                           >
-                            <span className="text-muted-foreground w-12">
+                            <span className="text-muted-foreground w-10 sm:w-12">
                               Set {set.setNumber}
                             </span>
                             <span className="font-medium">
@@ -208,7 +211,7 @@ export function WorkoutHistory({ sessions, onDeleteSession }: WorkoutHistoryProp
                   ))}
                   {session.notes && (
                     <div className="pt-2 border-t">
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-xs sm:text-sm text-muted-foreground">
                         <span className="font-medium">Notes:</span> {session.notes}
                       </p>
                     </div>

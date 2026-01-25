@@ -39,10 +39,10 @@ function AnimatedStat({ end, suffix, label, delay }: StatProps) {
 
   return (
     <div className="text-center">
-      <div className="text-3xl md:text-4xl font-bold text-primary-foreground">
+      <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-primary-foreground">
         {count}{suffix}
       </div>
-      <div className="text-sm text-primary-foreground/70 mt-1">{label}</div>
+      <div className="text-xs sm:text-sm text-primary-foreground/70 mt-0.5 sm:mt-1">{label}</div>
     </div>
   );
 }
@@ -105,10 +105,10 @@ export function HeroSection({ onExploreClick, onGenerateClick }: HeroSectionProp
         </div>
         
         {/* Stats */}
-        <div className="grid grid-cols-3 gap-8 max-w-lg mx-auto p-6 rounded-2xl bg-foreground/90 backdrop-blur-sm">
+        <div className="grid grid-cols-3 gap-4 sm:gap-8 max-w-lg mx-auto p-4 sm:p-6 rounded-2xl bg-foreground/90 backdrop-blur-sm">
           <AnimatedStat end={exercises.length} suffix="+" label="Exercises" delay={0} />
-          <AnimatedStat end={muscleGroups.length} suffix="" label="Muscle Groups" delay={200} />
-          <AnimatedStat end={1} suffix="" label="AI Generator" delay={400} />
+          <AnimatedStat end={muscleGroups.length} suffix="" label="Muscles" delay={200} />
+          <AnimatedStat end={1} suffix="" label="AI" delay={400} />
         </div>
         
         {/* Scroll indicator */}

@@ -38,10 +38,10 @@ const goalOptions: { value: DietGoal; label: string; description: string; icon: 
 
 export function StepGoal({ goal, setGoal }: StepGoalProps) {
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 sm:space-y-4">
       <div>
-        <h3 className="text-lg font-semibold">What's your primary goal?</h3>
-        <p className="text-sm text-muted-foreground">
+        <h3 className="text-base sm:text-lg font-semibold">What's your primary goal?</h3>
+        <p className="text-xs sm:text-sm text-muted-foreground">
           We'll optimize your macros based on your goal
         </p>
       </div>
@@ -49,7 +49,7 @@ export function StepGoal({ goal, setGoal }: StepGoalProps) {
       <RadioGroup
         value={goal}
         onValueChange={(value) => setGoal(value as DietGoal)}
-        className="grid gap-3"
+        className="grid gap-2 sm:gap-3"
       >
         {goalOptions.map((option) => {
           const Icon = option.icon;
@@ -64,14 +64,14 @@ export function StepGoal({ goal, setGoal }: StepGoalProps) {
                   goal === option.value ? 'border-primary bg-primary/5 ring-1 ring-primary' : ''
                 }`}
               >
-                <CardContent className="flex items-center gap-4 p-4">
+                <CardContent className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4">
                   <RadioGroupItem value={option.value} id={option.value} className="sr-only" />
-                  <div className={`p-2 rounded-lg ${goal === option.value ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
-                    <Icon className="w-5 h-5" />
+                  <div className={`p-1.5 sm:p-2 rounded-lg shrink-0 ${goal === option.value ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
+                    <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
                   </div>
-                  <div className="flex-1">
-                    <p className="font-medium">{option.label}</p>
-                    <p className="text-sm text-muted-foreground">{option.description}</p>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm sm:text-base">{option.label}</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2">{option.description}</p>
                   </div>
                 </CardContent>
               </Card>
