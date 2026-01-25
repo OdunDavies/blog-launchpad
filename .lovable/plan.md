@@ -1,231 +1,182 @@
 
-# Mobile UI/UX Optimization Plan
+# Unified Cuisine Food Database Plan
 
 ## Problem Summary
-The MuscleAtlas app has several components that don't adapt well to mobile screens (< 768px), causing cramped layouts, text overflow, and poor touch targets. This plan addresses all mobile UX issues across the application.
+Currently, the Diet Generator has 3 separate cuisine options (International, Nigerian, West African) that are mutually exclusive. Users must choose one, limiting meal variety. The goal is to combine all food databases into a single unified approach that intelligently draws from both International and Nigerian/West African foods to create the best, most varied meal plans.
 
 ---
 
-## Phase 1: Main Navigation Tabs
+## Solution Overview
 
-### Task 1.1: Responsive Tab Navigation
-**File:** `src/pages/Index.tsx`
-
-Current issue: 5 tabs in `grid-cols-5` become unreadable on mobile.
-
-**Solution:**
-- On mobile: Show only icons (no text labels)
-- Add horizontal scroll capability for very small screens
-- Increase touch target size for mobile
-
-```text
-Mobile View:
-[📚] [📋] [✨] [🥗] [📝]
-
-Desktop View:
-[📚 Library] [📋 Templates] [✨ AI Workout] [🥗 AI Diet] [📝 Tracker]
-```
-
-**Changes:**
-- Update TabsList to use `overflow-x-auto` with `scrollbar-hide` on mobile
-- Hide ALL tab text on mobile (not just partial words)
-- Use `flex` instead of `grid` for more flexible spacing
-- Increase TabsTrigger padding for better touch targets
+Instead of asking users to choose a cuisine, we will:
+1. **Remove the Cuisine step** from the wizard (reducing from 7 steps to 6)
+2. **Create a unified food database** that includes International AND Nigerian/West African foods
+3. **Add an optional "Regional Preference" toggle** to let users indicate if they want a heavier focus on Nigerian/African foods vs balanced global mix
 
 ---
 
-## Phase 2: Active Workout Tracker
+## Phase 1: Remove Cuisine Step from Wizard
 
-### Task 2.1: Mobile-Optimized Set Logging
-**File:** `src/components/workout-tracker/ActiveWorkout.tsx`
-
-Current issue: 5-column grid for sets is too cramped on mobile.
-
-**Solution:**
-- Stack weight/reps inputs vertically on mobile
-- Use a card-based layout for each set instead of grid
-- Make Warmup/Working toggle full-width on mobile
-
-```text
-Mobile Layout (each set):
-+---------------------------+
-| Set 1              [🗑️]  |
-| Weight: [____] kg         |
-| Reps:   [____]            |
-| [Warmup] [Working]        |
-+---------------------------+
-
-Desktop Layout (unchanged):
-| Set | Weight | Reps | Type    | X |
-| 1   | [80]   | [8]  | Working | X |
-```
-
-**Changes:**
-- Add responsive breakpoint classes
-- Use `flex flex-col sm:grid sm:grid-cols-[40px_1fr_1fr_1fr_40px]`
-- Make inputs larger for touch (`h-10` instead of `h-9`)
-- Increase spacing on mobile
-
-### Task 2.2: Mobile-Optimized Header
-**File:** `src/components/workout-tracker/ActiveWorkout.tsx`
-
-Current issue: Timer, buttons, and session info crowd the header on mobile.
-
-**Solution:**
-- Stack session info and controls vertically on mobile
-- Make timer more prominent
-- Full-width buttons on mobile
-
----
-
-## Phase 3: Workout History
-
-### Task 3.1: Mobile-Friendly Session Cards
-**File:** `src/components/workout-tracker/WorkoutHistory.tsx`
-
-Current issue: Date, duration, and volume stats overflow on mobile.
-
-**Solution:**
-- Stack metadata vertically on mobile
-- Use wrapping flex layout
-- Reduce text size on mobile
-
-```text
-Mobile Layout:
-+---------------------------+
-| Push Day          [🗑️] ⌄ |
-| 📅 Today                  |
-| ⏱️ 45m  💪 12.5k kg      |
-+---------------------------+
-```
-
----
-
-## Phase 4: Start Workout Modal
-
-### Task 4.1: Mobile-Optimized Modal
-**File:** `src/components/workout-tracker/StartWorkoutModal.tsx`
-
-Current issue: Dialog content can be too wide on mobile.
-
-**Solution:**
-- Use `Drawer` component on mobile instead of `Dialog`
-- Full-width on mobile with proper padding
-- Larger touch targets for plan/template selection
-
----
-
-## Phase 5: Workout Stats Dashboard
-
-### Task 5.1: Mobile Stats Grid
-**File:** `src/components/workout-tracker/WorkoutStats.tsx`
-
-Current issue: Stats cards are cramped on mobile.
-
-**Solution:**
-- Use 2-column grid on mobile with scrollable overflow
-- Reduce card padding on mobile
-- Stack icon and value vertically on very small screens
-
----
-
-## Phase 6: Diet Generator Wizard
-
-### Task 6.1: Mobile Wizard Progress
+### Task 1.1: Update Wizard Steps
 **File:** `src/components/DietGenerator.tsx`
 
-Current issue: 7-step wizard progress indicator takes too much space.
+Changes:
+- Remove `StepCuisine` from imports and renderStep()
+- Change wizardSteps from 7 to 6 steps
+- Remove cuisine state and setCuisine
+- Update step indices in `canProceed()` and `renderStep()`
+- Send `cuisine: 'unified'` to the edge function
 
-**Solution:**
-- Show step numbers only (no titles) on mobile
-- Use compact step indicators
-- Horizontal scroll for step navigation
+### Task 1.2: Update Type Definitions
+**File:** `src/types/diet.ts`
 
-### Task 6.2: Mobile-Friendly Wizard Steps
-**Files:** `src/components/diet-wizard/*.tsx`
-
-**Solution:**
-- Full-width option cards on mobile
-- Increase tap targets
-- Reduce padding/margins on mobile
-- Single column grids on mobile
-
----
-
-## Phase 7: Profile Components
-
-### Task 7.1: Mobile Header Optimization
-**Files:** `src/pages/Index.tsx`, `src/components/ProfileStatusBadge.tsx`
-
-Current issue: Header can get crowded on mobile.
-
-**Solution:**
-- Collapse ProfileStatusBadge to icon-only on mobile
-- Use a smaller logo on mobile
-- Add proper spacing
-
-### Task 7.2: Mobile Profile Editor
-**File:** `src/components/ProfileEditor.tsx`
-
-**Solution:**
-- Sheet component already works well on mobile
-- Ensure input fields have proper spacing
-- Add scroll behavior for keyboard
+Changes:
+- Change `CuisinePreference` type to just `'unified'`
+- Update `CUISINE_LABELS` to reflect unified approach
+- Keep backward compatibility for saved plans
 
 ---
 
-## Phase 8: Global Mobile Styles
+## Phase 2: Create Unified Food Database in Edge Function
 
-### Task 8.1: Add Utility Classes
-**File:** `src/index.css`
+### Task 2.1: Merge Food Databases
+**File:** `supabase/functions/generate-diet/index.ts`
 
-Add mobile-first utility classes:
-- `.scrollbar-hide` - Hide scrollbars for horizontal scroll areas
-- `.touch-target` - Minimum 44px touch targets
-- `.mobile-card` - Optimized card padding for mobile
+Create a comprehensive unified database that includes:
+
+```text
+GLOBAL FITNESS FOOD DATABASE:
+
+PROTEINS (International):
+- Grilled Chicken Breast, Salmon, Greek Yogurt, Eggs, Turkey, Tuna, Tofu, etc.
+
+PROTEINS (Nigerian/West African):
+- Suya, Kilishi, Stockfish, Goat Meat, Grilled Tilapia, Chicken Pepper Soup, Asun, etc.
+
+CARBOHYDRATES (International):
+- Brown Rice, Sweet Potato, Quinoa, Oatmeal, Whole Wheat Pasta, etc.
+
+CARBOHYDRATES (Nigerian/West African):
+- Ofada Rice, Jollof Rice, Pounded Yam, Moi Moi, Akara, Plantain, Fufu, etc.
+
+SOUPS & STEWS (Nigerian/West African):
+- Egusi Soup, Okra Soup, Efo Riro, Ogbono Soup, Pepper Soup, etc.
+
+VEGETABLES & GREENS (International):
+- Broccoli, Spinach, Bell Peppers, Asparagus, Mixed Salad, etc.
+
+HEALTHY FATS (Global):
+- Avocado, Olive Oil, Almonds, Roasted Groundnuts, Walnuts, etc.
+```
+
+### Task 2.2: Add Smart Prompt Instructions
+**File:** `supabase/functions/generate-diet/index.ts`
+
+Update the AI prompt to:
+- Intelligently mix foods from both databases
+- Ensure variety across the 7 days
+- Balance International and African meals throughout the week
+- Consider meal appropriateness (e.g., Suya for dinner, oatmeal for breakfast)
+
+---
+
+## Phase 3: Add Optional Regional Preference (Enhancement)
+
+### Task 3.1: Add Regional Focus Toggle to StepDietType
+**File:** `src/components/diet-wizard/StepDietType.tsx`
+
+Add a simple preference toggle at the bottom:
+- "Nigerian/African Focus" - Prioritize local foods
+- "Balanced Global" (default) - Even mix of cuisines
+
+This is lighter than the previous cuisine step but gives users some control.
+
+### Task 3.2: Pass Preference to Edge Function
+**File:** `src/components/DietGenerator.tsx`
+
+Add `regionalFocus: 'african' | 'balanced'` state and pass it to the edge function.
+
+---
+
+## Phase 4: Update Edge Function Prompt Logic
+
+### Task 4.1: Implement Regional Focus in Prompt
+**File:** `supabase/functions/generate-diet/index.ts`
+
+Modify prompt based on regional focus:
+- **African Focus**: "Prioritize Nigerian and West African foods, but include some International options for variety"
+- **Balanced**: "Create a diverse mix of International and Nigerian/West African meals, alternating cuisines throughout the week"
+
+---
+
+## Phase 5: Clean Up Unused Components
+
+### Task 5.1: Delete StepCuisine Component
+**File:** `src/components/diet-wizard/StepCuisine.tsx`
+
+Remove this file entirely as it's no longer needed.
+
+### Task 5.2: Update StepReview
+**File:** `src/components/diet-wizard/StepReview.tsx`
+
+- Remove cuisine display from review
+- Add regional preference display if applicable
 
 ---
 
 ## Technical Implementation Details
 
-### Responsive Breakpoints Used
-- `sm:` (640px) - Small tablets
-- `md:` (768px) - Tablets/small laptops (main mobile breakpoint)
-- `lg:` (1024px) - Desktops
+### Files to Modify
+| File | Change |
+|------|--------|
+| `src/types/diet.ts` | Update CuisinePreference type |
+| `src/components/DietGenerator.tsx` | Remove cuisine step, add regional preference |
+| `src/components/diet-wizard/StepDietType.tsx` | Add regional focus toggle |
+| `src/components/diet-wizard/StepReview.tsx` | Update review display |
+| `supabase/functions/generate-diet/index.ts` | Unified food database + smart prompts |
 
-### Key Mobile Patterns
-1. **Icon-only navigation** on mobile
-2. **Stacked layouts** instead of horizontal grids
-3. **Drawer/Sheet** instead of Dialog for modals
-4. **Larger touch targets** (min 44px)
-5. **Horizontal scroll** instead of wrapping/hiding
+### Files to Delete
+| File | Reason |
+|------|--------|
+| `src/components/diet-wizard/StepCuisine.tsx` | No longer needed |
+
+### New Data Flow
+
+```text
+User Wizard (6 Steps):
+Goal -> Calories -> Diet Type + Regional Pref -> Restrictions -> Meals -> Review
+
+Edge Function receives:
+{
+  goal, dailyCalories, dietType, restrictions, mealTypes,
+  regionalFocus: 'african' | 'balanced'  // NEW
+}
+
+AI Uses:
+- Full unified food database (all foods)
+- Smart mixing instructions based on regionalFocus
+- Goal-specific macro calculations
+```
 
 ---
 
-## File Changes Summary
+## Expected Outcome
 
-| File | Change Type |
-|------|-------------|
-| `src/pages/Index.tsx` | Modify - Responsive tabs |
-| `src/components/workout-tracker/ActiveWorkout.tsx` | Modify - Mobile set logging |
-| `src/components/workout-tracker/WorkoutHistory.tsx` | Modify - Mobile cards |
-| `src/components/workout-tracker/StartWorkoutModal.tsx` | Modify - Mobile modal/drawer |
-| `src/components/workout-tracker/WorkoutStats.tsx` | Modify - Mobile stats grid |
-| `src/components/DietGenerator.tsx` | Modify - Mobile wizard |
-| `src/components/diet-wizard/*.tsx` | Modify - Mobile option cards |
-| `src/components/ProfileStatusBadge.tsx` | Modify - Mobile-compact |
-| `src/components/HeroSection.tsx` | Modify - Mobile stats |
-| `src/index.css` | Modify - Add utility classes |
+**Before:** Users pick ONE cuisine and only get foods from that database
+**After:** Users get a rich, varied 7-day plan with:
+- Best foods from International AND Nigerian/African cuisines
+- Smart meal pairing (African dinner + International breakfast variety)
+- Optional preference to skew toward local foods if desired
+- Reduced wizard steps (6 instead of 7)
 
 ---
 
 ## Implementation Order
 
-1. **Global styles** (CSS utilities)
-2. **Main navigation** (Index.tsx tabs)
-3. **Active Workout** (highest interaction frequency)
-4. **Start Workout Modal** (convert to Drawer on mobile)
-5. **Workout History** (viewing past workouts)
-6. **Stats Dashboard** (overview)
-7. **Diet Generator** (wizard flow)
-8. **Profile components** (finishing touches)
+1. Update types in `diet.ts`
+2. Modify `StepDietType.tsx` to add regional toggle
+3. Update `DietGenerator.tsx` to remove cuisine step
+4. Update `StepReview.tsx` to show regional preference
+5. Rewrite edge function with unified database
+6. Delete `StepCuisine.tsx`
+7. Test the complete flow
