@@ -50,10 +50,10 @@ const dietTypeOptions: { value: DietType; label: string; description: string; ic
 
 export function StepDietType({ dietType, setDietType }: StepDietTypeProps) {
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 sm:space-y-4">
       <div>
-        <h3 className="text-lg font-semibold">Choose your diet approach</h3>
-        <p className="text-sm text-muted-foreground">
+        <h3 className="text-base sm:text-lg font-semibold">Choose your diet approach</h3>
+        <p className="text-xs sm:text-sm text-muted-foreground">
           Select the eating style that fits your preferences
         </p>
       </div>
@@ -61,7 +61,7 @@ export function StepDietType({ dietType, setDietType }: StepDietTypeProps) {
       <RadioGroup
         value={dietType}
         onValueChange={(value) => setDietType(value as DietType)}
-        className="grid gap-3 sm:grid-cols-2"
+        className="grid gap-2 sm:gap-3 grid-cols-1 sm:grid-cols-2"
       >
         {dietTypeOptions.map((option) => {
           const Icon = option.icon;
@@ -76,14 +76,14 @@ export function StepDietType({ dietType, setDietType }: StepDietTypeProps) {
                   dietType === option.value ? 'border-primary bg-primary/5 ring-1 ring-primary' : ''
                 }`}
               >
-                <CardContent className="flex items-start gap-3 p-4">
+                <CardContent className="flex items-start gap-2 sm:gap-3 p-3 sm:p-4">
                   <RadioGroupItem value={option.value} id={`diet-${option.value}`} className="sr-only" />
-                  <div className={`p-2 rounded-lg shrink-0 ${dietType === option.value ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
+                  <div className={`p-1.5 sm:p-2 rounded-lg shrink-0 ${dietType === option.value ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
                     <Icon className="w-4 h-4" />
                   </div>
-                  <div>
-                    <p className="font-medium">{option.label}</p>
-                    <p className="text-xs text-muted-foreground">{option.description}</p>
+                  <div className="min-w-0">
+                    <p className="font-medium text-sm">{option.label}</p>
+                    <p className="text-xs text-muted-foreground line-clamp-2">{option.description}</p>
                   </div>
                 </CardContent>
               </Card>

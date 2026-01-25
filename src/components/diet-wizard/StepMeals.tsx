@@ -11,13 +11,13 @@ interface StepMealsProps {
 
 const mealOptions: { value: MealType; label: string; description: string; icon: React.ElementType }[] = [
   { value: 'breakfast', label: 'Breakfast', description: 'Morning fuel', icon: Coffee },
-  { value: 'morning_snack', label: 'Morning Snack', description: 'Mid-morning boost', icon: Cookie },
+  { value: 'morning_snack', label: 'AM Snack', description: 'Mid-morning', icon: Cookie },
   { value: 'lunch', label: 'Lunch', description: 'Midday meal', icon: UtensilsCrossed },
-  { value: 'afternoon_snack', label: 'Afternoon Snack', description: 'Pre-dinner energy', icon: Cookie },
+  { value: 'afternoon_snack', label: 'PM Snack', description: 'Pre-dinner', icon: Cookie },
   { value: 'dinner', label: 'Dinner', description: 'Evening meal', icon: Moon },
-  { value: 'evening_snack', label: 'Evening Snack', description: 'Light night bite', icon: Cookie },
-  { value: 'pre_workout', label: 'Pre-Workout', description: 'Energy before training', icon: Dumbbell },
-  { value: 'post_workout', label: 'Post-Workout', description: 'Recovery nutrition', icon: Dumbbell },
+  { value: 'evening_snack', label: 'Eve Snack', description: 'Night bite', icon: Cookie },
+  { value: 'pre_workout', label: 'Pre-Workout', description: 'Before training', icon: Dumbbell },
+  { value: 'post_workout', label: 'Post-Workout', description: 'Recovery', icon: Dumbbell },
 ];
 
 export function StepMeals({ mealTypes, setMealTypes }: StepMealsProps) {
@@ -44,10 +44,10 @@ export function StepMeals({ mealTypes, setMealTypes }: StepMealsProps) {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 sm:space-y-4">
       <div>
-        <h3 className="text-lg font-semibold">How many meals per day?</h3>
-        <p className="text-sm text-muted-foreground">
+        <h3 className="text-base sm:text-lg font-semibold">How many meals per day?</h3>
+        <p className="text-xs sm:text-sm text-muted-foreground">
           Choose the meals you want in your plan
         </p>
       </div>
@@ -58,23 +58,23 @@ export function StepMeals({ mealTypes, setMealTypes }: StepMealsProps) {
           onClick={() => selectPreset('basic')}
           className="text-xs px-3 py-1.5 rounded-full bg-muted hover:bg-muted/80 transition-colors"
         >
-          3 Meals (Basic)
+          3 Meals
         </button>
         <button
           onClick={() => selectPreset('standard')}
           className="text-xs px-3 py-1.5 rounded-full bg-muted hover:bg-muted/80 transition-colors"
         >
-          5 Meals (Standard)
+          5 Meals
         </button>
         <button
           onClick={() => selectPreset('athlete')}
           className="text-xs px-3 py-1.5 rounded-full bg-muted hover:bg-muted/80 transition-colors"
         >
-          7 Meals (Athlete)
+          7 Meals
         </button>
       </div>
 
-      <div className="grid gap-2 sm:grid-cols-2">
+      <div className="grid gap-2 grid-cols-1 sm:grid-cols-2">
         {mealOptions.map((option) => {
           const Icon = option.icon;
           return (
@@ -85,18 +85,19 @@ export function StepMeals({ mealTypes, setMealTypes }: StepMealsProps) {
               }`}
               onClick={() => toggleMeal(option.value)}
             >
-              <CardContent className="flex items-center gap-3 p-3">
+              <CardContent className="flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3">
                 <Checkbox
                   id={`meal-${option.value}`}
                   checked={mealTypes.includes(option.value)}
                   onCheckedChange={() => toggleMeal(option.value)}
+                  className="shrink-0"
                 />
-                <Icon className="w-4 h-4 text-muted-foreground" />
-                <div className="flex-1">
-                  <Label htmlFor={`meal-${option.value}`} className="cursor-pointer font-medium text-sm">
+                <Icon className="w-4 h-4 text-muted-foreground shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <Label htmlFor={`meal-${option.value}`} className="cursor-pointer font-medium text-xs sm:text-sm">
                     {option.label}
                   </Label>
-                  <p className="text-xs text-muted-foreground">{option.description}</p>
+                  <p className="text-xs text-muted-foreground hidden sm:block">{option.description}</p>
                 </div>
               </CardContent>
             </Card>
@@ -105,7 +106,7 @@ export function StepMeals({ mealTypes, setMealTypes }: StepMealsProps) {
       </div>
 
       {mealTypes.length > 0 && (
-        <p className="text-sm text-muted-foreground text-center">
+        <p className="text-xs sm:text-sm text-muted-foreground text-center">
           {mealTypes.length} meal{mealTypes.length !== 1 ? 's' : ''} selected per day
         </p>
       )}

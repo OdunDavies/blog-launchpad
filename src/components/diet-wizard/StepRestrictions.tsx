@@ -30,15 +30,15 @@ export function StepRestrictions({ restrictions, setRestrictions }: StepRestrict
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 sm:space-y-4">
       <div>
-        <h3 className="text-lg font-semibold">Any dietary restrictions?</h3>
-        <p className="text-sm text-muted-foreground">
+        <h3 className="text-base sm:text-lg font-semibold">Any dietary restrictions?</h3>
+        <p className="text-xs sm:text-sm text-muted-foreground">
           Select all that apply (optional)
         </p>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid gap-2 sm:gap-3 grid-cols-1 sm:grid-cols-2">
         {restrictionOptions.map((option) => (
           <Card
             key={option.value}
@@ -47,14 +47,15 @@ export function StepRestrictions({ restrictions, setRestrictions }: StepRestrict
             }`}
             onClick={() => toggleRestriction(option.value)}
           >
-            <CardContent className="flex items-center gap-3 p-4">
+            <CardContent className="flex items-center gap-2 sm:gap-3 p-3 sm:p-4">
               <Checkbox
                 id={`restriction-${option.value}`}
                 checked={restrictions.includes(option.value)}
                 onCheckedChange={() => toggleRestriction(option.value)}
+                className="shrink-0"
               />
-              <div className="flex-1">
-                <Label htmlFor={`restriction-${option.value}`} className="cursor-pointer font-medium">
+              <div className="flex-1 min-w-0">
+                <Label htmlFor={`restriction-${option.value}`} className="cursor-pointer font-medium text-sm">
                   {option.label}
                 </Label>
                 <p className="text-xs text-muted-foreground">{option.description}</p>
@@ -66,11 +67,11 @@ export function StepRestrictions({ restrictions, setRestrictions }: StepRestrict
 
       {restrictions.length > 0 && (
         <Card className="bg-muted/50">
-          <CardContent className="flex items-start gap-3 p-4">
-            <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
-            <div>
-              <p className="font-medium text-sm">Selected Restrictions</p>
-              <p className="text-sm text-muted-foreground">
+          <CardContent className="flex items-start gap-2 sm:gap-3 p-3 sm:p-4">
+            <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5 text-amber-500 shrink-0 mt-0.5" />
+            <div className="min-w-0">
+              <p className="font-medium text-xs sm:text-sm">Selected Restrictions</p>
+              <p className="text-xs sm:text-sm text-muted-foreground">
                 Your meal plan will exclude: {restrictions.map(r => RESTRICTION_LABELS[r]).join(', ')}
               </p>
             </div>

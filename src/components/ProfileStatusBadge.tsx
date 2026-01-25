@@ -14,13 +14,13 @@ export function ProfileStatusBadge() {
         variant="ghost"
         size="sm"
         onClick={() => setEditorOpen(true)}
-        className="gap-2"
+        className="gap-1 sm:gap-2 px-2 sm:px-3"
       >
         {!isProfileComplete && (
-          <AlertCircle className="w-4 h-4 text-warning" />
+          <AlertCircle className="w-4 h-4 text-destructive" />
         )}
         <User className="w-4 h-4" />
-        <span className="hidden sm:inline">
+        <span className="hidden md:inline text-sm">
           {profile.name || 'Set Profile'}
         </span>
       </Button>

@@ -37,18 +37,18 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-50" role="banner">
-        <nav className="container max-w-6xl mx-auto px-4 py-4" aria-label="Main navigation">
+        <nav className="container max-w-6xl mx-auto px-4 py-3 sm:py-4" aria-label="Main navigation">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-foreground text-background">
-                <Dumbbell className="w-5 h-5" aria-hidden="true" />
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="p-1.5 sm:p-2 rounded-lg bg-foreground text-background">
+                <Dumbbell className="w-4 h-4 sm:w-5 sm:h-5" aria-hidden="true" />
               </div>
               <div>
-                <span className="text-xl font-bold tracking-tight">MuscleAtlas</span>
+                <span className="text-lg sm:text-xl font-bold tracking-tight">MuscleAtlas</span>
                 <p className="text-xs text-muted-foreground hidden sm:block">Navigate your fitness journey</p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 sm:gap-2">
               <ProfileStatusBadge />
               <ThemeToggle />
             </div>
@@ -63,36 +63,36 @@ const Index = () => {
       />
 
       {/* Main Content */}
-      <main id="main-content" className="container max-w-6xl mx-auto px-4 py-8" role="main" aria-label="Main content">
+      <main id="main-content" className="container max-w-6xl mx-auto px-4 py-6 sm:py-8" role="main" aria-label="Main content">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full max-w-3xl grid-cols-5" aria-label="Content sections">
-            <TabsTrigger value="library" className="flex items-center gap-2">
-              <Library className="w-4 h-4" aria-hidden="true" />
-              <span className="hidden sm:inline">Exercise</span> Library
+          <TabsList className="flex w-full max-w-3xl overflow-x-auto scrollbar-hide" aria-label="Content sections">
+            <TabsTrigger value="library" className="flex-1 min-w-0 flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4 py-2.5 touch-target">
+              <Library className="w-4 h-4 shrink-0" aria-hidden="true" />
+              <span className="hidden sm:inline text-sm">Library</span>
             </TabsTrigger>
-            <TabsTrigger value="templates" className="flex items-center gap-2">
-              <LayoutTemplate className="w-4 h-4" aria-hidden="true" />
-              Templates
+            <TabsTrigger value="templates" className="flex-1 min-w-0 flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4 py-2.5 touch-target">
+              <LayoutTemplate className="w-4 h-4 shrink-0" aria-hidden="true" />
+              <span className="hidden sm:inline text-sm">Templates</span>
             </TabsTrigger>
-            <TabsTrigger value="generator" className="flex items-center gap-2">
-              <Sparkles className="w-4 h-4" aria-hidden="true" />
-              <span className="hidden sm:inline">AI</span> Workout
+            <TabsTrigger value="generator" className="flex-1 min-w-0 flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4 py-2.5 touch-target">
+              <Sparkles className="w-4 h-4 shrink-0" aria-hidden="true" />
+              <span className="hidden sm:inline text-sm">AI Workout</span>
             </TabsTrigger>
-            <TabsTrigger value="diet" className="flex items-center gap-2">
-              <Salad className="w-4 h-4" aria-hidden="true" />
-              <span className="hidden sm:inline">AI</span> Diet
+            <TabsTrigger value="diet" className="flex-1 min-w-0 flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4 py-2.5 touch-target">
+              <Salad className="w-4 h-4 shrink-0" aria-hidden="true" />
+              <span className="hidden sm:inline text-sm">AI Diet</span>
             </TabsTrigger>
-            <TabsTrigger value="tracker" className="flex items-center gap-2">
-              <ClipboardList className="w-4 h-4" aria-hidden="true" />
-              Tracker
+            <TabsTrigger value="tracker" className="flex-1 min-w-0 flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4 py-2.5 touch-target">
+              <ClipboardList className="w-4 h-4 shrink-0" aria-hidden="true" />
+              <span className="hidden sm:inline text-sm">Tracker</span>
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="library" className="mt-6">
             <article>
               <header className="mb-6">
-                <h2 className="text-2xl font-bold mb-2">Exercise Library</h2>
-                <p className="text-muted-foreground">
+                <h2 className="text-xl sm:text-2xl font-bold mb-2">Exercise Library</h2>
+                <p className="text-sm sm:text-base text-muted-foreground">
                   Browse our collection of exercises with video demonstrations and muscle targeting info.
                 </p>
               </header>
@@ -103,8 +103,8 @@ const Index = () => {
           <TabsContent value="templates" className="mt-6">
             <article>
               <header className="mb-6">
-                <h2 className="text-2xl font-bold mb-2">Workout Templates</h2>
-                <p className="text-muted-foreground">
+                <h2 className="text-xl sm:text-2xl font-bold mb-2">Workout Templates</h2>
+                <p className="text-sm sm:text-base text-muted-foreground">
                   Pre-made workout routines to get you started quickly. Click any template to view details.
                 </p>
               </header>
@@ -115,8 +115,8 @@ const Index = () => {
           <TabsContent value="generator" className="mt-6">
             <article>
               <header className="mb-6">
-                <h2 className="text-2xl font-bold mb-2">AI Workout Generator</h2>
-                <p className="text-muted-foreground">
+                <h2 className="text-xl sm:text-2xl font-bold mb-2">AI Workout Generator</h2>
+                <p className="text-sm sm:text-base text-muted-foreground">
                   Get a personalized workout split based on your goals and target muscles.
                 </p>
               </header>
@@ -127,8 +127,8 @@ const Index = () => {
           <TabsContent value="diet" className="mt-6">
             <article>
               <header className="mb-6">
-                <h2 className="text-2xl font-bold mb-2">AI Diet Generator</h2>
-                <p className="text-muted-foreground">
+                <h2 className="text-xl sm:text-2xl font-bold mb-2">AI Diet Generator</h2>
+                <p className="text-sm sm:text-base text-muted-foreground">
                   Get a personalized 7-day meal plan based on your goals, preferences, and cuisine.
                 </p>
               </header>
@@ -139,8 +139,8 @@ const Index = () => {
           <TabsContent value="tracker" className="mt-6">
             <article>
               <header className="mb-6">
-                <h2 className="text-2xl font-bold mb-2">Workout Tracker</h2>
-                <p className="text-muted-foreground">
+                <h2 className="text-xl sm:text-2xl font-bold mb-2">Workout Tracker</h2>
+                <p className="text-sm sm:text-base text-muted-foreground">
                   Log your workouts, track your progress, and celebrate your personal records.
                 </p>
               </header>
@@ -152,14 +152,14 @@ const Index = () => {
 
       {/* Footer */}
       <footer className="border-t mt-auto bg-muted/30" role="contentinfo">
-        <div className="container max-w-6xl mx-auto px-4 py-6">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="container max-w-6xl mx-auto px-4 py-4 sm:py-6">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
             <div className="flex items-center gap-2">
               <div className="p-1.5 rounded-lg bg-foreground text-background">
                 <Dumbbell className="w-3 h-3" aria-hidden="true" />
               </div>
-              <span className="font-semibold">MuscleAtlas</span>
-              <span className="text-sm text-muted-foreground">© {new Date().getFullYear()}</span>
+              <span className="font-semibold text-sm sm:text-base">MuscleAtlas</span>
+              <span className="text-xs sm:text-sm text-muted-foreground">© {new Date().getFullYear()}</span>
             </div>
             <Button 
               variant="ghost" 
