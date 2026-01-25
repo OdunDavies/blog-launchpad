@@ -436,7 +436,7 @@ export const exercises: Exercise[] = [
     secondaryMuscles: ['hamstrings', 'abs'],
     equipment: 'Barbell, Dumbbell, or Bodyweight',
     difficulty: 'beginner',
-    videoUrl: 'https://www.youtube.com/embed/9ZuXKqRbT9k',
+    videoUrl: 'https://www.youtube.com/embed/u2oXPmPH0hA',
     instructions: [
       'Stand with feet wider than shoulder-width, toes pointed out 45 degrees',
       'Keep chest up and core engaged',
@@ -444,7 +444,8 @@ export const exercises: Exercise[] = [
       'Descend until thighs are parallel or below',
       'Drive through heels to stand'
     ],
-    category: 'legs'
+    category: 'legs',
+    imageUrl: 'https://liftmanual.com/wp-content/uploads/2023/04/sumo-squat.jpg'
   },
   {
     id: 'step-ups',
@@ -453,7 +454,7 @@ export const exercises: Exercise[] = [
     secondaryMuscles: ['hamstrings', 'calves'],
     equipment: 'Bench or Box, Dumbbells (optional)',
     difficulty: 'beginner',
-    videoUrl: 'https://www.youtube.com/embed/dQqApCGd5Ss',
+    videoUrl: 'https://www.youtube.com/embed/DeCnHqrN22U',
     instructions: [
       'Stand facing a sturdy bench or box',
       'Step up with one foot, driving through the heel',
@@ -461,7 +462,8 @@ export const exercises: Exercise[] = [
       'Step back down with control',
       'Alternate legs or complete all reps on one side'
     ],
-    category: 'legs'
+    category: 'legs',
+    imageUrl: 'https://liftmanual.com/wp-content/uploads/2023/04/dumbbell-step-up.jpg'
   },
   {
     id: 'bulgarian-split-squat',
@@ -470,7 +472,7 @@ export const exercises: Exercise[] = [
     secondaryMuscles: ['hamstrings'],
     equipment: 'Bench, Dumbbells (optional)',
     difficulty: 'intermediate',
-    videoUrl: 'https://www.youtube.com/embed/2C-uNgKwPLE',
+    videoUrl: 'https://www.youtube.com/embed/9FOMyxA3Lw4',
     instructions: [
       'Stand about 2 feet in front of a bench',
       'Place rear foot on bench behind you',
@@ -478,7 +480,8 @@ export const exercises: Exercise[] = [
       'Keep torso upright and core tight',
       'Push through front heel to stand'
     ],
-    category: 'legs'
+    category: 'legs',
+    imageUrl: 'https://liftmanual.com/wp-content/uploads/2023/04/dumbbell-bulgarian-split-squat.jpg'
   },
 
   // CORE
