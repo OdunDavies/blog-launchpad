@@ -69,7 +69,7 @@ export function ExercisePickerModal({ open, onClose, onSelectExercise, dayFocus 
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col overflow-hidden">
+      <DialogContent className="max-w-2xl h-[80vh] flex flex-col overflow-hidden">
         <DialogHeader className="flex-shrink-0">
           <DialogTitle>Add Exercise{dayFocus && ` to ${dayFocus}`}</DialogTitle>
         </DialogHeader>
