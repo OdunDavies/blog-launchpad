@@ -6,44 +6,51 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { WizardProgress } from '@/components/workout-wizard/WizardProgress';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { DietWizardProgress } from '@/components/diet-wizard/DietWizardProgress';
 import { StepGoal } from '@/components/diet-wizard/StepGoal';
 import { StepCalories } from '@/components/diet-wizard/StepCalories';
 import { StepDietType } from '@/components/diet-wizard/StepDietType';
 import { StepRestrictions } from '@/components/diet-wizard/StepRestrictions';
 import { StepMeals } from '@/components/diet-wizard/StepMeals';
-import { StepReview } from '@/components/diet-wizard/StepReview';
+import { StepCuisine } from '@/components/diet-wizard/StepCuisine';
+import { StepDietReview } from '@/components/diet-wizard/StepDietReview';
+import { MealCard } from '@/components/MealCard';
+import { NutritionSummary } from '@/components/NutritionSummary';
 import {
-  DietGoal, DietType, RegionalFocus, DietaryRestriction, MealType,
-  GeneratedDietPlan, SavedDietPlan, DietDay,
-  GOAL_LABELS, DIET_TYPE_LABELS, REGIONAL_FOCUS_LABELS, MEAL_TYPE_LABELS,
+  FitnessGoal, DietType, CuisineType, DietPlan, SavedDietPlan, DayPlan,
+  GOAL_LABELS, DIET_TYPE_LABELS, CUISINE_LABELS,
 } from '@/types/diet';
-import { Target, Flame, ChevronLeft, ChevronRight, Sparkles, Save, Trash2, RotateCcw, Loader2, UtensilsCrossed } from 'lucide-react';
+import { getSuggestedCalories } from '@/utils/tdeeCalculator';
+import { Target, Flame, ChevronLeft, ChevronRight, Sparkles, Save, Trash2, RotateCcw, Loader2, UtensilsCrossed, Clock, Globe, ShieldAlert } from 'lucide-react';
 
 const wizardSteps = [
-  { title: 'Goal', icon: <Target className="w-4 h-4 sm:w-5 sm:h-5" /> },
-  { title: 'Calories', icon: <Flame className="w-4 h-4 sm:w-5 sm:h-5" /> },
-  { title: 'Diet', icon: <UtensilsCrossed className="w-4 h-4 sm:w-5 sm:h-5" /> },
-  { title: 'Restrict', icon: <UtensilsCrossed className="w-4 h-4 sm:w-5 sm:h-5" /> },
-  { title: 'Meals', icon: <UtensilsCrossed className="w-4 h-4 sm:w-5 sm:h-5" /> },
-  { title: 'Review', icon: <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" /> },
+  { title: 'Goal', icon: <Target className="w-4 h-4" /> },
+  { title: 'Calories', icon: <Flame className="w-4 h-4" /> },
+  { title: 'Diet', icon: <UtensilsCrossed className="w-4 h-4" /> },
+  { title: 'Restrict', icon: <ShieldAlert className="w-4 h-4" /> },
+  { title: 'Meals', icon: <Clock className="w-4 h-4" /> },
+  { title: 'Cuisine', icon: <Globe className="w-4 h-4" /> },
+  { title: 'Review', icon: <Sparkles className="w-4 h-4" /> },
 ];
 
 export function DietGenerator() {
-  const { profile, tdee } = useProfile();
+  const { profile, bmr, tdee } = useProfile();
   const { trackEvent } = useAnalytics();
   
-  const [currentStep, setCurrentStep] = useState(0);
-  const [goal, setGoal] = useState<DietGoal | ''>('');
-  const [dailyCalories, setDailyCalories] = useState(0);
+  const [currentStep, setCurrentStep] = useState(1);
+  const [goal, setGoal] = useState<FitnessGoal | ''>('');
+  const [calorieTarget, setCalorieTarget] = useState<string>('');
+  const [customCalories, setCustomCalories] = useState<string>('');
   const [dietType, setDietType] = useState<DietType | ''>('');
-  const [restrictions, setRestrictions] = useState<DietaryRestriction[]>([]);
-  const [mealTypes, setMealTypes] = useState<MealType[]>(['breakfast', 'lunch', 'dinner']);
-  const [regionalFocus, setRegionalFocus] = useState<RegionalFocus>('balanced');
+  const [restrictions, setRestrictions] = useState<string[]>([]);
+  const [mealsPerDay, setMealsPerDay] = useState<string>('3');
+  const [cuisine, setCuisine] = useState<CuisineType>('international');
   
-  const [generatedPlan, setGeneratedPlan] = useState<GeneratedDietPlan | null>(null);
+  const [generatedPlan, setGeneratedPlan] = useState<DietPlan | null>(null);
   const [savedPlans, setSavedPlans] = useState<SavedDietPlan[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [selectedDayIndex, setSelectedDayIndex] = useState(0);
 
   // Load saved plans from localStorage
   useEffect(() => {
@@ -56,27 +63,31 @@ export function DietGenerator() {
     localStorage.setItem('diet-planner-saved-plans', JSON.stringify(savedPlans));
   }, [savedPlans]);
 
-  // Auto-set calories from TDEE when goal changes
-  useEffect(() => {
-    if (tdee && goal && !dailyCalories) {
-      const modifiers: Record<DietGoal, number> = {
-        muscle_building: 1.1,
-        fat_loss: 0.8,
-        maintenance: 1,
-        endurance: 1.15,
-      };
-      setDailyCalories(Math.round(tdee * modifiers[goal]));
-    }
-  }, [goal, tdee, dailyCalories]);
+  // Calculate suggested calories based on goal and TDEE
+  const suggestedCalories = tdee && goal ? getSuggestedCalories(tdee, goal) : null;
+
+  // Get effective calorie target
+  const getEffectiveCalories = (): number => {
+    if (calorieTarget === 'suggested' && suggestedCalories) return suggestedCalories;
+    if (calorieTarget === 'custom') return parseInt(customCalories) || 0;
+    return parseInt(calorieTarget) || 0;
+  };
+
+  const toggleRestriction = (value: string) => {
+    setRestrictions(prev => 
+      prev.includes(value) ? prev.filter(r => r !== value) : [...prev, value]
+    );
+  };
 
   const canProceed = () => {
     switch (currentStep) {
-      case 0: return !!goal;
-      case 1: return dailyCalories >= 1200;
-      case 2: return !!dietType;
-      case 3: return true; // restrictions optional
-      case 4: return mealTypes.length >= 2;
-      case 5: return true;
+      case 1: return !!goal;
+      case 2: return getEffectiveCalories() >= 1200;
+      case 3: return !!dietType;
+      case 4: return true;
+      case 5: return !!mealsPerDay;
+      case 6: return !!cuisine;
+      case 7: return true;
       default: return false;
     }
   };
@@ -84,23 +95,36 @@ export function DietGenerator() {
   const generateDietPlan = async () => {
     setIsGenerating(true);
     try {
+      const effectiveCalories = getEffectiveCalories();
+      
       const { data, error } = await supabase.functions.invoke('generate-diet', {
-        body: { goal, dailyCalories, dietType, restrictions, mealTypes, regionalFocus, gender: profile.gender },
+        body: { 
+          goal, 
+          calorieTarget: effectiveCalories, 
+          dietType, 
+          restrictions, 
+          mealsPerDay: parseInt(mealsPerDay), 
+          cuisine, 
+          gender: profile.gender,
+          profile,
+        },
       });
       
       if (error) throw error;
       
       setGeneratedPlan({
-        goal: goal as DietGoal,
-        dailyCalories,
+        goal: goal as FitnessGoal,
+        calorieTarget: effectiveCalories,
         dietType: dietType as DietType,
         restrictions,
-        mealTypes,
-        cuisine: 'unified',
-        schedule: data.schedule,
+        mealsPerDay: parseInt(mealsPerDay),
+        cuisine,
+        profile,
+        gender: profile.gender,
+        mealPlan: data.mealPlan,
       });
       
-      trackEvent('diet_generated', { dietType, regionalFocus, mealCount: mealTypes.length });
+      trackEvent('diet_generated', { dietType, cuisine, mealsPerDay });
       toast.success('Diet plan generated!');
     } catch (err: any) {
       console.error('Generation error:', err);
@@ -134,38 +158,44 @@ export function DietGenerator() {
 
   const startNewPlan = () => {
     setGeneratedPlan(null);
-    setCurrentStep(0);
+    setCurrentStep(1);
     setGoal('');
-    setDailyCalories(0);
+    setCalorieTarget('');
+    setCustomCalories('');
     setDietType('');
     setRestrictions([]);
-    setMealTypes(['breakfast', 'lunch', 'dinner']);
-    setRegionalFocus('balanced');
+    setMealsPerDay('3');
+    setCuisine('international');
+    setSelectedDayIndex(0);
   };
 
   const renderStep = () => {
     switch (currentStep) {
-      case 0: return <StepGoal goal={goal} setGoal={setGoal} />;
-      case 1: return <StepCalories dailyCalories={dailyCalories} setDailyCalories={setDailyCalories} goal={goal} />;
-      case 2: return <StepDietType dietType={dietType} setDietType={setDietType} regionalFocus={regionalFocus} setRegionalFocus={setRegionalFocus} />;
-      case 3: return <StepRestrictions restrictions={restrictions} setRestrictions={setRestrictions} />;
-      case 4: return <StepMeals mealTypes={mealTypes} setMealTypes={setMealTypes} />;
-      case 5: return <StepReview goal={goal} dailyCalories={dailyCalories} dietType={dietType} restrictions={restrictions} mealTypes={mealTypes} regionalFocus={regionalFocus} />;
+      case 1: return <StepGoal goal={goal} setGoal={setGoal} />;
+      case 2: return <StepCalories calorieTarget={calorieTarget} setCalorieTarget={setCalorieTarget} customCalories={customCalories} setCustomCalories={setCustomCalories} goal={goal} suggestedCalories={suggestedCalories} bmr={bmr} tdee={tdee} />;
+      case 3: return <StepDietType dietType={dietType} setDietType={setDietType} />;
+      case 4: return <StepRestrictions restrictions={restrictions} toggleRestriction={toggleRestriction} />;
+      case 5: return <StepMeals mealsPerDay={mealsPerDay} setMealsPerDay={setMealsPerDay} />;
+      case 6: return <StepCuisine cuisine={cuisine} setCuisine={setCuisine} />;
+      case 7: return <StepDietReview goal={goal} calorieTarget={getEffectiveCalories()} dietType={dietType} restrictions={restrictions} mealsPerDay={mealsPerDay} cuisine={cuisine} profile={profile} bmr={bmr} tdee={tdee} />;
       default: return null;
     }
   };
 
+  // Render generated plan
   if (generatedPlan) {
+    const selectedDay = generatedPlan.mealPlan[selectedDayIndex];
+    
     return (
       <div className="space-y-4 sm:space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <h3 className="text-lg sm:text-xl font-bold">Your 7-Day Diet Plan</h3>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={startNewPlan} className="flex-1 sm:flex-none">
+            <Button variant="outline" size="sm" onClick={startNewPlan}>
               <RotateCcw className="w-4 h-4 sm:mr-1" />
               <span className="hidden sm:inline">New Plan</span>
             </Button>
-            <Button variant="outline" size="sm" onClick={savePlan} className="flex-1 sm:flex-none">
+            <Button variant="outline" size="sm" onClick={savePlan}>
               <Save className="w-4 h-4 sm:mr-1" />
               <span className="hidden sm:inline">Save</span>
             </Button>
@@ -174,44 +204,44 @@ export function DietGenerator() {
 
         <div className="flex flex-wrap gap-1 sm:gap-2 text-xs sm:text-sm">
           <Badge>{GOAL_LABELS[generatedPlan.goal]}</Badge>
-          <Badge variant="secondary">{generatedPlan.dailyCalories} kcal</Badge>
+          <Badge variant="secondary">{generatedPlan.calorieTarget} kcal</Badge>
           <Badge variant="secondary">{DIET_TYPE_LABELS[generatedPlan.dietType]}</Badge>
-          <Badge variant="secondary">{REGIONAL_FOCUS_LABELS[regionalFocus]}</Badge>
+          <Badge variant="secondary">{CUISINE_LABELS[generatedPlan.cuisine]}</Badge>
         </div>
 
-        <div className="space-y-3 sm:space-y-4">
-          {generatedPlan.schedule.map((day: DietDay, idx: number) => (
-            <Card key={idx}>
-              <CardHeader className="pb-2 px-3 sm:px-6 py-3 sm:py-4">
-                <CardTitle className="text-base sm:text-lg flex justify-between">
-                  <span>{day.day}</span>
-                  <span className="text-xs sm:text-sm font-normal text-muted-foreground">{day.totalCalories} kcal</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2 sm:space-y-3 px-3 sm:px-6">
-                {day.meals.map((meal, mIdx) => (
-                  <div key={mIdx} className="p-2 sm:p-3 bg-muted/50 rounded-lg">
-                    <div className="flex justify-between items-start mb-1">
-                      <span className="font-medium text-xs sm:text-sm">{MEAL_TYPE_LABELS[meal.mealType as MealType] || meal.mealType}</span>
-                      <span className="text-xs text-muted-foreground">{meal.calories} kcal</span>
-                    </div>
-                    <p className="text-xs sm:text-sm font-medium text-primary">{meal.name}</p>
-                    <p className="text-xs text-muted-foreground line-clamp-2">{meal.foods.join(', ')}</p>
-                    <div className="flex gap-2 sm:gap-3 mt-1 text-xs">
-                      <span>P: {meal.protein}g</span>
-                      <span>C: {meal.carbs}g</span>
-                      <span>F: {meal.fats}g</span>
-                    </div>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        {/* Day Selector */}
+        <Tabs value={selectedDayIndex.toString()} onValueChange={(v) => setSelectedDayIndex(parseInt(v))}>
+          <TabsList className="w-full justify-start overflow-x-auto">
+            {generatedPlan.mealPlan.map((day, idx) => (
+              <TabsTrigger key={idx} value={idx.toString()} className="text-xs sm:text-sm">
+                Day {idx + 1}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
+
+        {selectedDay && (
+          <div className="space-y-4">
+            <NutritionSummary 
+              calories={selectedDay.totalCalories}
+              targetCalories={generatedPlan.calorieTarget}
+              protein={selectedDay.totalProtein}
+              carbs={selectedDay.totalCarbs}
+              fat={selectedDay.totalFat}
+            />
+            
+            <div className="space-y-3">
+              {selectedDay.meals.map((meal, idx) => (
+                <MealCard key={idx} meal={meal} />
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     );
   }
 
+  // Render wizard
   return (
     <div className="space-y-4 sm:space-y-6">
       {savedPlans.length > 0 && (
@@ -235,18 +265,18 @@ export function DietGenerator() {
         </Card>
       )}
 
-      <WizardProgress currentStep={currentStep + 1} totalSteps={wizardSteps.length} steps={wizardSteps} />
+      <DietWizardProgress currentStep={currentStep} totalSteps={wizardSteps.length} steps={wizardSteps} />
 
       <Card>
         <CardContent className="pt-4 sm:pt-6 px-3 sm:px-6">{renderStep()}</CardContent>
       </Card>
 
       <div className="flex justify-between gap-2">
-        <Button variant="outline" onClick={() => setCurrentStep(s => s - 1)} disabled={currentStep === 0} className="flex-1 sm:flex-none">
+        <Button variant="outline" onClick={() => setCurrentStep(s => s - 1)} disabled={currentStep === 1} className="flex-1 sm:flex-none">
           <ChevronLeft className="w-4 h-4 sm:mr-1" />
           <span className="hidden sm:inline">Back</span>
         </Button>
-        {currentStep < 5 ? (
+        {currentStep < 7 ? (
           <Button onClick={() => setCurrentStep(s => s + 1)} disabled={!canProceed()} className="flex-1 sm:flex-none">
             <span className="hidden sm:inline">Next</span>
             <ChevronRight className="w-4 h-4 sm:ml-1" />
