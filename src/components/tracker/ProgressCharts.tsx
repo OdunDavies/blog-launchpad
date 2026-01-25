@@ -14,13 +14,12 @@ import {
   CartesianGrid,
   BarChart,
   Bar,
-  ResponsiveContainer,
 } from 'recharts';
-import { WorkoutSession, calculateSessionVolume } from '@/types/workout-tracker';
+import { WorkoutLog, calculateLogVolume } from '@/types/workout-tracker';
 import { TrendingUp, BarChart3 } from 'lucide-react';
 
 interface ProgressChartsProps {
-  sessions: WorkoutSession[];
+  logs: WorkoutLog[];
 }
 
 const chartConfig = {
@@ -34,18 +33,18 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export function ProgressCharts({ sessions }: ProgressChartsProps) {
+export function ProgressCharts({ logs }: ProgressChartsProps) {
   const volumeData = useMemo(() => {
-    return sessions
-      .slice(0, 14) // Last 14 workouts
+    return logs
+      .slice(0, 14)
       .reverse()
-      .map((session, index) => ({
+      .map((log, index) => ({
         workout: `W${index + 1}`,
-        date: new Date(session.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-        volume: Math.round(calculateSessionVolume(session) / 1000), // in thousands
-        duration: session.duration || 0,
+        date: new Date(log.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        volume: Math.round(calculateLogVolume(log) / 1000),
+        duration: log.duration || 0,
       }));
-  }, [sessions]);
+  }, [logs]);
 
   const weeklyData = useMemo(() => {
     const now = new Date();
@@ -57,22 +56,22 @@ export function ProgressCharts({ sessions }: ProgressChartsProps) {
       const weekEnd = new Date(weekStart);
       weekEnd.setDate(weekEnd.getDate() + 6);
       
-      const weekSessions = sessions.filter(s => {
-        const sessionDate = new Date(s.date);
-        return sessionDate >= weekStart && sessionDate <= weekEnd;
+      const weekLogs = logs.filter(l => {
+        const logDate = new Date(l.date);
+        return logDate >= weekStart && logDate <= weekEnd;
       });
       
       weeks.push({
         week: `Week ${4 - i}`,
-        workouts: weekSessions.length,
-        volume: Math.round(weekSessions.reduce((sum, s) => sum + calculateSessionVolume(s), 0) / 1000),
+        workouts: weekLogs.length,
+        volume: Math.round(weekLogs.reduce((sum, l) => sum + calculateLogVolume(l), 0) / 1000),
       });
     }
     
     return weeks;
-  }, [sessions]);
+  }, [logs]);
 
-  if (sessions.length < 2) {
+  if (logs.length < 2) {
     return (
       <Card>
         <CardContent className="py-12 text-center">
