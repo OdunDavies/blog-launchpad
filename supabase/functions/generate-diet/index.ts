@@ -349,15 +349,54 @@ DINNER (25-35% of daily calories):
 - Can be heavier if eating before 8pm
 - Examples: Grilled Steak + Sweet Potato + Asparagus, Eba + Egusi + Assorted Meat, Salmon + Brown Rice + Roasted Vegetables
 
+=== NIGERIAN MEAL PAIRING RULES (CRITICAL - MUST FOLLOW) ===
+
+SWALLOW + SOUP COMBINATIONS (LUNCH/DINNER ONLY - NEVER BREAKFAST):
+- Swallows: Eba, Pounded Yam, Amala, Fufu, Tuwo Shinkafa, Starch
+- Pair ONLY with Nigerian soups: Egusi, Ogbono, Efo Riro, Afang, Edikang Ikong, Oha, Banga, Nsala
+- The soup IS the protein/vegetable component - do NOT add extra protein when using soup
+- NEVER serve swallow+soup for breakfast - this is WRONG
+
+BOILED YAM PAIRINGS (IMPORTANT):
+- GOOD pairings: Egg sauce, Fried eggs, Fish stew (tomato-based), Pepper sauce, Palm oil sauce
+- BAD pairings: Ogbono soup, Egusi soup, Okra soup, Efo Riro (these NEED swallows like Eba/Pounded Yam)
+- Boiled Yam + Ogbono is CULTURALLY INCORRECT - NEVER do this
+
+FRIED PLANTAIN (DODO) PAIRINGS:
+- Good: Jollof rice, Fried rice, Beans, Scrambled eggs, Stew, as side dish
+- Can also be standalone snack
+
+RICE PAIRINGS:
+- Jollof Rice → With: Grilled/fried chicken, Fish, Plantain, Salad, Coleslaw
+- Fried Rice → With: Chicken, Beef, Shrimp, Plantain
+- White Rice → With: Stews (tomato, chicken, beef), Beans
+- Rice dishes are for LUNCH/DINNER only, not breakfast
+
+BREAKFAST APPROPRIATE (Nigerian):
+- Akara + Pap (Ogi) + fruit
+- Moi Moi + Custard or Pap
+- Bread + Eggs (scrambled, fried, omelette)
+- Bread + Beans
+- Yam + Egg sauce or Fried eggs (NOT with draw soups!)
+- Tea + Bread/Toast
+- Oatmeal + Banana + Eggs
+
+BREAKFAST INAPPROPRIATE (NEVER USE FOR BREAKFAST):
+- Swallow + Soup (too heavy, culturally wrong time)
+- Jollof Rice, Fried Rice (lunch/dinner foods)
+- Pepper Soup (evening food)
+- Boiled Yam + Ogbono/Egusi/Efo Riro (WRONG pairing)
+
 === SNACK CONSTRAINTS (VERY IMPORTANT) ===
 1. Maximum 3 items per snack - NEVER MORE
 2. Each day MUST have at least 1 fruit-based snack
-3. Snacks should NOT include heavy main-meal foods like rice, pasta, eba, pounded yam
+3. Snacks should NOT include heavy main-meal foods like rice, pasta, eba, pounded yam, soups
 4. Keep snacks simple and portable
 5. Include fruits: Banana, Apple, Orange, Mango, Pawpaw, Watermelon, Berries
 6. Nigerian snack options: Kulikuli, Tiger Nuts, Roasted Groundnuts, Boiled Corn, Coconut Chunks
+7. Snacks are NEVER swallow + soup combinations - those are main meals only
 
-DIETARY RESTRICTIONS TO AVOID: ${restrictions.length > 0 ? restrictions.join(', ') : 'None'}
+DIETARY RESTRICTIONS TO AVOID: \${restrictions.length > 0 ? restrictions.join(', ') : 'None'}
 
 DIET TYPE: ${dietType}
 ${dietType === 'low-carb' ? '- Keep carbs under 100g/day. Focus on proteins and healthy fats.' : ''}
