@@ -1,182 +1,282 @@
 
-# Unified Cuisine Food Database Plan
+# Workout Tracker Redesign Plan
 
-## Problem Summary
-Currently, the Diet Generator has 3 separate cuisine options (International, Nigerian, West African) that are mutually exclusive. Users must choose one, limiting meal variety. The goal is to combine all food databases into a single unified approach that intelligently draws from both International and Nigerian/West African foods to create the best, most varied meal plans.
-
----
-
-## Solution Overview
-
-Instead of asking users to choose a cuisine, we will:
-1. **Remove the Cuisine step** from the wizard (reducing from 7 steps to 6)
-2. **Create a unified food database** that includes International AND Nigerian/West African foods
-3. **Add an optional "Regional Preference" toggle** to let users indicate if they want a heavier focus on Nigerian/African foods vs balanced global mix
+## Overview
+Replace the current workout tracker implementation with the enhanced version from the reference repository. The new version includes significant improvements in UX, feature set, and code architecture.
 
 ---
 
-## Phase 1: Remove Cuisine Step from Wizard
+## Key Improvements from Reference Implementation
 
-### Task 1.1: Update Wizard Steps
-**File:** `src/components/DietGenerator.tsx`
-
-Changes:
-- Remove `StepCuisine` from imports and renderStep()
-- Change wizardSteps from 7 to 6 steps
-- Remove cuisine state and setCuisine
-- Update step indices in `canProceed()` and `renderStep()`
-- Send `cuisine: 'unified'` to the edge function
-
-### Task 1.2: Update Type Definitions
-**File:** `src/types/diet.ts`
-
-Changes:
-- Change `CuisinePreference` type to just `'unified'`
-- Update `CUISINE_LABELS` to reflect unified approach
-- Keep backward compatibility for saved plans
+| Feature | Current | Reference |
+|---------|---------|-----------|
+| Workout Summary | Basic notes input | Full modal with mood, stats, PR celebration |
+| Set Completion | No completion toggle | Checkbox per set to mark complete |
+| Warmup Sets | Basic toggle | Dedicated warmup button with Flame icon |
+| Exercise Logger | Inline in ActiveWorkout | Separate reusable component |
+| Set Row | Table-based | Card-based with visual feedback |
+| Weight Unit | Hardcoded kg | User-selectable kg/lbs with persistence |
+| Exercise History | Minimal | Shows "previous best" per exercise |
+| PR Detection | After workout | Real-time during workout |
+| Day Streak | Not tracked | Calculated and displayed |
+| Start Modal | Tab-based | Step-based wizard navigation |
 
 ---
 
-## Phase 2: Create Unified Food Database in Edge Function
+## Phase 1: Update Type Definitions
 
-### Task 2.1: Merge Food Databases
-**File:** `supabase/functions/generate-diet/index.ts`
+### Task 1.1: Rewrite `src/types/workout-tracker.ts`
 
-Create a comprehensive unified database that includes:
-
-```text
-GLOBAL FITNESS FOOD DATABASE:
-
-PROTEINS (International):
-- Grilled Chicken Breast, Salmon, Greek Yogurt, Eggs, Turkey, Tuna, Tofu, etc.
-
-PROTEINS (Nigerian/West African):
-- Suya, Kilishi, Stockfish, Goat Meat, Grilled Tilapia, Chicken Pepper Soup, Asun, etc.
-
-CARBOHYDRATES (International):
-- Brown Rice, Sweet Potato, Quinoa, Oatmeal, Whole Wheat Pasta, etc.
-
-CARBOHYDRATES (Nigerian/West African):
-- Ofada Rice, Jollof Rice, Pounded Yam, Moi Moi, Akara, Plantain, Fufu, etc.
-
-SOUPS & STEWS (Nigerian/West African):
-- Egusi Soup, Okra Soup, Efo Riro, Ogbono Soup, Pepper Soup, etc.
-
-VEGETABLES & GREENS (International):
-- Broccoli, Spinach, Bell Peppers, Asparagus, Mixed Salad, etc.
-
-HEALTHY FATS (Global):
-- Avocado, Olive Oil, Almonds, Roasted Groundnuts, Walnuts, etc.
-```
-
-### Task 2.2: Add Smart Prompt Instructions
-**File:** `supabase/functions/generate-diet/index.ts`
-
-Update the AI prompt to:
-- Intelligently mix foods from both databases
-- Ensure variety across the 7 days
-- Balance International and African meals throughout the week
-- Consider meal appropriateness (e.g., Suya for dinner, oatmeal for breakfast)
+Replace current types with enhanced versions:
+- Add `completed` field to `WorkoutSet`
+- Add `weightUnit` field to `WorkoutSet`
+- Add `rpe` (Rate of Perceived Exertion) optional field
+- Rename `TrackedExercise` to `LoggedExercise` for consistency
+- Rename `WorkoutSession` to `WorkoutLog` for clarity
+- Add `ActiveWorkoutState` interface for active tracking
+- Add `mood` field to completed workouts
+- Add localStorage key constants
+- Export `calculate1RM` function from hook
 
 ---
 
-## Phase 3: Add Optional Regional Preference (Enhancement)
+## Phase 2: Rewrite the Hook
 
-### Task 3.1: Add Regional Focus Toggle to StepDietType
-**File:** `src/components/diet-wizard/StepDietType.tsx`
+### Task 2.1: Rewrite `src/hooks/useWorkoutTracker.ts`
 
-Add a simple preference toggle at the bottom:
-- "Nigerian/African Focus" - Prioritize local foods
-- "Balanced Global" (default) - Even mix of cuisines
-
-This is lighter than the previous cuisine step but gives users some control.
-
-### Task 3.2: Pass Preference to Edge Function
-**File:** `src/components/DietGenerator.tsx`
-
-Add `regionalFocus: 'african' | 'balanced'` state and pass it to the edge function.
+Major changes:
+- Add `weightUnit` state with localStorage persistence
+- Use `Record<string, ExercisePR>` instead of array for faster lookups
+- Persist active workout to localStorage (survives page refresh)
+- Add `calculate1RM` export for external use
+- Real-time PR detection during set updates
+- Add `getExerciseHistory` with best set calculation
+- Add workout streak calculation logic
 
 ---
 
-## Phase 4: Update Edge Function Prompt Logic
+## Phase 3: Create New Component Files
 
-### Task 4.1: Implement Regional Focus in Prompt
-**File:** `supabase/functions/generate-diet/index.ts`
+### Task 3.1: Create `src/components/tracker/SetRow.tsx`
 
-Modify prompt based on regional focus:
-- **African Focus**: "Prioritize Nigerian and West African foods, but include some International options for variety"
-- **Balanced**: "Create a diverse mix of International and Nigerian/West African meals, alternating cuisines throughout the week"
+New component for individual set logging:
+- Grid layout with set number, weight input, reps input, completion checkbox, delete button
+- Visual feedback for warmup sets (orange background)
+- Visual feedback for completed sets (green/primary tint)
+- PR trophy icon when set is a PR
+- Weight unit display in input suffix
+- Previous best hint in placeholder
+
+### Task 3.2: Create `src/components/tracker/ExerciseLogger.tsx`
+
+New component for per-exercise logging:
+- Collapsible card with exercise name header
+- Displays completed/total sets count
+- Shows total volume lifted
+- "Previous best" display from history
+- PR badge when exercise contains a PR set
+- SetRow components for each set
+- Add Set and Add Warmup buttons
+- Delete exercise button
+
+### Task 3.3: Create `src/components/tracker/WorkoutSummary.tsx`
+
+New modal component for finishing workouts:
+- Summary stats grid (duration, total sets, volume)
+- New PRs celebration card with yellow styling
+- Mood selector with emoji icons (great, good, okay, tired, exhausted)
+- Notes textarea
+- Continue / Save & Finish buttons
+
+### Task 3.4: Rewrite `src/components/tracker/ActiveWorkout.tsx`
+
+Completely rewrite using new sub-components:
+- Use ExercisePickerModal for adding exercises
+- Use ExerciseLogger for each exercise
+- Use WorkoutSummary modal for finishing
+- Cancel confirmation AlertDialog
+- Real-time PR detection using `calculate1RM`
+- Pass exercise history to ExerciseLogger for "previous best"
+
+### Task 3.5: Rewrite `src/components/tracker/StartWorkoutModal.tsx`
+
+Replace tabs with step-based navigation:
+- Step 1: Choose - Empty, Template, or Saved Plans
+- Step 2: Template list or Saved Plans list
+- Step 3: Day selection with exercise preview
+- Back button navigation between steps
+- Workout name input on first step
+- Uses Dialog component (already mobile-optimized with Drawer)
+
+### Task 3.6: Rewrite `src/components/tracker/WorkoutStats.tsx`
+
+Enhance with:
+- Day streak calculation and display with Flame icon
+- 4-week bar chart for workout frequency
+- Personal Records card with sorted list (most recent first)
+- Responsive 2x2 or 4-column grid for stat cards
+
+### Task 3.7: Rewrite `src/components/tracker/WorkoutHistory.tsx`
+
+Enhance with:
+- Click to view full workout detail in Dialog
+- Mood emoji display
+- PR badge on cards containing PRs
+- Summary stats in detail view (exercises, sets, volume)
+- Scrollable exercise list in detail modal
+- Notes display
 
 ---
 
-## Phase 5: Clean Up Unused Components
+## Phase 4: Update Main Tracker Component
 
-### Task 5.1: Delete StepCuisine Component
-**File:** `src/components/diet-wizard/StepCuisine.tsx`
+### Task 4.1: Rewrite `src/components/WorkoutTracker.tsx`
 
-Remove this file entirely as it's no longer needed.
+Update to use new hook interface:
+- Destructure `weightUnit` and `setWeightUnit` from hook
+- Add weight unit toggle in header
+- Pass all required props to child components
+- Handle new callback signatures
 
-### Task 5.2: Update StepReview
-**File:** `src/components/diet-wizard/StepReview.tsx`
+---
 
-- Remove cuisine display from review
-- Add regional preference display if applicable
+## Phase 5: File Organization
+
+### Task 5.1: Create tracker folder structure
+
+Rename `src/components/workout-tracker/` to `src/components/tracker/`:
+- SetRow.tsx (new)
+- ExerciseLogger.tsx (new)
+- WorkoutSummary.tsx (new)
+- ActiveWorkout.tsx (rewritten)
+- StartWorkoutModal.tsx (rewritten)
+- WorkoutStats.tsx (rewritten)
+- WorkoutHistory.tsx (rewritten)
+- ProgressCharts.tsx (keep, minor updates)
+
+### Task 5.2: Update imports across the app
+
+Update `src/components/WorkoutTracker.tsx` and any other files importing from `workout-tracker/` to use `tracker/`
 
 ---
 
 ## Technical Implementation Details
 
-### Files to Modify
-| File | Change |
-|------|--------|
-| `src/types/diet.ts` | Update CuisinePreference type |
-| `src/components/DietGenerator.tsx` | Remove cuisine step, add regional preference |
-| `src/components/diet-wizard/StepDietType.tsx` | Add regional focus toggle |
-| `src/components/diet-wizard/StepReview.tsx` | Update review display |
-| `supabase/functions/generate-diet/index.ts` | Unified food database + smart prompts |
-
-### Files to Delete
-| File | Reason |
-|------|--------|
-| `src/components/diet-wizard/StepCuisine.tsx` | No longer needed |
-
-### New Data Flow
+### New Type Definitions
 
 ```text
-User Wizard (6 Steps):
-Goal -> Calories -> Diet Type + Regional Pref -> Restrictions -> Meals -> Review
+WorkoutSet:
+  - setNumber: number
+  - weight: number
+  - weightUnit: 'kg' | 'lbs'
+  - reps: number
+  - rpe?: number (1-10)
+  - isWarmup?: boolean
+  - isPR?: boolean
+  - completed?: boolean  // NEW
 
-Edge Function receives:
-{
-  goal, dailyCalories, dietType, restrictions, mealTypes,
-  regionalFocus: 'african' | 'balanced'  // NEW
-}
+LoggedExercise:
+  - exerciseId: string
+  - exerciseName: string
+  - sets: WorkoutSet[]
+  - notes?: string
 
-AI Uses:
-- Full unified food database (all foods)
-- Smart mixing instructions based on regionalFocus
-- Goal-specific macro calculations
+WorkoutLog:
+  - id: string
+  - date: string
+  - startTime: string
+  - endTime?: string
+  - duration?: number
+  - workoutName?: string
+  - templateId?: string
+  - exercises: LoggedExercise[]
+  - notes?: string
+  - mood?: 'great' | 'good' | 'okay' | 'tired' | 'exhausted'  // NEW
+
+ActiveWorkoutState:
+  - id: string
+  - startTime: string
+  - workoutName?: string
+  - templateId?: string
+  - exercises: LoggedExercise[]
+
+ExercisePR:
+  - exerciseId: string
+  - exerciseName: string
+  - weight: number
+  - weightUnit: 'kg' | 'lbs'
+  - reps: number
+  - estimated1RM: number
+  - date: string
+
+WeightUnit: 'kg' | 'lbs'
+```
+
+### LocalStorage Keys
+
+```text
+WORKOUT_LOGS_KEY = 'muscleatlas-workout-logs'
+ACTIVE_WORKOUT_KEY = 'muscleatlas-active-workout'
+EXERCISE_PRS_KEY = 'muscleatlas-exercise-prs'
+WEIGHT_UNIT_KEY = 'muscleatlas-weight-unit'
 ```
 
 ---
 
-## Expected Outcome
+## Migration Considerations
 
-**Before:** Users pick ONE cuisine and only get foods from that database
-**After:** Users get a rich, varied 7-day plan with:
-- Best foods from International AND Nigerian/African cuisines
-- Smart meal pairing (African dinner + International breakfast variety)
-- Optional preference to skew toward local foods if desired
-- Reduced wizard steps (6 instead of 7)
+### Data Migration
+The existing localStorage keys are different:
+- Current: `muscleatlas-workout-sessions`, `muscleatlas-personal-records`
+- New: `muscleatlas-workout-logs`, `muscleatlas-exercise-prs`
+
+Add migration logic in the hook to check for old keys and convert data format if found.
+
+### Breaking Changes
+- Exercise ID changes from generated `${timestamp}-${index}` to slug-based `exercise-name-slug`
+- PR storage changes from array to Record object
+- Set completion is now explicit (checkbox) rather than implicit
+
+---
+
+## Files to Create
+
+| File | Description |
+|------|-------------|
+| `src/components/tracker/SetRow.tsx` | Individual set input row |
+| `src/components/tracker/ExerciseLogger.tsx` | Per-exercise logging card |
+| `src/components/tracker/WorkoutSummary.tsx` | Finish workout modal |
+
+## Files to Rewrite
+
+| File | Description |
+|------|-------------|
+| `src/types/workout-tracker.ts` | Enhanced type definitions |
+| `src/hooks/useWorkoutTracker.ts` | Complete hook rewrite |
+| `src/components/tracker/ActiveWorkout.tsx` | Use new sub-components |
+| `src/components/tracker/StartWorkoutModal.tsx` | Step-based wizard |
+| `src/components/tracker/WorkoutStats.tsx` | Enhanced stats with streak |
+| `src/components/tracker/WorkoutHistory.tsx` | Enhanced with detail modal |
+
+## Files to Delete
+
+| File | Reason |
+|------|--------|
+| `src/components/workout-tracker/*` | Old folder, replaced by `tracker/` |
 
 ---
 
 ## Implementation Order
 
-1. Update types in `diet.ts`
-2. Modify `StepDietType.tsx` to add regional toggle
-3. Update `DietGenerator.tsx` to remove cuisine step
-4. Update `StepReview.tsx` to show regional preference
-5. Rewrite edge function with unified database
-6. Delete `StepCuisine.tsx`
-7. Test the complete flow
+1. Update type definitions (`src/types/workout-tracker.ts`)
+2. Rewrite hook (`src/hooks/useWorkoutTracker.ts`)
+3. Create SetRow component
+4. Create ExerciseLogger component
+5. Create WorkoutSummary component
+6. Rewrite ActiveWorkout using new components
+7. Rewrite StartWorkoutModal
+8. Rewrite WorkoutStats
+9. Rewrite WorkoutHistory
+10. Update WorkoutTracker main component
+11. Rename folder and update imports
+12. Delete old files
