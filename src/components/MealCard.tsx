@@ -85,7 +85,7 @@ export function MealCard({ meal, isEditing = false, onRemoveFood, onRemoveMeal, 
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-muted-foreground whitespace-nowrap">
-                    {food.calories} cal
+                    {food.calories} cal | {food.protein}g protein
                   </span>
                   {isEditing && onRemoveFood && (
                     <Button
