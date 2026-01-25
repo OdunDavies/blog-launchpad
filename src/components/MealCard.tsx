@@ -1,13 +1,14 @@
 import { Meal, Food } from '@/types/diet';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Clock, Flame, X } from 'lucide-react';
+import { Clock, Flame, X, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface MealCardProps {
   meal: Meal;
   isEditing?: boolean;
   onRemoveFood?: (foodIndex: number) => void;
+  onRemoveMeal?: () => void;
 }
 
 // Calculate total macros for a meal
@@ -23,14 +24,26 @@ function getMealTotals(foods: Food[]) {
   );
 }
 
-export function MealCard({ meal, isEditing = false, onRemoveFood }: MealCardProps) {
+export function MealCard({ meal, isEditing = false, onRemoveFood, onRemoveMeal }: MealCardProps) {
   const totals = getMealTotals(meal.foods);
 
   return (
-    <Card>
+    <Card className={isEditing ? 'border-primary/50 bg-primary/5' : ''}>
       <CardHeader className="pb-2 px-4 py-3">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-base font-semibold">{meal.name}</CardTitle>
+          <div className="flex items-center gap-2">
+            <CardTitle className="text-base font-semibold">{meal.name}</CardTitle>
+            {isEditing && onRemoveMeal && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6 text-destructive hover:text-destructive hover:bg-destructive/10"
+                onClick={onRemoveMeal}
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </Button>
+            )}
+          </div>
           <div className="flex items-center gap-1 text-muted-foreground">
             <Clock className="w-3.5 h-3.5" />
             <span className="text-xs">{meal.time}</span>
@@ -56,34 +69,38 @@ export function MealCard({ meal, isEditing = false, onRemoveFood }: MealCardProp
       </CardHeader>
       
       <CardContent className="px-4 pb-4 pt-0">
-        <div className="space-y-2">
-          {meal.foods.map((food, index) => (
-            <div 
-              key={index} 
-              className="flex items-center justify-between py-2 border-b border-border/50 last:border-0"
-            >
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">{food.name}</p>
-                <p className="text-xs text-muted-foreground">{food.portion}</p>
+        {meal.foods.length === 0 ? (
+          <p className="text-sm text-muted-foreground italic py-2">No foods in this meal</p>
+        ) : (
+          <div className="space-y-2">
+            {meal.foods.map((food, index) => (
+              <div 
+                key={index} 
+                className={`flex items-center justify-between py-2 border-b border-border/50 last:border-0 ${isEditing ? 'hover:bg-muted/50 rounded px-1 -mx-1' : ''}`}
+              >
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">{food.name}</p>
+                  <p className="text-xs text-muted-foreground">{food.portion}</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-muted-foreground whitespace-nowrap">
+                    {food.calories} cal
+                  </span>
+                  {isEditing && onRemoveFood && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6 text-destructive hover:text-destructive hover:bg-destructive/10"
+                      onClick={() => onRemoveFood(index)}
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </Button>
+                  )}
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-muted-foreground whitespace-nowrap">
-                  {food.calories} cal
-                </span>
-                {isEditing && onRemoveFood && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-6 w-6"
-                    onClick={() => onRemoveFood(index)}
-                  >
-                    <X className="w-3.5 h-3.5" />
-                  </Button>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </CardContent>
     </Card>
   );
