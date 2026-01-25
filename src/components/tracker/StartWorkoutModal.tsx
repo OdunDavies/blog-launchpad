@@ -26,8 +26,11 @@ interface SavedPlan {
   id: string;
   name: string;
   goal: string;
+  splitDays: number;
+  gender: string;
+  targetMuscles: string[];
   schedule: TemplateDay[];
-  createdAt: string;
+  savedAt: string;
 }
 
 type Step = 'choose' | 'templates' | 'ai-plans' | 'day-select';
@@ -43,7 +46,7 @@ export function StartWorkoutModal({ open, onOpenChange, onStart }: StartWorkoutM
   // Load saved AI plans
   useEffect(() => {
     if (open) {
-      const saved = localStorage.getItem('muscleatlas-saved-plans');
+      const saved = localStorage.getItem('workout-planner-saved-plans');
       if (saved) {
         try {
           setSavedPlans(JSON.parse(saved));
@@ -245,7 +248,7 @@ export function StartWorkoutModal({ open, onOpenChange, onStart }: StartWorkoutM
                     <Badge variant="secondary">{plan.schedule.length} days</Badge>
                   </div>
                   <p className="text-xs text-muted-foreground mt-2">
-                    Created {new Date(plan.createdAt).toLocaleDateString()}
+                    Saved {new Date(plan.savedAt).toLocaleDateString()}
                   </p>
                 </CardContent>
               </Card>
