@@ -12,9 +12,9 @@ serve(async (req) => {
   }
 
   try {
-    const { goal, dailyCalories, dietType, restrictions, mealTypes, regionalFocus, gender } = await req.json();
+    const { calorieTarget, dietType, restrictions, mealsPerDay, goal, profile, cuisine } = await req.json();
 
-    console.log("Generating diet plan with:", { goal, dailyCalories, dietType, restrictions, mealTypes, regionalFocus, gender });
+    console.log("Generating diet plan with:", { calorieTarget, dietType, restrictions, mealsPerDay, goal, cuisine });
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
@@ -111,38 +111,56 @@ UNIFIED GLOBAL FITNESS FOOD DATABASE:
 - Green Smoothie: 100 cal/cup, 2g protein, 22g carbs, 0.5g fat
 `;
 
-    // Determine mixing instructions based on regional focus
-    const mixingInstructions = regionalFocus === 'african' 
-      ? `
-CUISINE MIXING PRIORITY: AFRICAN FOCUS
-- Prioritize Nigerian and West African foods (~70% of meals)
-- Include some International options for breakfast variety and snacks (~30%)
-- Every dinner should feature African dishes (soups with swallows, Jollof, Suya, etc.)
-- Breakfasts can alternate between African (Akara, Moi Moi) and International (Oatmeal, Eggs)
-- Lunches should be primarily African-inspired
-- Use African protein sources: Suya, Kilishi, Stockfish, Goat Meat, Grilled Fish
-`
-      : `
-CUISINE MIXING PRIORITY: BALANCED GLOBAL MIX
+    // Map cuisine to mixing instructions
+    const cuisineInstructions = {
+      'nigerian': `
+CUISINE PRIORITY: NIGERIAN FOCUS
+- Use primarily Nigerian foods (~80% of meals)
+- Feature Nigerian proteins: Suya, Kilishi, Stockfish, Goat Meat, Grilled Fish
+- Use Nigerian carbs: Ofada Rice, Jollof Rice, Pounded Yam, Eba, Amala, Plantain
+- Include Nigerian soups: Egusi, Okra, Efo Riro, Ogbono, Pepper Soup
+- Snacks: Akara, Moi Moi, Zobo, Kunu
+`,
+      'west-african': `
+CUISINE PRIORITY: WEST AFRICAN FOCUS
+- Use primarily West African foods (~75% of meals)
+- Feature proteins: Suya, Grilled Fish, Goat Meat, Chicken Pepper Soup
+- Include variety of swallows and soups
+- Mix Nigerian with other West African variations
+- Include traditional snacks and beverages
+`,
+      'international': `
+CUISINE PRIORITY: INTERNATIONAL MIX
 - Create a diverse 50/50 mix of International and African cuisines
 - Alternate cuisine styles across meals and days for maximum variety
-- Day 1: African dinner, International breakfast
-- Day 2: International dinner, African lunch
 - Mix proteins creatively: Salmon one day, Suya the next
 - Pair International carbs (Quinoa, Brown Rice) with African proteins and vice versa
 - Include both Western salads and African soups for vegetables
 - Ensure each day has at least one meal from each cuisine tradition
-`;
+`
+    };
 
-    // Macro distribution based on goal
+    const mixingInstructions = cuisineInstructions[cuisine as keyof typeof cuisineInstructions] || cuisineInstructions.international;
+
+    // Map goal to macro distribution
     const macroDistribution = {
-      muscle_building: { protein: 30, carbs: 40, fats: 30 },
-      fat_loss: { protein: 35, carbs: 30, fats: 35 },
-      maintenance: { protein: 25, carbs: 45, fats: 30 },
-      endurance: { protein: 20, carbs: 55, fats: 25 },
+      'muscle-gain': { protein: 30, carbs: 45, fats: 25 },
+      'fat-loss': { protein: 35, carbs: 30, fats: 35 },
+      'maintenance': { protein: 25, carbs: 45, fats: 30 },
+      'recomposition': { protein: 35, carbs: 35, fats: 30 },
     };
 
     const macros = macroDistribution[goal as keyof typeof macroDistribution] || macroDistribution.maintenance;
+
+    // Generate meal times based on mealsPerDay
+    const mealSchedules: Record<number, string[]> = {
+      3: ['Breakfast (7:00 AM)', 'Lunch (12:30 PM)', 'Dinner (7:00 PM)'],
+      4: ['Breakfast (7:00 AM)', 'Lunch (12:30 PM)', 'Snack (4:00 PM)', 'Dinner (7:30 PM)'],
+      5: ['Breakfast (7:00 AM)', 'Mid-Morning Snack (10:00 AM)', 'Lunch (1:00 PM)', 'Afternoon Snack (4:00 PM)', 'Dinner (7:30 PM)'],
+      6: ['Breakfast (6:30 AM)', 'Mid-Morning Snack (9:30 AM)', 'Lunch (12:30 PM)', 'Afternoon Snack (3:30 PM)', 'Dinner (6:30 PM)', 'Evening Snack (9:00 PM)'],
+    };
+
+    const mealTimes = mealSchedules[mealsPerDay] || mealSchedules[3];
 
     const systemPrompt = `You are an expert nutritionist creating personalized meal plans. You have access to a UNIFIED food database containing both International AND Nigerian/West African foods. Create varied, culturally diverse meal plans.
 
@@ -151,29 +169,28 @@ ${unifiedFoodDatabase}
 ${mixingInstructions}
 
 MACRO TARGETS FOR THIS PLAN:
-- Daily Calories: ${dailyCalories} kcal
-- Protein: ${macros.protein}% (${Math.round((dailyCalories * macros.protein / 100) / 4)}g)
-- Carbohydrates: ${macros.carbs}% (${Math.round((dailyCalories * macros.carbs / 100) / 4)}g)
-- Fats: ${macros.fats}% (${Math.round((dailyCalories * macros.fats / 100) / 9)}g)
+- Daily Calories: ${calorieTarget} kcal
+- Protein: ${macros.protein}% (${Math.round((calorieTarget * macros.protein / 100) / 4)}g)
+- Carbohydrates: ${macros.carbs}% (${Math.round((calorieTarget * macros.carbs / 100) / 4)}g)
+- Fats: ${macros.fats}% (${Math.round((calorieTarget * macros.fats / 100) / 9)}g)
+
+MEALS PER DAY: ${mealsPerDay}
+MEAL TIMES: ${mealTimes.join(', ')}
 
 MEAL DISTRIBUTION RULES:
-- Breakfast: 15-20% of daily calories (energizing, lighter meals)
-- Morning/Afternoon Snacks: 150-300 calories each (portable, quick)
-- Lunch: 25-30% of daily calories (substantial, balanced)
-- Dinner: 25-30% of daily calories (substantial, satisfying)
-- Pre-Workout: 200-400 calories (easily digestible carbs + moderate protein)
-- Post-Workout: 300-500 calories (high protein + fast carbs for recovery)
+- Distribute calories evenly across ${mealsPerDay} meals
+- Main meals (Breakfast, Lunch, Dinner) should be larger
+- Snacks should be 150-300 calories each
 
 DIETARY RESTRICTIONS TO AVOID: ${restrictions.length > 0 ? restrictions.join(', ') : 'None'}
 
 DIET TYPE: ${dietType}
-${dietType === 'keto' ? '- Keep carbs under 20-50g per day total. Focus on proteins and healthy fats from both cuisines.' : ''}
-${dietType === 'high_protein' ? '- Prioritize protein-rich foods: Suya, Kilishi, Chicken, Fish, Eggs, Greek Yogurt' : ''}
-${dietType === 'vegetarian' ? '- No meat or fish. Use: Moi Moi, Akara, Eggs, Tofu, Greek Yogurt, Beans, Egusi (for vegetarians)' : ''}
-${dietType === 'vegan' ? '- No animal products. Use: Moi Moi, Akara, Tofu, Tempeh, Beans, Plantain, Vegetables' : ''}
-${dietType === 'low_carb' ? '- Keep carbs moderate. Focus on proteins and non-starchy vegetables from both cuisines' : ''}
-
-MEAL TYPES TO INCLUDE: ${mealTypes.join(', ')}
+${dietType === 'low-carb' ? '- Keep carbs moderate (under 100g/day). Focus on proteins and healthy fats.' : ''}
+${dietType === 'high-protein' ? '- Prioritize protein-rich foods in every meal: meat, fish, eggs, dairy, legumes' : ''}
+${dietType === 'vegetarian' ? '- No meat or fish. Use: Eggs, Tofu, Greek Yogurt, Beans, Moi Moi, Akara, Cheese' : ''}
+${dietType === 'vegan' ? '- No animal products. Use: Tofu, Tempeh, Beans, Moi Moi, Akara, Plantain, Vegetables' : ''}
+${dietType === 'mediterranean' ? '- Focus on olive oil, fish, whole grains, vegetables, legumes, nuts' : ''}
+${dietType === 'balanced' ? '- Balanced mix of proteins, carbs, and fats from whole food sources' : ''}
 
 VARIETY REQUIREMENTS:
 - Each day must have different main dishes
@@ -181,17 +198,17 @@ VARIETY REQUIREMENTS:
 - Mix cooking styles: grilled, stewed, boiled, baked
 - Include a variety of proteins, carbs, and vegetables across the week
 
-Create a 7-day meal plan using foods from the unified database. Each meal must have realistic portion sizes and accurate nutritional information.`;
+Create a 7-day meal plan. Each food item must include its portion size and individual macros.`;
 
-    const userPrompt = `Create a personalized 7-day meal plan for a ${gender || 'person'} with a ${goal.replace('_', ' ')} goal.
+    const userPrompt = `Create a personalized 7-day meal plan for a ${profile?.gender || 'person'} with a ${goal.replace('-', ' ')} goal.
 
-Regional preference: ${regionalFocus === 'african' ? 'Prioritize Nigerian/African foods' : 'Balanced mix of International and African foods'}
-Daily target: ${dailyCalories} calories
+Cuisine preference: ${cuisine === 'nigerian' ? 'Nigerian foods' : cuisine === 'west-african' ? 'West African foods' : 'International mix'}
+Daily target: ${calorieTarget} calories
 Diet approach: ${dietType}
-Include these meals each day: ${mealTypes.join(', ')}
+Meals per day: ${mealsPerDay}
 ${restrictions.length > 0 ? `Avoid: ${restrictions.join(', ')}` : ''}
 
-Generate varied, delicious meals that hit the macro targets while being practical to prepare. Mix cuisines intelligently based on the regional preference.`;
+Generate varied, delicious meals that hit the macro targets. Each meal should list individual food items with their portions and nutrition info.`;
 
     console.log("Calling Lovable AI Gateway...");
 
@@ -216,7 +233,7 @@ Generate varied, delicious meals that hit the macro targets while being practica
               parameters: {
                 type: "object",
                 properties: {
-                  schedule: {
+                  mealPlan: {
                     type: "array",
                     description: "Array of 7 day plans",
                     items: {
@@ -238,42 +255,67 @@ Generate varied, delicious meals that hit the macro targets while being practica
                           type: "number",
                           description: "Total carbs in grams",
                         },
-                        totalFats: {
+                        totalFat: {
                           type: "number",
-                          description: "Total fats in grams",
+                          description: "Total fat in grams",
                         },
                         meals: {
                           type: "array",
                           items: {
                             type: "object",
                             properties: {
-                              mealType: {
-                                type: "string",
-                                description: "Type of meal",
-                              },
                               name: {
                                 type: "string",
-                                description: "Descriptive name of the meal",
+                                description: "Name of the meal (e.g., 'Breakfast', 'Lunch')",
+                              },
+                              time: {
+                                type: "string",
+                                description: "Time of the meal (e.g., '7:00 AM')",
                               },
                               foods: {
                                 type: "array",
-                                items: { type: "string" },
-                                description: "List of foods with portions",
+                                items: {
+                                  type: "object",
+                                  properties: {
+                                    name: {
+                                      type: "string",
+                                      description: "Name of the food item",
+                                    },
+                                    portion: {
+                                      type: "string",
+                                      description: "Portion size (e.g., '100g', '1 cup', '2 pieces')",
+                                    },
+                                    calories: {
+                                      type: "number",
+                                      description: "Calories for this portion",
+                                    },
+                                    protein: {
+                                      type: "number",
+                                      description: "Protein in grams",
+                                    },
+                                    carbs: {
+                                      type: "number",
+                                      description: "Carbs in grams",
+                                    },
+                                    fat: {
+                                      type: "number",
+                                      description: "Fat in grams",
+                                    },
+                                  },
+                                  required: ["name", "portion", "calories", "protein", "carbs", "fat"],
+                                },
+                                description: "List of food items in this meal",
                               },
-                              calories: { type: "number" },
-                              protein: { type: "number" },
-                              carbs: { type: "number" },
-                              fats: { type: "number" },
                             },
-                            required: ["mealType", "name", "foods", "calories", "protein", "carbs", "fats"],
+                            required: ["name", "time", "foods"],
                           },
                         },
                       },
-                      required: ["day", "totalCalories", "totalProtein", "totalCarbs", "totalFats", "meals"],
+                      required: ["day", "totalCalories", "totalProtein", "totalCarbs", "totalFat", "meals"],
                     },
                   },
                 },
-                required: ["schedule"],
+                required: ["mealPlan"],
               },
             },
           },
@@ -314,7 +356,7 @@ Generate varied, delicious meals that hit the macro targets while being practica
     }
 
     const dietPlan = JSON.parse(toolCall.function.arguments);
-    console.log("Diet plan generated successfully");
+    console.log("Diet plan generated successfully with", dietPlan.mealPlan?.length, "days");
 
     return new Response(JSON.stringify(dietPlan), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
