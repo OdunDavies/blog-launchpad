@@ -21,126 +21,242 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    // Unified food database combining International AND Nigerian/West African foods
+    // MASSIVE Unified food database - 150+ foods mixing International AND Nigerian/West African
     const unifiedFoodDatabase = `
-UNIFIED GLOBAL FITNESS FOOD DATABASE:
+MASSIVE UNIFIED GLOBAL FITNESS FOOD DATABASE (150+ items):
 
-=== PROTEINS (INTERNATIONAL) ===
-- Grilled Chicken Breast: 165 cal/100g, 31g protein, 0g carbs, 3.6g fat
-- Salmon Fillet: 208 cal/100g, 20g protein, 0g carbs, 13g fat
-- Lean Ground Beef: 176 cal/100g, 20g protein, 0g carbs, 10g fat
-- Greek Yogurt: 97 cal/100g, 9g protein, 3.6g carbs, 5g fat
-- Eggs (2 large): 143 cal, 13g protein, 1g carbs, 10g fat
-- Cottage Cheese: 98 cal/100g, 11g protein, 3.4g carbs, 4.3g fat
-- Turkey Breast: 135 cal/100g, 30g protein, 0g carbs, 1g fat
-- Tuna: 132 cal/100g, 28g protein, 0g carbs, 1g fat
-- Tofu: 76 cal/100g, 8g protein, 2g carbs, 4.5g fat
-- Tempeh: 192 cal/100g, 20g protein, 8g carbs, 11g fat
-- Shrimp: 99 cal/100g, 24g protein, 0g carbs, 0.3g fat
-- Cod: 82 cal/100g, 18g protein, 0g carbs, 0.7g fat
+=== PROTEINS - INTERNATIONAL (20 items) ===
+- Grilled Chicken Breast: 165 cal/100g, 31g P, 0g C, 3.6g F
+- Salmon Fillet: 208 cal/100g, 20g P, 0g C, 13g F
+- Turkey Breast: 135 cal/100g, 30g P, 0g C, 1g F
+- Tuna Steak: 132 cal/100g, 28g P, 0g C, 1g F
+- Shrimp: 99 cal/100g, 24g P, 0g C, 0.3g F
+- Cod Fillet: 82 cal/100g, 18g P, 0g C, 0.7g F
+- Lean Ground Beef: 176 cal/100g, 20g P, 0g C, 10g F
+- Pork Tenderloin: 143 cal/100g, 26g P, 0g C, 3.5g F
+- Lamb Chops: 250 cal/100g, 25g P, 0g C, 16g F
+- Duck Breast: 135 cal/100g, 19g P, 0g C, 6g F
+- Greek Yogurt: 97 cal/100g, 9g P, 3.6g C, 5g F
+- Cottage Cheese: 98 cal/100g, 11g P, 3.4g C, 4.3g F
+- Eggs (2 large): 143 cal, 13g P, 1g C, 10g F
+- Whey Protein Shake: 120 cal/scoop, 24g P, 3g C, 1g F
+- Tofu: 76 cal/100g, 8g P, 2g C, 4.5g F
+- Tempeh: 192 cal/100g, 20g P, 8g C, 11g F
+- Mackerel: 205 cal/100g, 19g P, 0g C, 14g F
+- Sardines: 208 cal/100g, 25g P, 0g C, 11g F
+- Halibut: 111 cal/100g, 23g P, 0g C, 2g F
+- Beef Steak (lean): 271 cal/100g, 26g P, 0g C, 18g F
 
-=== PROTEINS (NIGERIAN/WEST AFRICAN) ===
-- Suya (spiced grilled beef): 250 cal/100g, 25g protein, 5g carbs, 15g fat
-- Kilishi (dried spiced beef): 300 cal/100g, 35g protein, 8g carbs, 14g fat
-- Stockfish (dried cod): 290 cal/100g, 62g protein, 0g carbs, 2.5g fat
-- Goat Meat (stewed): 143 cal/100g, 27g protein, 0g carbs, 3g fat
-- Grilled Tilapia: 128 cal/100g, 26g protein, 0g carbs, 2.5g fat
-- Dried Fish (eja kika): 320 cal/100g, 60g protein, 0g carbs, 8g fat
-- Chicken Pepper Soup: 180 cal/serving, 22g protein, 8g carbs, 6g fat
-- Nkwobi (spiced cow foot): 200 cal/serving, 18g protein, 5g carbs, 12g fat
-- Asun (spiced goat meat): 220 cal/100g, 24g protein, 3g carbs, 12g fat
-- Ponmo (cow skin): 110 cal/100g, 25g protein, 0g carbs, 0.5g fat
+=== PROTEINS - NIGERIAN/AFRICAN (20 items) ===
+- Suya (grilled spiced beef): 250 cal/100g, 25g P, 5g C, 15g F
+- Kilishi (dried beef jerky): 300 cal/100g, 35g P, 8g C, 14g F
+- Grilled Tilapia: 128 cal/100g, 26g P, 0g C, 2.5g F
+- Catfish Pepper Soup: 160 cal/serving, 24g P, 4g C, 5g F
+- Smoked Fish (Eja Sise): 290 cal/100g, 52g P, 0g C, 12g F
+- Stockfish: 290 cal/100g, 62g P, 0g C, 2.5g F
+- Dried Prawns (Crayfish): 280 cal/100g, 60g P, 2g C, 3g F
+- Goat Meat Stew: 143 cal/100g, 27g P, 0g C, 3g F
+- Asun (spiced goat): 220 cal/100g, 24g P, 3g C, 12g F
+- Chicken Pepper Soup: 180 cal/serving, 22g P, 8g C, 6g F
+- Nkwobi (spiced cow foot): 200 cal/serving, 18g P, 5g C, 12g F
+- Ponmo (cow skin): 110 cal/100g, 25g P, 0g C, 0.5g F
+- Guinea Fowl: 160 cal/100g, 28g P, 0g C, 5g F
+- Snail (Igbin): 90 cal/100g, 16g P, 2g C, 1.5g F
+- Grilled Croaker Fish: 120 cal/100g, 24g P, 0g C, 2g F
+- Smoked Turkey: 145 cal/100g, 28g P, 2g C, 3g F
+- Kpomo (soft cow skin): 100 cal/100g, 22g P, 0g C, 1g F
+- Isi Ewu (goat head): 230 cal/serving, 20g P, 4g C, 15g F
+- Grilled Mackerel (Titus): 200 cal/100g, 20g P, 0g C, 13g F
+- Dried Catfish: 310 cal/100g, 55g P, 0g C, 10g F
 
-=== CARBOHYDRATES (INTERNATIONAL) ===
-- Brown Rice: 123 cal/100g, 2.7g protein, 26g carbs, 1g fat
-- Sweet Potato: 86 cal/100g, 1.6g protein, 20g carbs, 0.1g fat
-- Quinoa: 120 cal/100g, 4.4g protein, 21g carbs, 1.9g fat
-- Oatmeal: 68 cal/100g, 2.4g protein, 12g carbs, 1.4g fat
-- Whole Wheat Pasta: 124 cal/100g, 5g protein, 25g carbs, 0.5g fat
-- White Rice: 130 cal/100g, 2.7g protein, 28g carbs, 0.3g fat
-- Bread (whole grain): 247 cal/100g, 13g protein, 41g carbs, 4g fat
-- Potatoes: 77 cal/100g, 2g protein, 17g carbs, 0.1g fat
+=== CARBOHYDRATES - INTERNATIONAL (15 items) ===
+- Brown Rice: 123 cal/100g, 2.7g P, 26g C, 1g F
+- Quinoa: 120 cal/100g, 4.4g P, 21g C, 1.9g F
+- Sweet Potato: 86 cal/100g, 1.6g P, 20g C, 0.1g F
+- Oatmeal: 68 cal/100g, 2.4g P, 12g C, 1.4g F
+- Whole Wheat Bread (2 slices): 160 cal, 8g P, 28g C, 2g F
+- Basmati Rice: 130 cal/100g, 2.7g P, 28g C, 0.3g F
+- Whole Wheat Pasta: 124 cal/100g, 5g P, 25g C, 0.5g F
+- Couscous: 112 cal/100g, 3.8g P, 23g C, 0.2g F
+- Bulgur Wheat: 83 cal/100g, 3g P, 19g C, 0.2g F
+- White Rice: 130 cal/100g, 2.7g P, 28g C, 0.3g F
+- Baked Potato: 93 cal/100g, 2.5g P, 21g C, 0.1g F
+- Corn on the Cob: 96 cal/medium, 3g P, 21g C, 1.5g F
+- Buckwheat: 92 cal/100g, 3.4g P, 20g C, 0.9g F
+- Barley: 123 cal/100g, 2.3g P, 28g C, 0.4g F
+- Millet Porridge: 119 cal/100g, 3.5g P, 23g C, 1g F
 
-=== CARBOHYDRATES (NIGERIAN/WEST AFRICAN) ===
-- Ofada Rice: 130 cal/100g, 2.5g protein, 28g carbs, 0.5g fat
-- Jollof Rice: 180 cal/100g, 4g protein, 32g carbs, 4g fat
-- Pounded Yam: 118 cal/100g, 1.5g protein, 28g carbs, 0.1g fat
-- Eba (garri): 160 cal/100g, 0.5g protein, 38g carbs, 0.5g fat
-- Amala (yam flour): 120 cal/100g, 2g protein, 28g carbs, 0.3g fat
-- Plantain (fried dodo): 150 cal/100g, 1g protein, 35g carbs, 2g fat
-- Moi Moi: 180 cal/serving, 9g protein, 18g carbs, 8g fat
-- Akara (bean cakes): 170 cal/3 pieces, 6g protein, 15g carbs, 10g fat
-- Tuwo Shinkafa: 115 cal/100g, 2g protein, 25g carbs, 0.3g fat
-- Fufu: 120 cal/100g, 1g protein, 28g carbs, 0.5g fat
+=== CARBOHYDRATES - NIGERIAN/AFRICAN (20 items) ===
+- Jollof Rice: 180 cal/100g, 4g P, 32g C, 4g F
+- Ofada Rice: 130 cal/100g, 2.5g P, 28g C, 0.5g F
+- Fried Rice: 200 cal/100g, 5g P, 30g C, 6g F
+- Pounded Yam: 118 cal/100g, 1.5g P, 28g C, 0.1g F
+- Amala: 120 cal/100g, 2g P, 28g C, 0.3g F
+- Eba (Garri): 160 cal/100g, 0.5g P, 38g C, 0.5g F
+- Fufu: 120 cal/100g, 1g P, 28g C, 0.5g F
+- Tuwo Shinkafa: 115 cal/100g, 2g P, 25g C, 0.3g F
+- Boiled Yam: 118 cal/100g, 1.5g P, 28g C, 0.1g F
+- Fried Plantain (Dodo): 150 cal/100g, 1g P, 35g C, 2g F
+- Boiled Plantain: 122 cal/100g, 1g P, 32g C, 0.4g F
+- Moi Moi: 180 cal/serving, 9g P, 18g C, 8g F
+- Akara (3 pieces): 170 cal, 6g P, 15g C, 10g F
+- Agidi/Eko: 90 cal/100g, 1g P, 20g C, 0.5g F
+- Masa (rice cakes, 3 pieces): 150 cal, 3g P, 25g C, 4g F
+- Pap/Ogi (with milk): 120 cal/cup, 4g P, 22g C, 2g F
+- Abacha (African Salad): 200 cal/serving, 3g P, 28g C, 9g F
+- Ukwa (Breadfruit): 180 cal/100g, 4g P, 35g C, 3g F
+- Roasted Corn: 140 cal/medium, 5g P, 29g C, 2g F
+- Nigerian Coconut Rice: 220 cal/100g, 4g P, 32g C, 8g F
 
-=== SOUPS & STEWS (NIGERIAN/WEST AFRICAN) ===
-- Egusi Soup: 250 cal/serving, 12g protein, 8g carbs, 20g fat
-- Okra Soup (ila alasepo): 80 cal/serving, 4g protein, 10g carbs, 3g fat
-- Efo Riro (spinach stew): 180 cal/serving, 8g protein, 6g carbs, 14g fat
-- Ogbono Soup: 200 cal/serving, 10g protein, 8g carbs, 15g fat
-- Afang Soup: 150 cal/serving, 8g protein, 5g carbs, 11g fat
-- Edikang Ikong: 160 cal/serving, 10g protein, 6g carbs, 11g fat
-- Banga Soup: 280 cal/serving, 8g protein, 10g carbs, 24g fat
-- Pepper Soup: 120 cal/serving, 15g protein, 5g carbs, 4g fat
-- Groundnut Soup: 220 cal/serving, 10g protein, 12g carbs, 16g fat
+=== FRUITS - UNIVERSAL (20 items) ===
+- Banana: 89 cal/medium, 1g P, 23g C, 0.3g F
+- Apple: 95 cal/medium, 0.5g P, 25g C, 0.3g F
+- Orange: 62 cal/medium, 1g P, 15g C, 0.2g F
+- Strawberries: 32 cal/100g, 0.7g P, 8g C, 0.3g F
+- Blueberries: 57 cal/100g, 0.7g P, 14g C, 0.3g F
+- Raspberries: 52 cal/100g, 1.2g P, 12g C, 0.7g F
+- Mango: 60 cal/100g, 0.8g P, 15g C, 0.4g F
+- Pineapple: 50 cal/100g, 0.5g P, 13g C, 0.1g F
+- Watermelon: 30 cal/100g, 0.6g P, 8g C, 0.2g F
+- Grapes: 69 cal/100g, 0.7g P, 18g C, 0.2g F
+- Kiwi: 61 cal/100g, 1g P, 15g C, 0.5g F
+- Grapefruit: 42 cal/100g, 0.8g P, 11g C, 0.1g F
+- Pear: 57 cal/medium, 0.4g P, 15g C, 0.1g F
+- Cantaloupe: 34 cal/100g, 0.8g P, 8g C, 0.2g F
+- Peach: 39 cal/medium, 0.9g P, 10g C, 0.3g F
+- Plums: 46 cal/medium, 0.7g P, 11g C, 0.3g F
+- Cherries: 63 cal/100g, 1g P, 16g C, 0.2g F
+- Apricots: 48 cal/100g, 1.4g P, 11g C, 0.4g F
+- Honeydew Melon: 36 cal/100g, 0.5g P, 9g C, 0.1g F
+- Mixed Berries: 45 cal/100g, 0.8g P, 11g C, 0.3g F
 
-=== VEGETABLES & GREENS ===
-- Broccoli: 34 cal/100g, 2.8g protein, 7g carbs, 0.4g fat
-- Spinach: 23 cal/100g, 2.9g protein, 3.6g carbs, 0.4g fat
-- Mixed Salad: 20 cal/100g, 1.5g protein, 3g carbs, 0.2g fat
-- Bell Peppers: 31 cal/100g, 1g protein, 6g carbs, 0.3g fat
-- Asparagus: 20 cal/100g, 2.2g protein, 4g carbs, 0.1g fat
-- Garden Egg (eggplant): 25 cal/100g, 1g protein, 6g carbs, 0.1g fat
-- Ugu (fluted pumpkin leaves): 30 cal/100g, 3g protein, 4g carbs, 0.5g fat
-- Water Leaf: 25 cal/100g, 2g protein, 4g carbs, 0.3g fat
+=== FRUITS - AFRICAN (10 items) ===
+- Pawpaw (Papaya): 43 cal/100g, 0.5g P, 11g C, 0.3g F
+- African Star Apple (Agbalumo): 67 cal/100g, 1g P, 16g C, 0.4g F
+- Soursop: 66 cal/100g, 1g P, 17g C, 0.3g F
+- African Pear (Ube): 150 cal/100g, 2g P, 12g C, 10g F
+- Guava: 68 cal/100g, 2.5g P, 14g C, 1g F
+- African Cherry (Agbalumo): 45 cal/100g, 0.8g P, 11g C, 0.3g F
+- Fresh Coconut: 354 cal/100g, 3g P, 15g C, 33g F
+- Tangerine: 53 cal/medium, 0.8g P, 13g C, 0.3g F
+- African Velvet Tamarind (Awin): 115 cal/100g, 2g P, 28g C, 0.5g F
+- Garden Egg (raw): 25 cal/100g, 1g P, 6g C, 0.1g F
 
-=== HEALTHY FATS ===
-- Avocado: 160 cal/100g, 2g protein, 9g carbs, 15g fat
-- Olive Oil: 884 cal/100ml, 0g protein, 0g carbs, 100g fat
-- Almonds: 579 cal/100g, 21g protein, 22g carbs, 50g fat
-- Walnuts: 654 cal/100g, 15g protein, 14g carbs, 65g fat
-- Roasted Groundnuts: 567 cal/100g, 26g protein, 16g carbs, 49g fat
-- Palm Oil (red): 884 cal/100ml, 0g protein, 0g carbs, 100g fat (use sparingly)
+=== HEALTHY SNACKS - PROTEIN-BASED (12 items) ===
+- Greek Yogurt with Berries: 120 cal, 12g P, 15g C, 2g F
+- Boiled Eggs (2): 140 cal, 12g P, 1g C, 10g F
+- Cottage Cheese with Fruit: 150 cal, 14g P, 15g C, 3g F
+- Protein Bar: 200 cal, 20g P, 20g C, 6g F
+- String Cheese (2 sticks): 160 cal, 14g P, 2g C, 10g F
+- Beef Jerky (30g): 116 cal, 10g P, 3g C, 7g F
+- Turkey Roll-Ups: 100 cal, 18g P, 2g C, 2g F
+- Hard Boiled Egg Whites (4): 68 cal, 14g P, 1g C, 0g F
+- Low-Fat Yogurt Cup: 100 cal, 8g P, 15g C, 1g F
+- Smoked Salmon Slice: 80 cal, 14g P, 0g C, 3g F
+- Chicken Breast Strip: 90 cal, 18g P, 0g C, 2g F
+- Tuna Salad (small): 120 cal, 15g P, 3g C, 5g F
 
-=== SNACKS & BEVERAGES ===
-- Zobo (hibiscus drink, unsweetened): 20 cal/cup, 0g protein, 5g carbs, 0g fat
-- Kunu (millet drink): 80 cal/cup, 2g protein, 16g carbs, 1g fat
-- Tiger Nuts: 400 cal/100g, 5g protein, 45g carbs, 24g fat
-- Chin Chin (limit - treat): 450 cal/100g, 6g protein, 55g carbs, 22g fat
-- Protein Shake: 120 cal/scoop, 24g protein, 3g carbs, 1g fat
-- Green Smoothie: 100 cal/cup, 2g protein, 22g carbs, 0.5g fat
+=== HEALTHY SNACKS - NUTS & SEEDS (10 items) ===
+- Almonds (handful/28g): 164 cal, 6g P, 6g C, 14g F
+- Cashews (handful/28g): 157 cal, 5g P, 9g C, 12g F
+- Walnuts (handful/28g): 185 cal, 4g P, 4g C, 18g F
+- Pumpkin Seeds (28g): 151 cal, 7g P, 5g C, 13g F
+- Mixed Nuts (28g): 172 cal, 5g P, 6g C, 15g F
+- Trail Mix (1/4 cup): 180 cal, 5g P, 15g C, 12g F
+- Pistachios (28g): 159 cal, 6g P, 8g C, 13g F
+- Sunflower Seeds (28g): 165 cal, 6g P, 7g C, 14g F
+- Chia Seeds (2 tbsp): 120 cal, 4g P, 10g C, 8g F
+- Flax Seeds (2 tbsp): 110 cal, 4g P, 6g C, 9g F
+
+=== HEALTHY SNACKS - FRUIT-BASED (10 items) ===
+- Apple with Peanut Butter: 200 cal, 5g P, 25g C, 10g F
+- Banana with Almond Butter: 230 cal, 5g P, 30g C, 12g F
+- Mixed Fruit Bowl: 100 cal, 1g P, 25g C, 0.5g F
+- Berry Smoothie (no sugar): 150 cal, 4g P, 28g C, 3g F
+- Frozen Grapes: 62 cal/100g, 0.6g P, 16g C, 0.3g F
+- Orange Slices: 62 cal, 1g P, 15g C, 0.2g F
+- Melon Cubes: 45 cal, 1g P, 11g C, 0.2g F
+- Fresh Pineapple Chunks: 50 cal, 0.5g P, 13g C, 0.1g F
+- Sliced Mango: 60 cal, 0.8g P, 15g C, 0.4g F
+- Fruit Salad (mixed): 80 cal, 1g P, 20g C, 0.3g F
+
+=== HEALTHY SNACKS - NIGERIAN (12 items) ===
+- Kulikuli (groundnut snack, 30g): 150 cal, 7g P, 8g C, 11g F
+- Tiger Nuts (Aya, 30g): 120 cal, 2g P, 15g C, 7g F
+- Garden Egg with Groundnut: 100 cal, 3g P, 10g C, 6g F
+- Roasted Groundnuts (30g): 170 cal, 8g P, 5g C, 14g F
+- Coconut Chunks (50g): 180 cal, 2g P, 8g C, 17g F
+- Dried Mango Slices (30g): 80 cal, 1g P, 20g C, 0g F
+- Toasted Cashews (28g): 160 cal, 5g P, 9g C, 13g F
+- Roasted Plantain Chips (30g): 160 cal, 1g P, 22g C, 8g F
+- Zobo (Hibiscus, unsweetened): 20 cal/cup, 0g P, 5g C, 0g F
+- Kunu (millet drink): 80 cal/cup, 2g P, 16g C, 1g F
+- Boiled Corn (1 cob): 90 cal, 3g P, 19g C, 1g F
+- Roasted Corn (1 cob): 120 cal, 4g P, 22g C, 2g F
+
+=== HEALTHY SNACKS - LIGHT (8 items) ===
+- Rice Cakes with Avocado: 100 cal, 2g P, 12g C, 5g F
+- Hummus with Veggies: 130 cal, 4g P, 15g C, 6g F
+- Edamame (100g): 120 cal, 11g P, 9g C, 5g F
+- Dark Chocolate 70% (30g): 170 cal, 2g P, 13g C, 12g F
+- Celery with Peanut Butter: 100 cal, 3g P, 5g C, 8g F
+- Carrot Sticks with Hummus: 100 cal, 3g P, 12g C, 5g F
+- Cucumber Slices with Tzatziki: 60 cal, 3g P, 5g C, 3g F
+- Rice Cake with Cottage Cheese: 80 cal, 6g P, 10g C, 1g F
+
+=== NIGERIAN SOUPS (12 items) ===
+- Egusi Soup: 250 cal/serving, 12g P, 8g C, 20g F
+- Okra Soup: 80 cal/serving, 4g P, 10g C, 3g F
+- Efo Riro: 180 cal/serving, 8g P, 6g C, 14g F
+- Ogbono Soup: 200 cal/serving, 10g P, 8g C, 15g F
+- Afang Soup: 150 cal/serving, 8g P, 5g C, 11g F
+- Edikang Ikong: 160 cal/serving, 10g P, 6g C, 11g F
+- Banga Soup: 280 cal/serving, 8g P, 10g C, 24g F
+- Pepper Soup (base): 120 cal/serving, 15g P, 5g C, 4g F
+- Oha Soup: 170 cal/serving, 9g P, 7g C, 13g F
+- Nsala (White Soup): 200 cal/serving, 12g P, 6g C, 15g F
+- Groundnut Soup: 220 cal/serving, 10g P, 12g C, 16g F
+- Miyan Kuka: 150 cal/serving, 7g P, 8g C, 10g F
+
+=== VEGETABLES (15 items) ===
+- Broccoli: 34 cal/100g, 2.8g P, 7g C, 0.4g F
+- Spinach: 23 cal/100g, 2.9g P, 3.6g C, 0.4g F
+- Mixed Salad: 20 cal/100g, 1.5g P, 3g C, 0.2g F
+- Ugu (Pumpkin Leaves): 30 cal/100g, 3g P, 4g C, 0.5g F
+- Water Leaf: 25 cal/100g, 2g P, 4g C, 0.3g F
+- Ewedu: 25 cal/100g, 2g P, 3g C, 0.5g F
+- Bitter Leaf: 20 cal/100g, 2g P, 3g C, 0.3g F
+- Scent Leaf: 22 cal/100g, 2g P, 3g C, 0.3g F
+- Steamed Vegetables: 50 cal/100g, 2g P, 10g C, 0.5g F
+- Roasted Vegetables: 80 cal/100g, 2g P, 12g C, 3g F
+- Cucumber: 16 cal/100g, 0.7g P, 4g C, 0.1g F
+- Carrots: 41 cal/100g, 0.9g P, 10g C, 0.2g F
+- Green Beans: 31 cal/100g, 1.8g P, 7g C, 0.1g F
+- Bell Peppers: 31 cal/100g, 1g P, 6g C, 0.3g F
+- Asparagus: 20 cal/100g, 2.2g P, 4g C, 0.1g F
 `;
 
-    // Map cuisine to mixing instructions
-    const cuisineInstructions = {
-      'nigerian': `
-CUISINE PRIORITY: NIGERIAN FOCUS
-- Use primarily Nigerian foods (~80% of meals)
-- Feature Nigerian proteins: Suya, Kilishi, Stockfish, Goat Meat, Grilled Fish
-- Use Nigerian carbs: Ofada Rice, Jollof Rice, Pounded Yam, Eba, Amala, Plantain
-- Include Nigerian soups: Egusi, Okra, Efo Riro, Ogbono, Pepper Soup
-- Snacks: Akara, Moi Moi, Zobo, Kunu
-`,
-      'west-african': `
-CUISINE PRIORITY: WEST AFRICAN FOCUS
-- Use primarily West African foods (~75% of meals)
-- Feature proteins: Suya, Grilled Fish, Goat Meat, Chicken Pepper Soup
-- Include variety of swallows and soups
-- Mix Nigerian with other West African variations
-- Include traditional snacks and beverages
-`,
-      'international': `
-CUISINE PRIORITY: INTERNATIONAL MIX
-- Create a diverse 50/50 mix of International and African cuisines
-- Alternate cuisine styles across meals and days for maximum variety
-- Mix proteins creatively: Salmon one day, Suya the next
-- Pair International carbs (Quinoa, Brown Rice) with African proteins and vice versa
-- Include both Western salads and African soups for vegetables
-- Ensure each day has at least one meal from each cuisine tradition
-`
-    };
+    // Map cuisine to mixing instructions - now always 50/50 mix
+    const mixingInstructions = `
+CUISINE MIXING RULES - CREATE DIVERSE INTERNATIONAL + NIGERIAN/AFRICAN FUSION:
+- ALWAYS create a 50/50 mix of International and Nigerian/African foods
+- Each day should have meals from BOTH cuisines
+- Alternate proteins: Salmon one meal, Suya the next
+- Mix carb sources: Quinoa with African proteins, Jollof Rice with grilled chicken
+- Include fruits in at least 2 snacks per day
+- Use Nigerian soups with international sides and vice versa
+- Create unexpected but delicious combinations
 
-    const mixingInstructions = cuisineInstructions[cuisine as keyof typeof cuisineInstructions] || cuisineInstructions.international;
+${cuisine === 'nigerian' ? 'BIAS: Slightly favor Nigerian foods (60/40 split) but STILL include international options' : ''}
+${cuisine === 'west-african' ? 'BIAS: Focus on West African foods (60/40 split) but include international variety' : ''}
+${cuisine === 'international' ? 'BALANCE: True 50/50 international and African mix for maximum diversity' : ''}
+
+VARIETY IS KEY:
+- Never repeat the same meal within 3 days
+- Use different proteins each day
+- Alternate between rice types, yam, plantain, oatmeal, quinoa
+- Mix cooking styles: grilled, stewed, boiled, roasted, steamed
+`;
 
     // Map goal to macro distribution
     const macroDistribution = {
@@ -152,17 +268,42 @@ CUISINE PRIORITY: INTERNATIONAL MIX
 
     const macros = macroDistribution[goal as keyof typeof macroDistribution] || macroDistribution.maintenance;
 
-    // Generate meal times based on mealsPerDay
-    const mealSchedules: Record<number, string[]> = {
-      3: ['Breakfast (7:00 AM)', 'Lunch (12:30 PM)', 'Dinner (7:00 PM)'],
-      4: ['Breakfast (7:00 AM)', 'Lunch (12:30 PM)', 'Snack (4:00 PM)', 'Dinner (7:30 PM)'],
-      5: ['Breakfast (7:00 AM)', 'Mid-Morning Snack (10:00 AM)', 'Lunch (1:00 PM)', 'Afternoon Snack (4:00 PM)', 'Dinner (7:30 PM)'],
-      6: ['Breakfast (6:30 AM)', 'Mid-Morning Snack (9:30 AM)', 'Lunch (12:30 PM)', 'Afternoon Snack (3:30 PM)', 'Dinner (6:30 PM)', 'Evening Snack (9:00 PM)'],
+    // Generate meal times and calorie distribution based on mealsPerDay
+    const mealConfigs: Record<number, { name: string; time: string; caloriePercent: number; type: string }[]> = {
+      3: [
+        { name: 'Breakfast', time: '7:00 AM', caloriePercent: 25, type: 'main' },
+        { name: 'Lunch', time: '12:30 PM', caloriePercent: 40, type: 'main' },
+        { name: 'Dinner', time: '7:00 PM', caloriePercent: 35, type: 'main' },
+      ],
+      4: [
+        { name: 'Breakfast', time: '7:00 AM', caloriePercent: 20, type: 'main' },
+        { name: 'Lunch', time: '12:30 PM', caloriePercent: 30, type: 'main' },
+        { name: 'Afternoon Snack', time: '4:00 PM', caloriePercent: 15, type: 'snack' },
+        { name: 'Dinner', time: '7:30 PM', caloriePercent: 35, type: 'main' },
+      ],
+      5: [
+        { name: 'Breakfast', time: '7:00 AM', caloriePercent: 18, type: 'main' },
+        { name: 'Mid-Morning Snack', time: '10:00 AM', caloriePercent: 10, type: 'snack' },
+        { name: 'Lunch', time: '1:00 PM', caloriePercent: 28, type: 'main' },
+        { name: 'Afternoon Snack', time: '4:00 PM', caloriePercent: 12, type: 'snack' },
+        { name: 'Dinner', time: '7:30 PM', caloriePercent: 32, type: 'main' },
+      ],
+      6: [
+        { name: 'Breakfast', time: '6:30 AM', caloriePercent: 15, type: 'main' },
+        { name: 'Mid-Morning Snack', time: '9:30 AM', caloriePercent: 10, type: 'snack' },
+        { name: 'Lunch', time: '12:30 PM', caloriePercent: 25, type: 'main' },
+        { name: 'Afternoon Snack', time: '3:30 PM', caloriePercent: 10, type: 'snack' },
+        { name: 'Dinner', time: '6:30 PM', caloriePercent: 30, type: 'main' },
+        { name: 'Evening Snack', time: '9:00 PM', caloriePercent: 10, type: 'snack' },
+      ],
     };
 
-    const mealTimes = mealSchedules[mealsPerDay] || mealSchedules[3];
+    const mealConfig = mealConfigs[mealsPerDay] || mealConfigs[3];
+    const mealConfigText = mealConfig.map(m => 
+      `${m.name} (${m.time}): ${m.caloriePercent}% of daily calories (~${Math.round(calorieTarget * m.caloriePercent / 100)} cal) - ${m.type.toUpperCase()}`
+    ).join('\n');
 
-    const systemPrompt = `You are an expert nutritionist creating personalized meal plans. You have access to a UNIFIED food database containing both International AND Nigerian/West African foods. Create varied, culturally diverse meal plans.
+    const systemPrompt = `You are an expert nutritionist creating personalized, culturally diverse meal plans. You have access to a MASSIVE unified food database with 150+ items mixing International AND Nigerian/West African foods.
 
 ${unifiedFoodDatabase}
 
@@ -175,40 +316,75 @@ MACRO TARGETS FOR THIS PLAN:
 - Fats: ${macros.fats}% (${Math.round((calorieTarget * macros.fats / 100) / 9)}g)
 
 MEALS PER DAY: ${mealsPerDay}
-MEAL TIMES: ${mealTimes.join(', ')}
 
-MEAL DISTRIBUTION RULES:
-- Distribute calories evenly across ${mealsPerDay} meals
-- Main meals (Breakfast, Lunch, Dinner) should be larger
-- Snacks should be 150-300 calories each
+MEAL-TIME CALORIE DISTRIBUTION (CRITICAL - FOLLOW EXACTLY):
+${mealConfigText}
+
+=== MEAL-TIME SPECIFIC RULES ===
+
+BREAKFAST (15-20% of daily calories):
+- Light, energizing, easy to digest
+- Structure: 1 protein + 1 complex carb OR fruit + optional light side
+- Good combos: Eggs + Oatmeal + Banana, Akara + Pap + Pawpaw, Toast + Scrambled Eggs + Orange
+- ALWAYS include 1 fruit
+
+SNACKS (10-15% each, 150-250 cal MAX):
+- MUST be simple: 1-3 items ONLY
+- MUST be grab-and-go portable foods
+- Morning snack: PRIORITIZE FRUITS (fruit + nuts combo)
+- Afternoon snack: Protein-focused (Greek yogurt, boiled eggs, kulikuli)
+- Evening snack (if applicable): Light protein only (cottage cheese, almonds)
+- EACH DAY must have at least 1 fruit-based snack
+- Examples: Apple + Almonds, Banana, Greek Yogurt + Berries, Kulikuli + Orange, Tiger Nuts
+
+LUNCH (25-30% of daily calories):
+- Most substantial meal of the day
+- Structure: Protein + Carb + Vegetable/Soup
+- Mix cuisines: Jollof Rice + Grilled Fish + Salad, Quinoa + Suya + Steamed Veggies
+- Include colorful vegetables
+
+DINNER (25-35% of daily calories):
+- Protein-heavy, moderate carbs
+- Structure: Larger protein portion + moderate carb + vegetables
+- Can be heavier if eating before 8pm
+- Examples: Grilled Steak + Sweet Potato + Asparagus, Eba + Egusi + Assorted Meat, Salmon + Brown Rice + Roasted Vegetables
+
+=== SNACK CONSTRAINTS (VERY IMPORTANT) ===
+1. Maximum 3 items per snack - NEVER MORE
+2. Each day MUST have at least 1 fruit-based snack
+3. Snacks should NOT include heavy main-meal foods like rice, pasta, eba, pounded yam
+4. Keep snacks simple and portable
+5. Include fruits: Banana, Apple, Orange, Mango, Pawpaw, Watermelon, Berries
+6. Nigerian snack options: Kulikuli, Tiger Nuts, Roasted Groundnuts, Boiled Corn, Coconut Chunks
 
 DIETARY RESTRICTIONS TO AVOID: ${restrictions.length > 0 ? restrictions.join(', ') : 'None'}
 
 DIET TYPE: ${dietType}
-${dietType === 'low-carb' ? '- Keep carbs moderate (under 100g/day). Focus on proteins and healthy fats.' : ''}
-${dietType === 'high-protein' ? '- Prioritize protein-rich foods in every meal: meat, fish, eggs, dairy, legumes' : ''}
-${dietType === 'vegetarian' ? '- No meat or fish. Use: Eggs, Tofu, Greek Yogurt, Beans, Moi Moi, Akara, Cheese' : ''}
-${dietType === 'vegan' ? '- No animal products. Use: Tofu, Tempeh, Beans, Moi Moi, Akara, Plantain, Vegetables' : ''}
+${dietType === 'low-carb' ? '- Keep carbs under 100g/day. Focus on proteins and healthy fats.' : ''}
+${dietType === 'high-protein' ? '- Prioritize protein in every meal: meat, fish, eggs, dairy, legumes' : ''}
+${dietType === 'vegetarian' ? '- No meat or fish. Use: Eggs, Tofu, Greek Yogurt, Beans, Moi Moi, Akara' : ''}
+${dietType === 'vegan' ? '- No animal products. Use: Tofu, Tempeh, Beans, Moi Moi, Akara, Plantain' : ''}
 ${dietType === 'mediterranean' ? '- Focus on olive oil, fish, whole grains, vegetables, legumes, nuts' : ''}
 ${dietType === 'balanced' ? '- Balanced mix of proteins, carbs, and fats from whole food sources' : ''}
-
-VARIETY REQUIREMENTS:
-- Each day must have different main dishes
-- Don't repeat the same meal on consecutive days
-- Mix cooking styles: grilled, stewed, boiled, baked
-- Include a variety of proteins, carbs, and vegetables across the week
 
 Create a 7-day meal plan. Each food item must include its portion size and individual macros.`;
 
     const userPrompt = `Create a personalized 7-day meal plan for a ${profile?.gender || 'person'} with a ${goal.replace('-', ' ')} goal.
 
-Cuisine preference: ${cuisine === 'nigerian' ? 'Nigerian foods' : cuisine === 'west-african' ? 'West African foods' : 'International mix'}
+Mix of cuisines: ${cuisine === 'nigerian' ? 'Nigerian-focused with international variety' : cuisine === 'west-african' ? 'West African-focused with international variety' : 'True 50/50 international and Nigerian/African mix'}
 Daily target: ${calorieTarget} calories
 Diet approach: ${dietType}
 Meals per day: ${mealsPerDay}
 ${restrictions.length > 0 ? `Avoid: ${restrictions.join(', ')}` : ''}
 
-Generate varied, delicious meals that hit the macro targets. Each meal should list individual food items with their portions and nutrition info.`;
+REMEMBER:
+- Breakfast should be LIGHT (15-20% calories)
+- Snacks should be SIMPLE (1-3 items, 150-250 cal max)
+- Include FRUITS in snacks (at least 1 fruit snack per day)
+- Mix Nigerian AND international foods for variety
+- Never repeat the same main dish within 3 days
+
+Generate varied, delicious meals that hit the macro targets.`;
 
     console.log("Calling Lovable AI Gateway...");
 

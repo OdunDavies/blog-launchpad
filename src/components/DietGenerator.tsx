@@ -22,7 +22,7 @@ import {
   GOAL_LABELS, DIET_TYPE_LABELS, CUISINE_LABELS,
 } from '@/types/diet';
 import { getSuggestedCalories } from '@/utils/tdeeCalculator';
-import { Target, Flame, ChevronLeft, ChevronRight, Sparkles, Save, Trash2, RotateCcw, Loader2, UtensilsCrossed, Clock, Globe, ShieldAlert } from 'lucide-react';
+import { Target, Flame, ChevronLeft, ChevronRight, Sparkles, Save, Trash2, RotateCcw, Loader2, UtensilsCrossed, Clock, Globe, ShieldAlert, Pencil, Check } from 'lucide-react';
 
 const wizardSteps = [
   { title: 'Goal', icon: <Target className="w-4 h-4" /> },
@@ -51,6 +51,7 @@ export function DietGenerator() {
   const [savedPlans, setSavedPlans] = useState<SavedDietPlan[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [selectedDayIndex, setSelectedDayIndex] = useState(0);
+  const [isEditing, setIsEditing] = useState(false);
 
   // Load saved plans from localStorage
   useEffect(() => {
@@ -90,6 +91,57 @@ export function DietGenerator() {
       case 7: return true;
       default: return false;
     }
+  };
+
+  // Remove a specific food from a meal
+  const handleRemoveFood = (dayIndex: number, mealIndex: number, foodIndex: number) => {
+    if (!generatedPlan) return;
+    
+    const updatedPlan = { ...generatedPlan };
+    const day = { ...updatedPlan.mealPlan[dayIndex] };
+    const meal = { ...day.meals[mealIndex] };
+    
+    // Get the food being removed for recalculation
+    const removedFood = meal.foods[foodIndex];
+    meal.foods = meal.foods.filter((_, i) => i !== foodIndex);
+    
+    // Recalculate day totals
+    day.totalCalories -= removedFood.calories;
+    day.totalProtein -= removedFood.protein;
+    day.totalCarbs -= removedFood.carbs;
+    day.totalFat -= removedFood.fat;
+    
+    day.meals[mealIndex] = meal;
+    updatedPlan.mealPlan[dayIndex] = day;
+    
+    setGeneratedPlan(updatedPlan);
+    toast.success(`Removed ${removedFood.name}`);
+  };
+
+  // Remove entire meal
+  const handleRemoveMeal = (dayIndex: number, mealIndex: number) => {
+    if (!generatedPlan) return;
+    
+    const updatedPlan = { ...generatedPlan };
+    const day = { ...updatedPlan.mealPlan[dayIndex] };
+    const removedMeal = day.meals[mealIndex];
+    
+    // Subtract meal totals from day
+    const mealCals = removedMeal.foods.reduce((s, f) => s + f.calories, 0);
+    const mealProtein = removedMeal.foods.reduce((s, f) => s + f.protein, 0);
+    const mealCarbs = removedMeal.foods.reduce((s, f) => s + f.carbs, 0);
+    const mealFat = removedMeal.foods.reduce((s, f) => s + f.fat, 0);
+    
+    day.totalCalories -= mealCals;
+    day.totalProtein -= mealProtein;
+    day.totalCarbs -= mealCarbs;
+    day.totalFat -= mealFat;
+    
+    day.meals = day.meals.filter((_, i) => i !== mealIndex);
+    updatedPlan.mealPlan[dayIndex] = day;
+    
+    setGeneratedPlan(updatedPlan);
+    toast.success(`Removed ${removedMeal.name}`);
   };
 
   const generateDietPlan = async () => {
@@ -167,6 +219,7 @@ export function DietGenerator() {
     setMealsPerDay('3');
     setCuisine('international');
     setSelectedDayIndex(0);
+    setIsEditing(false);
   };
 
   const renderStep = () => {
@@ -185,12 +238,30 @@ export function DietGenerator() {
   // Render generated plan
   if (generatedPlan) {
     const selectedDay = generatedPlan.mealPlan[selectedDayIndex];
+    const calorieDeficit = generatedPlan.calorieTarget - (selectedDay?.totalCalories || 0);
     
     return (
       <div className="space-y-4 sm:space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <h3 className="text-lg sm:text-xl font-bold">Your 7-Day Diet Plan</h3>
           <div className="flex gap-2">
+            <Button 
+              variant={isEditing ? "default" : "outline"} 
+              size="sm" 
+              onClick={() => setIsEditing(!isEditing)}
+            >
+              {isEditing ? (
+                <>
+                  <Check className="w-4 h-4 sm:mr-1" />
+                  <span className="hidden sm:inline">Done</span>
+                </>
+              ) : (
+                <>
+                  <Pencil className="w-4 h-4 sm:mr-1" />
+                  <span className="hidden sm:inline">Edit</span>
+                </>
+              )}
+            </Button>
             <Button variant="outline" size="sm" onClick={startNewPlan}>
               <RotateCcw className="w-4 h-4 sm:mr-1" />
               <span className="hidden sm:inline">New Plan</span>
@@ -208,6 +279,15 @@ export function DietGenerator() {
           <Badge variant="secondary">{DIET_TYPE_LABELS[generatedPlan.dietType]}</Badge>
           <Badge variant="secondary">{CUISINE_LABELS[generatedPlan.cuisine]}</Badge>
         </div>
+
+        {isEditing && calorieDeficit !== 0 && (
+          <div className={`p-3 rounded-lg text-sm ${calorieDeficit > 0 ? 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400' : 'bg-red-500/10 text-red-600 dark:text-red-400'}`}>
+            {calorieDeficit > 0 
+              ? `⚠️ Day ${selectedDayIndex + 1} is ${calorieDeficit} calories under target`
+              : `⚠️ Day ${selectedDayIndex + 1} is ${Math.abs(calorieDeficit)} calories over target`
+            }
+          </div>
+        )}
 
         {/* Day Selector */}
         <Tabs value={selectedDayIndex.toString()} onValueChange={(v) => setSelectedDayIndex(parseInt(v))}>
@@ -231,8 +311,14 @@ export function DietGenerator() {
             />
             
             <div className="space-y-3">
-              {selectedDay.meals.map((meal, idx) => (
-                <MealCard key={idx} meal={meal} />
+              {selectedDay.meals.map((meal, mealIdx) => (
+                <MealCard 
+                  key={mealIdx} 
+                  meal={meal} 
+                  isEditing={isEditing}
+                  onRemoveFood={(foodIdx) => handleRemoveFood(selectedDayIndex, mealIdx, foodIdx)}
+                  onRemoveMeal={() => handleRemoveMeal(selectedDayIndex, mealIdx)}
+                />
               ))}
             </div>
           </div>
