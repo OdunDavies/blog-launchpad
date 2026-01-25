@@ -1,169 +1,178 @@
-import { useProfile } from '@/contexts/ProfileContext';
+import { FitnessGoal } from '@/types/diet';
 import { Card, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { Calculator, Flame, TrendingDown, TrendingUp, Minus } from 'lucide-react';
-import { DietGoal } from '@/types/diet';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Flame, Zap, Calculator, Sparkles } from 'lucide-react';
 
 interface StepCaloriesProps {
-  dailyCalories: number;
-  setDailyCalories: (value: number) => void;
-  goal: DietGoal | '';
+  calorieTarget: string;
+  setCalorieTarget: (value: string) => void;
+  customCalories: string;
+  setCustomCalories: (value: string) => void;
+  goal: FitnessGoal | '';
+  suggestedCalories: number | null;
+  bmr: number | null;
+  tdee: number | null;
 }
 
-export function StepCalories({ dailyCalories, setDailyCalories, goal }: StepCaloriesProps) {
-  const { tdee, isProfileComplete } = useProfile();
+const presetOptions = [
+  { value: '1500', label: '1,500', description: 'Aggressive deficit' },
+  { value: '2000', label: '2,000', description: 'Moderate intake' },
+  { value: '2500', label: '2,500', description: 'Active lifestyle' },
+  { value: '3000', label: '3,000', description: 'High activity/bulk' },
+];
 
-  // Calculate suggested calories based on goal
-  const getSuggestedCalories = () => {
-    if (!tdee) return null;
-    
+export function StepCalories({ 
+  calorieTarget, 
+  setCalorieTarget, 
+  customCalories,
+  setCustomCalories,
+  goal,
+  suggestedCalories,
+  bmr,
+  tdee,
+}: StepCaloriesProps) {
+  const getGoalDescription = () => {
     switch (goal) {
-      case 'muscle_building':
-        return Math.round(tdee * 1.1); // +10% surplus
-      case 'fat_loss':
-        return Math.round(tdee * 0.8); // -20% deficit
+      case 'muscle-gain':
+        return 'Surplus recommended (+10-15% above TDEE)';
+      case 'fat-loss':
+        return 'Deficit recommended (-15-20% below TDEE)';
       case 'maintenance':
-        return tdee;
-      case 'endurance':
-        return Math.round(tdee * 1.15); // +15% for high activity
+        return 'Eat at your TDEE';
+      case 'recomposition':
+        return 'Slight deficit with high protein';
       default:
-        return tdee;
-    }
-  };
-
-  const suggestedCalories = getSuggestedCalories();
-
-  const applyTdee = (modifier: number) => {
-    if (tdee) {
-      setDailyCalories(Math.round(tdee * modifier));
+        return 'Select a goal first for recommendations';
     }
   };
 
   return (
-    <div className="space-y-3 sm:space-y-4">
-      <div>
-        <h3 className="text-base sm:text-lg font-semibold">Set your daily calorie target</h3>
-        <p className="text-xs sm:text-sm text-muted-foreground">
-          {isProfileComplete 
-            ? "Based on your profile, we've calculated your TDEE"
-            : "Complete your profile for personalized recommendations"}
-        </p>
-      </div>
-
-      {/* TDEE Display */}
-      {tdee && (
-        <Card className="bg-muted/50">
-          <CardContent className="p-3 sm:p-4">
-            <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
-              <Flame className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500 shrink-0" />
-              <div>
-                <p className="font-medium text-sm sm:text-base">Your TDEE: {tdee.toLocaleString()} calories</p>
-                <p className="text-xs sm:text-sm text-muted-foreground">
-                  Total Daily Energy Expenditure
-                </p>
-              </div>
-            </div>
-            
-            {suggestedCalories && goal && (
-              <div className="mt-2 sm:mt-3 p-2 sm:p-3 bg-background rounded-lg">
-                <p className="text-xs sm:text-sm">
-                  <span className="font-medium">Suggested for {goal.replace('_', ' ')}:</span>{' '}
-                  <span className="text-primary font-bold">{suggestedCalories.toLocaleString()} calories</span>
-                </p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Quick Adjustment Buttons */}
-      {tdee && (
-        <div className="space-y-2">
-          <Label className="text-xs sm:text-sm text-muted-foreground">Quick adjustments from TDEE:</Label>
-          <div className="grid grid-cols-3 gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => applyTdee(0.8)}
-              className="flex items-center justify-center gap-1 text-xs sm:text-sm"
-            >
-              <TrendingDown className="w-3 h-3 sm:w-4 sm:h-4" />
-              -20%
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => applyTdee(1)}
-              className="flex items-center justify-center gap-1 text-xs sm:text-sm"
-            >
-              <Minus className="w-3 h-3 sm:w-4 sm:h-4" />
-              TDEE
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => applyTdee(1.1)}
-              className="flex items-center justify-center gap-1 text-xs sm:text-sm"
-            >
-              <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4" />
-              +10%
-            </Button>
-          </div>
+    <div className="space-y-4 sm:space-y-6">
+      <div className="text-center space-y-2">
+        <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10">
+          <Flame className="w-6 h-6 text-primary" />
         </div>
-      )}
-
-      {/* Manual Input */}
-      <div className="space-y-2">
-        <Label htmlFor="calories" className="flex items-center gap-2 text-sm">
-          <Calculator className="w-4 h-4" />
-          Daily Calorie Target
-        </Label>
-        <Input
-          id="calories"
-          type="number"
-          placeholder="e.g., 2000"
-          min="1200"
-          max="6000"
-          step="50"
-          value={dailyCalories || ''}
-          onChange={(e) => setDailyCalories(parseInt(e.target.value) || 0)}
-          className="text-base sm:text-lg h-10 sm:h-11"
-        />
-        <p className="text-xs text-muted-foreground">
-          Recommended range: 1,200 - 6,000 calories
-        </p>
+        <h3 className="text-lg sm:text-xl font-semibold">Set Your Daily Calories</h3>
+        <p className="text-sm text-muted-foreground">{getGoalDescription()}</p>
       </div>
 
-      {/* Macro Preview */}
-      {dailyCalories > 0 && goal && (
-        <Card>
-          <CardContent className="p-3 sm:p-4">
-            <p className="font-medium text-sm mb-2">Estimated Daily Macros:</p>
-            <div className="grid grid-cols-3 gap-2 sm:gap-4 text-center">
+      {/* TDEE Summary Card */}
+      {bmr && tdee && (
+        <Card className="bg-muted/50 border-dashed">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <Calculator className="w-4 h-4 text-primary" />
+              <span className="font-medium text-sm">Your Metabolic Profile</span>
+            </div>
+            <div className="grid grid-cols-3 gap-3 text-center">
               <div>
-                <p className="text-lg sm:text-2xl font-bold text-primary">
-                  {Math.round(dailyCalories * (goal === 'fat_loss' ? 0.35 : goal === 'muscle_building' ? 0.3 : 0.25) / 4)}g
-                </p>
-                <p className="text-xs text-muted-foreground">Protein</p>
+                <p className="text-xs text-muted-foreground">BMR</p>
+                <p className="text-lg font-bold">{bmr.toLocaleString()}</p>
               </div>
               <div>
-                <p className="text-lg sm:text-2xl font-bold text-primary">
-                  {Math.round(dailyCalories * (goal === 'endurance' ? 0.55 : goal === 'fat_loss' ? 0.3 : 0.4) / 4)}g
-                </p>
-                <p className="text-xs text-muted-foreground">Carbs</p>
+                <p className="text-xs text-muted-foreground">TDEE</p>
+                <p className="text-lg font-bold text-primary">{tdee.toLocaleString()}</p>
               </div>
               <div>
-                <p className="text-lg sm:text-2xl font-bold text-primary">
-                  {Math.round(dailyCalories * (goal === 'fat_loss' ? 0.35 : 0.3) / 9)}g
-                </p>
-                <p className="text-xs text-muted-foreground">Fats</p>
+                <p className="text-xs text-muted-foreground">Suggested</p>
+                <p className="text-lg font-bold text-primary">{suggestedCalories?.toLocaleString()}</p>
               </div>
             </div>
           </CardContent>
         </Card>
       )}
+
+      <RadioGroup
+        value={calorieTarget}
+        onValueChange={setCalorieTarget}
+        className="grid gap-3"
+      >
+        {/* Suggested option */}
+        {suggestedCalories && (
+          <Label htmlFor="suggested" className="cursor-pointer">
+            <Card
+              className={`transition-all hover:border-primary ${
+                calorieTarget === 'suggested' ? 'border-primary bg-primary/5 ring-1 ring-primary' : ''
+              }`}
+            >
+              <CardContent className="flex items-center gap-4 p-4">
+                <RadioGroupItem value="suggested" id="suggested" className="sr-only" />
+                <div 
+                  className={`p-2.5 rounded-lg shrink-0 ${
+                    calorieTarget === 'suggested' ? 'bg-primary text-primary-foreground' : 'bg-muted'
+                  }`}
+                >
+                  <Sparkles className="w-5 h-5" />
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <p className="font-medium">{suggestedCalories.toLocaleString()} cal</p>
+                    <Badge variant="secondary" className="text-xs">Recommended</Badge>
+                  </div>
+                  <p className="text-xs text-muted-foreground">Based on your profile and goal</p>
+                </div>
+              </CardContent>
+            </Card>
+          </Label>
+        )}
+
+        {/* Preset options */}
+        <div className="grid grid-cols-2 gap-3">
+          {presetOptions.map((option) => (
+            <Label key={option.value} htmlFor={option.value} className="cursor-pointer">
+              <Card
+                className={`transition-all hover:border-primary ${
+                  calorieTarget === option.value ? 'border-primary bg-primary/5 ring-1 ring-primary' : ''
+                }`}
+              >
+                <CardContent className="p-3 text-center">
+                  <RadioGroupItem value={option.value} id={option.value} className="sr-only" />
+                  <p className="font-medium">{option.label}</p>
+                  <p className="text-xs text-muted-foreground">{option.description}</p>
+                </CardContent>
+              </Card>
+            </Label>
+          ))}
+        </div>
+
+        {/* Custom option */}
+        <Label htmlFor="custom" className="cursor-pointer">
+          <Card
+            className={`transition-all hover:border-primary ${
+              calorieTarget === 'custom' ? 'border-primary bg-primary/5 ring-1 ring-primary' : ''
+            }`}
+          >
+            <CardContent className="flex items-center gap-4 p-4">
+              <RadioGroupItem value="custom" id="custom" className="sr-only" />
+              <div 
+                className={`p-2.5 rounded-lg shrink-0 ${
+                  calorieTarget === 'custom' ? 'bg-primary text-primary-foreground' : 'bg-muted'
+                }`}
+              >
+                <Zap className="w-5 h-5" />
+              </div>
+              <div className="flex-1">
+                <p className="font-medium">Custom Amount</p>
+                {calorieTarget === 'custom' && (
+                  <Input
+                    type="number"
+                    placeholder="Enter calories"
+                    value={customCalories}
+                    onChange={(e) => setCustomCalories(e.target.value)}
+                    className="mt-2 w-full"
+                    min="1000"
+                    max="6000"
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </Label>
+      </RadioGroup>
     </div>
   );
 }

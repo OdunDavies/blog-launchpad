@@ -1,115 +1,96 @@
-import { MealType, MEAL_TYPE_LABELS } from '@/types/diet';
 import { Card, CardContent } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { Coffee, Cookie, UtensilsCrossed, Moon, Dumbbell } from 'lucide-react';
+import { Clock, Coffee, Sun, Moon, Cookie } from 'lucide-react';
 
 interface StepMealsProps {
-  mealTypes: MealType[];
-  setMealTypes: (value: MealType[]) => void;
+  mealsPerDay: string;
+  setMealsPerDay: (value: string) => void;
 }
 
-const mealOptions: { value: MealType; label: string; description: string; icon: React.ElementType }[] = [
-  { value: 'breakfast', label: 'Breakfast', description: 'Morning fuel', icon: Coffee },
-  { value: 'morning_snack', label: 'AM Snack', description: 'Mid-morning', icon: Cookie },
-  { value: 'lunch', label: 'Lunch', description: 'Midday meal', icon: UtensilsCrossed },
-  { value: 'afternoon_snack', label: 'PM Snack', description: 'Pre-dinner', icon: Cookie },
-  { value: 'dinner', label: 'Dinner', description: 'Evening meal', icon: Moon },
-  { value: 'evening_snack', label: 'Eve Snack', description: 'Night bite', icon: Cookie },
-  { value: 'pre_workout', label: 'Pre-Workout', description: 'Before training', icon: Dumbbell },
-  { value: 'post_workout', label: 'Post-Workout', description: 'Recovery', icon: Dumbbell },
+const mealOptions = [
+  { 
+    value: '3', 
+    label: '3 Meals', 
+    description: 'Breakfast, Lunch, Dinner',
+    icon: Coffee,
+  },
+  { 
+    value: '4', 
+    label: '4 Meals', 
+    description: '3 meals + 1 snack',
+    icon: Sun,
+  },
+  { 
+    value: '5', 
+    label: '5 Meals', 
+    description: '3 meals + 2 snacks',
+    icon: Cookie,
+  },
+  { 
+    value: '6', 
+    label: '6 Meals', 
+    description: '3 meals + 3 snacks',
+    icon: Moon,
+  },
 ];
 
-export function StepMeals({ mealTypes, setMealTypes }: StepMealsProps) {
-  const toggleMeal = (value: MealType) => {
-    if (mealTypes.includes(value)) {
-      setMealTypes(mealTypes.filter(m => m !== value));
-    } else {
-      setMealTypes([...mealTypes, value]);
-    }
-  };
-
-  const selectPreset = (preset: 'basic' | 'standard' | 'athlete') => {
-    switch (preset) {
-      case 'basic':
-        setMealTypes(['breakfast', 'lunch', 'dinner']);
-        break;
-      case 'standard':
-        setMealTypes(['breakfast', 'morning_snack', 'lunch', 'afternoon_snack', 'dinner']);
-        break;
-      case 'athlete':
-        setMealTypes(['breakfast', 'morning_snack', 'lunch', 'afternoon_snack', 'pre_workout', 'post_workout', 'dinner']);
-        break;
-    }
-  };
-
+export function StepMeals({ mealsPerDay, setMealsPerDay }: StepMealsProps) {
   return (
-    <div className="space-y-3 sm:space-y-4">
-      <div>
-        <h3 className="text-base sm:text-lg font-semibold">How many meals per day?</h3>
-        <p className="text-xs sm:text-sm text-muted-foreground">
-          Choose the meals you want in your plan
+    <div className="space-y-4 sm:space-y-6">
+      <div className="text-center space-y-2">
+        <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10">
+          <Clock className="w-6 h-6 text-primary" />
+        </div>
+        <h3 className="text-lg sm:text-xl font-semibold">How Many Meals Per Day?</h3>
+        <p className="text-sm text-muted-foreground">
+          Choose your preferred eating frequency
         </p>
       </div>
 
-      {/* Presets */}
-      <div className="flex flex-wrap gap-2">
-        <button
-          onClick={() => selectPreset('basic')}
-          className="text-xs px-3 py-1.5 rounded-full bg-muted hover:bg-muted/80 transition-colors"
-        >
-          3 Meals
-        </button>
-        <button
-          onClick={() => selectPreset('standard')}
-          className="text-xs px-3 py-1.5 rounded-full bg-muted hover:bg-muted/80 transition-colors"
-        >
-          5 Meals
-        </button>
-        <button
-          onClick={() => selectPreset('athlete')}
-          className="text-xs px-3 py-1.5 rounded-full bg-muted hover:bg-muted/80 transition-colors"
-        >
-          7 Meals
-        </button>
-      </div>
-
-      <div className="grid gap-2 grid-cols-1 sm:grid-cols-2">
+      <RadioGroup
+        value={mealsPerDay}
+        onValueChange={setMealsPerDay}
+        className="grid gap-3 sm:grid-cols-2"
+      >
         {mealOptions.map((option) => {
           const Icon = option.icon;
+          const isSelected = mealsPerDay === option.value;
+          
           return (
-            <Card
+            <Label
               key={option.value}
-              className={`cursor-pointer transition-all hover:border-primary ${
-                mealTypes.includes(option.value) ? 'border-primary bg-primary/5 ring-1 ring-primary' : ''
-              }`}
-              onClick={() => toggleMeal(option.value)}
+              htmlFor={`meals-${option.value}`}
+              className="cursor-pointer"
             >
-              <CardContent className="flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3">
-                <Checkbox
-                  id={`meal-${option.value}`}
-                  checked={mealTypes.includes(option.value)}
-                  onCheckedChange={() => toggleMeal(option.value)}
-                  className="shrink-0"
-                />
-                <Icon className="w-4 h-4 text-muted-foreground shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <Label htmlFor={`meal-${option.value}`} className="cursor-pointer font-medium text-xs sm:text-sm">
-                    {option.label}
-                  </Label>
-                  <p className="text-xs text-muted-foreground hidden sm:block">{option.description}</p>
-                </div>
-              </CardContent>
-            </Card>
+              <Card
+                className={`transition-all hover:border-primary ${
+                  isSelected ? 'border-primary bg-primary/5 ring-1 ring-primary' : ''
+                }`}
+              >
+                <CardContent className="flex items-center gap-3 p-4">
+                  <RadioGroupItem value={option.value} id={`meals-${option.value}`} className="sr-only" />
+                  <div 
+                    className={`p-2.5 rounded-lg shrink-0 ${
+                      isSelected ? 'bg-primary text-primary-foreground' : 'bg-muted'
+                    }`}
+                  >
+                    <Icon className="w-5 h-5" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-medium">{option.label}</p>
+                    <p className="text-xs text-muted-foreground">{option.description}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </Label>
           );
         })}
-      </div>
+      </RadioGroup>
 
-      {mealTypes.length > 0 && (
-        <p className="text-xs sm:text-sm text-muted-foreground text-center">
-          {mealTypes.length} meal{mealTypes.length !== 1 ? 's' : ''} selected per day
-        </p>
-      )}
+      <p className="text-xs sm:text-sm text-muted-foreground text-center">
+        More frequent meals can help manage hunger and maintain energy levels
+      </p>
     </div>
   );
 }

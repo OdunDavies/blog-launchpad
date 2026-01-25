@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { UserProfile, ActivityLevel, ACTIVITY_MULTIPLIERS } from '@/types/diet';
+import { convertWeightToKg, convertHeightToCm } from '@/utils/tdeeCalculator';
 
 interface ProfileContextType {
   profile: UserProfile;
@@ -14,13 +15,17 @@ const ProfileContext = createContext<ProfileContextType | undefined>(undefined);
 
 const STORAGE_KEY = 'muscleatlas-user-profile';
 
-const defaultProfile: UserProfile = {};
+const defaultProfile: UserProfile = {
+  weightUnit: 'kg',
+  heightUnit: 'cm',
+  trainingDays: 3,
+};
 
 export function ProfileProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<UserProfile>(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
-      return stored ? JSON.parse(stored) : defaultProfile;
+      return stored ? { ...defaultProfile, ...JSON.parse(stored) } : defaultProfile;
     } catch {
       return defaultProfile;
     }
@@ -37,13 +42,14 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
 
   // Calculate BMR using Mifflin-St Jeor equation
   const bmr = useMemo(() => {
-    const { gender, weight, height, age } = profile;
+    const { gender, weight, weightUnit, height, heightUnit, heightInches, age } = profile;
     if (!gender || !weight || !height || !age) return null;
 
+    const weightKg = convertWeightToKg(weight, weightUnit || 'kg');
+    const heightCm = convertHeightToCm(height, heightUnit || 'cm', heightInches);
+
     // Mifflin-St Jeor Formula
-    // Male: (10 × weight) + (6.25 × height) - (5 × age) + 5
-    // Female: (10 × weight) + (6.25 × height) - (5 × age) - 161
-    const baseBMR = (10 * weight) + (6.25 * height) - (5 * age);
+    const baseBMR = (10 * weightKg) + (6.25 * heightCm) - (5 * age);
     return Math.round(gender === 'male' ? baseBMR + 5 : baseBMR - 161);
   }, [profile]);
 
