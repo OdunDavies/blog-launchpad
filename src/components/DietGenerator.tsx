@@ -12,14 +12,13 @@ import { StepCalories } from '@/components/diet-wizard/StepCalories';
 import { StepDietType } from '@/components/diet-wizard/StepDietType';
 import { StepRestrictions } from '@/components/diet-wizard/StepRestrictions';
 import { StepMeals } from '@/components/diet-wizard/StepMeals';
-import { StepCuisine } from '@/components/diet-wizard/StepCuisine';
 import { StepReview } from '@/components/diet-wizard/StepReview';
 import {
-  DietGoal, DietType, CuisinePreference, DietaryRestriction, MealType,
+  DietGoal, DietType, RegionalFocus, DietaryRestriction, MealType,
   GeneratedDietPlan, SavedDietPlan, DietDay,
-  GOAL_LABELS, DIET_TYPE_LABELS, CUISINE_LABELS, MEAL_TYPE_LABELS,
+  GOAL_LABELS, DIET_TYPE_LABELS, REGIONAL_FOCUS_LABELS, MEAL_TYPE_LABELS,
 } from '@/types/diet';
-import { Target, Flame, ChevronLeft, ChevronRight, Sparkles, Save, Trash2, RotateCcw, Download, Loader2, UtensilsCrossed } from 'lucide-react';
+import { Target, Flame, ChevronLeft, ChevronRight, Sparkles, Save, Trash2, RotateCcw, Loader2, UtensilsCrossed } from 'lucide-react';
 
 const wizardSteps = [
   { title: 'Goal', icon: <Target className="w-4 h-4 sm:w-5 sm:h-5" /> },
@@ -27,7 +26,6 @@ const wizardSteps = [
   { title: 'Diet', icon: <UtensilsCrossed className="w-4 h-4 sm:w-5 sm:h-5" /> },
   { title: 'Restrict', icon: <UtensilsCrossed className="w-4 h-4 sm:w-5 sm:h-5" /> },
   { title: 'Meals', icon: <UtensilsCrossed className="w-4 h-4 sm:w-5 sm:h-5" /> },
-  { title: 'Cuisine', icon: <UtensilsCrossed className="w-4 h-4 sm:w-5 sm:h-5" /> },
   { title: 'Review', icon: <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" /> },
 ];
 
@@ -41,7 +39,7 @@ export function DietGenerator() {
   const [dietType, setDietType] = useState<DietType | ''>('');
   const [restrictions, setRestrictions] = useState<DietaryRestriction[]>([]);
   const [mealTypes, setMealTypes] = useState<MealType[]>(['breakfast', 'lunch', 'dinner']);
-  const [cuisine, setCuisine] = useState<CuisinePreference | ''>('');
+  const [regionalFocus, setRegionalFocus] = useState<RegionalFocus>('balanced');
   
   const [generatedPlan, setGeneratedPlan] = useState<GeneratedDietPlan | null>(null);
   const [savedPlans, setSavedPlans] = useState<SavedDietPlan[]>([]);
@@ -78,8 +76,7 @@ export function DietGenerator() {
       case 2: return !!dietType;
       case 3: return true; // restrictions optional
       case 4: return mealTypes.length >= 2;
-      case 5: return !!cuisine;
-      case 6: return true;
+      case 5: return true;
       default: return false;
     }
   };
@@ -88,7 +85,7 @@ export function DietGenerator() {
     setIsGenerating(true);
     try {
       const { data, error } = await supabase.functions.invoke('generate-diet', {
-        body: { goal, dailyCalories, dietType, restrictions, mealTypes, cuisine, gender: profile.gender },
+        body: { goal, dailyCalories, dietType, restrictions, mealTypes, regionalFocus, gender: profile.gender },
       });
       
       if (error) throw error;
@@ -99,11 +96,11 @@ export function DietGenerator() {
         dietType: dietType as DietType,
         restrictions,
         mealTypes,
-        cuisine: cuisine as CuisinePreference,
+        cuisine: 'unified',
         schedule: data.schedule,
       });
       
-      trackEvent('diet_generated', { dietType, cuisine, mealCount: mealTypes.length });
+      trackEvent('diet_generated', { dietType, regionalFocus, mealCount: mealTypes.length });
       toast.success('Diet plan generated!');
     } catch (err: any) {
       console.error('Generation error:', err);
@@ -143,18 +140,17 @@ export function DietGenerator() {
     setDietType('');
     setRestrictions([]);
     setMealTypes(['breakfast', 'lunch', 'dinner']);
-    setCuisine('');
+    setRegionalFocus('balanced');
   };
 
   const renderStep = () => {
     switch (currentStep) {
       case 0: return <StepGoal goal={goal} setGoal={setGoal} />;
       case 1: return <StepCalories dailyCalories={dailyCalories} setDailyCalories={setDailyCalories} goal={goal} />;
-      case 2: return <StepDietType dietType={dietType} setDietType={setDietType} />;
+      case 2: return <StepDietType dietType={dietType} setDietType={setDietType} regionalFocus={regionalFocus} setRegionalFocus={setRegionalFocus} />;
       case 3: return <StepRestrictions restrictions={restrictions} setRestrictions={setRestrictions} />;
       case 4: return <StepMeals mealTypes={mealTypes} setMealTypes={setMealTypes} />;
-      case 5: return <StepCuisine cuisine={cuisine} setCuisine={setCuisine} />;
-      case 6: return <StepReview goal={goal} dailyCalories={dailyCalories} dietType={dietType} restrictions={restrictions} mealTypes={mealTypes} cuisine={cuisine} />;
+      case 5: return <StepReview goal={goal} dailyCalories={dailyCalories} dietType={dietType} restrictions={restrictions} mealTypes={mealTypes} regionalFocus={regionalFocus} />;
       default: return null;
     }
   };
@@ -180,7 +176,7 @@ export function DietGenerator() {
           <Badge>{GOAL_LABELS[generatedPlan.goal]}</Badge>
           <Badge variant="secondary">{generatedPlan.dailyCalories} kcal</Badge>
           <Badge variant="secondary">{DIET_TYPE_LABELS[generatedPlan.dietType]}</Badge>
-          <Badge variant="secondary">{CUISINE_LABELS[generatedPlan.cuisine]}</Badge>
+          <Badge variant="secondary">{REGIONAL_FOCUS_LABELS[regionalFocus]}</Badge>
         </div>
 
         <div className="space-y-3 sm:space-y-4">
@@ -250,7 +246,7 @@ export function DietGenerator() {
           <ChevronLeft className="w-4 h-4 sm:mr-1" />
           <span className="hidden sm:inline">Back</span>
         </Button>
-        {currentStep < 6 ? (
+        {currentStep < 5 ? (
           <Button onClick={() => setCurrentStep(s => s + 1)} disabled={!canProceed()} className="flex-1 sm:flex-none">
             <span className="hidden sm:inline">Next</span>
             <ChevronRight className="w-4 h-4 sm:ml-1" />
