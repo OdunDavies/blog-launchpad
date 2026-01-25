@@ -1,7 +1,7 @@
 import { Meal, Food } from '@/types/diet';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Clock, Flame, X, Trash2 } from 'lucide-react';
+import { Clock, Flame, X, Trash2, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface MealCardProps {
@@ -9,6 +9,7 @@ interface MealCardProps {
   isEditing?: boolean;
   onRemoveFood?: (foodIndex: number) => void;
   onRemoveMeal?: () => void;
+  onAddFood?: () => void;
 }
 
 // Calculate total macros for a meal
@@ -24,7 +25,7 @@ function getMealTotals(foods: Food[]) {
   );
 }
 
-export function MealCard({ meal, isEditing = false, onRemoveFood, onRemoveMeal }: MealCardProps) {
+export function MealCard({ meal, isEditing = false, onRemoveFood, onRemoveMeal, onAddFood }: MealCardProps) {
   const totals = getMealTotals(meal.foods);
 
   return (
@@ -100,6 +101,19 @@ export function MealCard({ meal, isEditing = false, onRemoveFood, onRemoveMeal }
               </div>
             ))}
           </div>
+        )}
+        
+        {/* Add Food Button */}
+        {isEditing && onAddFood && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full mt-3"
+            onClick={onAddFood}
+          >
+            <Plus className="w-4 h-4 mr-1" />
+            Add Food
+          </Button>
         )}
       </CardContent>
     </Card>

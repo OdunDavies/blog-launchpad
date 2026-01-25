@@ -17,13 +17,13 @@ import { StepCuisine } from '@/components/diet-wizard/StepCuisine';
 import { StepDietReview } from '@/components/diet-wizard/StepDietReview';
 import { MealCard } from '@/components/MealCard';
 import { NutritionSummary } from '@/components/NutritionSummary';
+import { AddFoodModal } from '@/components/AddFoodModal';
 import {
-  FitnessGoal, DietType, CuisineType, DietPlan, SavedDietPlan, DayPlan,
+  FitnessGoal, DietType, CuisineType, DietPlan, SavedDietPlan, DayPlan, Food,
   GOAL_LABELS, DIET_TYPE_LABELS, CUISINE_LABELS,
 } from '@/types/diet';
 import { getSuggestedCalories } from '@/utils/tdeeCalculator';
 import { Target, Flame, ChevronLeft, ChevronRight, Sparkles, Save, Trash2, RotateCcw, Loader2, UtensilsCrossed, Clock, Globe, ShieldAlert, Pencil, Check } from 'lucide-react';
-
 const wizardSteps = [
   { title: 'Goal', icon: <Target className="w-4 h-4" /> },
   { title: 'Calories', icon: <Flame className="w-4 h-4" /> },
@@ -52,7 +52,8 @@ export function DietGenerator() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [selectedDayIndex, setSelectedDayIndex] = useState(0);
   const [isEditing, setIsEditing] = useState(false);
-
+  const [showAddFoodModal, setShowAddFoodModal] = useState(false);
+  const [addFoodMealIndex, setAddFoodMealIndex] = useState<number | null>(null);
   // Load saved plans from localStorage
   useEffect(() => {
     const saved = localStorage.getItem('diet-planner-saved-plans');
@@ -142,6 +143,38 @@ export function DietGenerator() {
     
     setGeneratedPlan(updatedPlan);
     toast.success(`Removed ${removedMeal.name}`);
+  };
+
+  // Add food to a meal
+  const handleAddFood = (food: Food) => {
+    if (!generatedPlan || addFoodMealIndex === null) return;
+    
+    const updatedPlan = { ...generatedPlan };
+    const day = { ...updatedPlan.mealPlan[selectedDayIndex] };
+    const meal = { ...day.meals[addFoodMealIndex] };
+    
+    // Add the food
+    meal.foods = [...meal.foods, food];
+    
+    // Recalculate day totals
+    day.totalCalories += food.calories;
+    day.totalProtein += food.protein;
+    day.totalCarbs += food.carbs;
+    day.totalFat += food.fat;
+    
+    day.meals[addFoodMealIndex] = meal;
+    updatedPlan.mealPlan[selectedDayIndex] = day;
+    
+    setGeneratedPlan(updatedPlan);
+    setShowAddFoodModal(false);
+    setAddFoodMealIndex(null);
+    toast.success(`Added ${food.name}`);
+  };
+
+  // Open add food modal for specific meal
+  const openAddFoodModal = (mealIndex: number) => {
+    setAddFoodMealIndex(mealIndex);
+    setShowAddFoodModal(true);
   };
 
   const generateDietPlan = async () => {
@@ -318,11 +351,23 @@ export function DietGenerator() {
                   isEditing={isEditing}
                   onRemoveFood={(foodIdx) => handleRemoveFood(selectedDayIndex, mealIdx, foodIdx)}
                   onRemoveMeal={() => handleRemoveMeal(selectedDayIndex, mealIdx)}
+                  onAddFood={() => openAddFoodModal(mealIdx)}
                 />
               ))}
             </div>
           </div>
         )}
+
+        {/* Add Food Modal */}
+        <AddFoodModal
+          isOpen={showAddFoodModal}
+          onClose={() => {
+            setShowAddFoodModal(false);
+            setAddFoodMealIndex(null);
+          }}
+          onAddFood={handleAddFood}
+          mealName={addFoodMealIndex !== null && selectedDay ? selectedDay.meals[addFoodMealIndex]?.name || 'Meal' : 'Meal'}
+        />
       </div>
     );
   }
