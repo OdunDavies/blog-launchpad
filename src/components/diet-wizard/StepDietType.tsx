@@ -1,12 +1,15 @@
-import { DietType, DIET_TYPE_LABELS } from '@/types/diet';
+import { DietType, RegionalFocus, DIET_TYPE_LABELS } from '@/types/diet';
 import { Card, CardContent } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { Scale, Beef, Wheat, Flame, Leaf, Salad } from 'lucide-react';
+import { Scale, Beef, Wheat, Flame, Leaf, Salad, Globe, MapPin } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
 
 interface StepDietTypeProps {
   dietType: DietType | '';
   setDietType: (value: DietType) => void;
+  regionalFocus: RegionalFocus;
+  setRegionalFocus: (value: RegionalFocus) => void;
 }
 
 const dietTypeOptions: { value: DietType; label: string; description: string; icon: React.ElementType }[] = [
@@ -48,9 +51,24 @@ const dietTypeOptions: { value: DietType; label: string; description: string; ic
   },
 ];
 
-export function StepDietType({ dietType, setDietType }: StepDietTypeProps) {
+const regionalFocusOptions: { value: RegionalFocus; label: string; description: string; icon: React.ElementType }[] = [
+  {
+    value: 'balanced',
+    label: 'Balanced Global',
+    description: 'Mix of international and African foods',
+    icon: Globe,
+  },
+  {
+    value: 'african',
+    label: 'African Focus',
+    description: 'Prioritize Nigerian & West African dishes',
+    icon: MapPin,
+  },
+];
+
+export function StepDietType({ dietType, setDietType, regionalFocus, setRegionalFocus }: StepDietTypeProps) {
   return (
-    <div className="space-y-3 sm:space-y-4">
+    <div className="space-y-4 sm:space-y-6">
       <div>
         <h3 className="text-base sm:text-lg font-semibold">Choose your diet approach</h3>
         <p className="text-xs sm:text-sm text-muted-foreground">
@@ -91,6 +109,49 @@ export function StepDietType({ dietType, setDietType }: StepDietTypeProps) {
           );
         })}
       </RadioGroup>
+
+      <Separator />
+
+      {/* Regional Focus Toggle */}
+      <div>
+        <h4 className="text-sm font-medium mb-2">Food Preference</h4>
+        <p className="text-xs text-muted-foreground mb-3">
+          Choose your preferred cuisine mix for variety
+        </p>
+        <RadioGroup
+          value={regionalFocus}
+          onValueChange={(value) => setRegionalFocus(value as RegionalFocus)}
+          className="grid gap-2 grid-cols-2"
+        >
+          {regionalFocusOptions.map((option) => {
+            const Icon = option.icon;
+            return (
+              <Label
+                key={option.value}
+                htmlFor={`regional-${option.value}`}
+                className="cursor-pointer"
+              >
+                <Card
+                  className={`transition-all hover:border-primary ${
+                    regionalFocus === option.value ? 'border-primary bg-primary/5 ring-1 ring-primary' : ''
+                  }`}
+                >
+                  <CardContent className="flex items-center gap-2 p-3">
+                    <RadioGroupItem value={option.value} id={`regional-${option.value}`} className="sr-only" />
+                    <div className={`p-1.5 rounded-lg shrink-0 ${regionalFocus === option.value ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
+                      <Icon className="w-3 h-3 sm:w-4 sm:h-4" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-medium text-xs sm:text-sm">{option.label}</p>
+                      <p className="text-xs text-muted-foreground line-clamp-1 hidden sm:block">{option.description}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </Label>
+            );
+          })}
+        </RadioGroup>
+      </div>
     </div>
   );
 }

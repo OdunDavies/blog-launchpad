@@ -5,7 +5,10 @@ export type DietGoal = 'muscle_building' | 'fat_loss' | 'maintenance' | 'enduran
 export type DietType = 'balanced' | 'high_protein' | 'low_carb' | 'keto' | 'vegetarian' | 'vegan';
 
 // Cuisine Preference
-export type CuisinePreference = 'international' | 'nigerian' | 'west_african';
+export type CuisinePreference = 'unified';
+
+// Regional focus for meal variety preference
+export type RegionalFocus = 'african' | 'balanced';
 
 // Activity Level for TDEE calculation
 export type ActivityLevel = 'sedentary' | 'lightly_active' | 'moderately_active' | 'very_active' | 'extremely_active';
@@ -108,11 +111,15 @@ export const DIET_TYPE_LABELS: Record<DietType, string> = {
   vegan: 'Vegan',
 };
 
-// Cuisine Labels for Display
+// Cuisine Labels for Display (unified approach)
 export const CUISINE_LABELS: Record<CuisinePreference, string> = {
-  international: 'International',
-  nigerian: 'Nigerian',
-  west_african: 'West African',
+  unified: 'Global & African Mix',
+};
+
+// Regional Focus Labels for Display
+export const REGIONAL_FOCUS_LABELS: Record<RegionalFocus, string> = {
+  african: 'African Focus',
+  balanced: 'Balanced Global',
 };
 
 // Activity Level Labels for Display

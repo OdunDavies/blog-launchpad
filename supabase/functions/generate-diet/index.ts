@@ -12,20 +12,34 @@ serve(async (req) => {
   }
 
   try {
-    const { goal, dailyCalories, dietType, restrictions, mealTypes, cuisine, gender } = await req.json();
+    const { goal, dailyCalories, dietType, restrictions, mealTypes, regionalFocus, gender } = await req.json();
 
-    console.log("Generating diet plan with:", { goal, dailyCalories, dietType, restrictions, mealTypes, cuisine, gender });
+    console.log("Generating diet plan with:", { goal, dailyCalories, dietType, restrictions, mealTypes, regionalFocus, gender });
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    // Build cuisine-specific food database
-    const cuisineDatabase = cuisine === 'nigerian' || cuisine === 'west_african' 
-      ? `
-NIGERIAN & WEST AFRICAN FOOD DATABASE:
-PROTEINS:
+    // Unified food database combining International AND Nigerian/West African foods
+    const unifiedFoodDatabase = `
+UNIFIED GLOBAL FITNESS FOOD DATABASE:
+
+=== PROTEINS (INTERNATIONAL) ===
+- Grilled Chicken Breast: 165 cal/100g, 31g protein, 0g carbs, 3.6g fat
+- Salmon Fillet: 208 cal/100g, 20g protein, 0g carbs, 13g fat
+- Lean Ground Beef: 176 cal/100g, 20g protein, 0g carbs, 10g fat
+- Greek Yogurt: 97 cal/100g, 9g protein, 3.6g carbs, 5g fat
+- Eggs (2 large): 143 cal, 13g protein, 1g carbs, 10g fat
+- Cottage Cheese: 98 cal/100g, 11g protein, 3.4g carbs, 4.3g fat
+- Turkey Breast: 135 cal/100g, 30g protein, 0g carbs, 1g fat
+- Tuna: 132 cal/100g, 28g protein, 0g carbs, 1g fat
+- Tofu: 76 cal/100g, 8g protein, 2g carbs, 4.5g fat
+- Tempeh: 192 cal/100g, 20g protein, 8g carbs, 11g fat
+- Shrimp: 99 cal/100g, 24g protein, 0g carbs, 0.3g fat
+- Cod: 82 cal/100g, 18g protein, 0g carbs, 0.7g fat
+
+=== PROTEINS (NIGERIAN/WEST AFRICAN) ===
 - Suya (spiced grilled beef): 250 cal/100g, 25g protein, 5g carbs, 15g fat
 - Kilishi (dried spiced beef): 300 cal/100g, 35g protein, 8g carbs, 14g fat
 - Stockfish (dried cod): 290 cal/100g, 62g protein, 0g carbs, 2.5g fat
@@ -37,7 +51,17 @@ PROTEINS:
 - Asun (spiced goat meat): 220 cal/100g, 24g protein, 3g carbs, 12g fat
 - Ponmo (cow skin): 110 cal/100g, 25g protein, 0g carbs, 0.5g fat
 
-CARBOHYDRATES:
+=== CARBOHYDRATES (INTERNATIONAL) ===
+- Brown Rice: 123 cal/100g, 2.7g protein, 26g carbs, 1g fat
+- Sweet Potato: 86 cal/100g, 1.6g protein, 20g carbs, 0.1g fat
+- Quinoa: 120 cal/100g, 4.4g protein, 21g carbs, 1.9g fat
+- Oatmeal: 68 cal/100g, 2.4g protein, 12g carbs, 1.4g fat
+- Whole Wheat Pasta: 124 cal/100g, 5g protein, 25g carbs, 0.5g fat
+- White Rice: 130 cal/100g, 2.7g protein, 28g carbs, 0.3g fat
+- Bread (whole grain): 247 cal/100g, 13g protein, 41g carbs, 4g fat
+- Potatoes: 77 cal/100g, 2g protein, 17g carbs, 0.1g fat
+
+=== CARBOHYDRATES (NIGERIAN/WEST AFRICAN) ===
 - Ofada Rice: 130 cal/100g, 2.5g protein, 28g carbs, 0.5g fat
 - Jollof Rice: 180 cal/100g, 4g protein, 32g carbs, 4g fat
 - Pounded Yam: 118 cal/100g, 1.5g protein, 28g carbs, 0.1g fat
@@ -49,7 +73,7 @@ CARBOHYDRATES:
 - Tuwo Shinkafa: 115 cal/100g, 2g protein, 25g carbs, 0.3g fat
 - Fufu: 120 cal/100g, 1g protein, 28g carbs, 0.5g fat
 
-SOUPS & STEWS:
+=== SOUPS & STEWS (NIGERIAN/WEST AFRICAN) ===
 - Egusi Soup: 250 cal/serving, 12g protein, 8g carbs, 20g fat
 - Okra Soup (ila alasepo): 80 cal/serving, 4g protein, 10g carbs, 3g fat
 - Efo Riro (spinach stew): 180 cal/serving, 8g protein, 6g carbs, 14g fat
@@ -58,51 +82,56 @@ SOUPS & STEWS:
 - Edikang Ikong: 160 cal/serving, 10g protein, 6g carbs, 11g fat
 - Banga Soup: 280 cal/serving, 8g protein, 10g carbs, 24g fat
 - Pepper Soup: 120 cal/serving, 15g protein, 5g carbs, 4g fat
+- Groundnut Soup: 220 cal/serving, 10g protein, 12g carbs, 16g fat
 
-SNACKS & SIDES:
-- Chin Chin: 450 cal/100g, 6g protein, 55g carbs, 22g fat
-- Puff Puff: 350 cal/100g, 5g protein, 45g carbs, 16g fat
-- Roasted Groundnuts: 567 cal/100g, 26g protein, 16g carbs, 49g fat
-- Garden Egg (eggplant): 25 cal/100g, 1g protein, 6g carbs, 0.1g fat
-- Zobo (hibiscus drink): 40 cal/cup, 0g protein, 10g carbs, 0g fat
-- Kunu (millet drink): 80 cal/cup, 2g protein, 16g carbs, 1g fat
-`
-      : `
-INTERNATIONAL FOOD DATABASE:
-PROTEINS:
-- Grilled Chicken Breast: 165 cal/100g, 31g protein, 0g carbs, 3.6g fat
-- Salmon Fillet: 208 cal/100g, 20g protein, 0g carbs, 13g fat
-- Lean Ground Beef: 176 cal/100g, 20g protein, 0g carbs, 10g fat
-- Greek Yogurt: 97 cal/100g, 9g protein, 3.6g carbs, 5g fat
-- Eggs (2 large): 143 cal, 13g protein, 1g carbs, 10g fat
-- Cottage Cheese: 98 cal/100g, 11g protein, 3.4g carbs, 4.3g fat
-- Turkey Breast: 135 cal/100g, 30g protein, 0g carbs, 1g fat
-- Tuna: 132 cal/100g, 28g protein, 0g carbs, 1g fat
-- Tofu: 76 cal/100g, 8g protein, 2g carbs, 4.5g fat
-- Tempeh: 192 cal/100g, 20g protein, 8g carbs, 11g fat
-
-CARBOHYDRATES:
-- Brown Rice: 123 cal/100g, 2.7g protein, 26g carbs, 1g fat
-- Sweet Potato: 86 cal/100g, 1.6g protein, 20g carbs, 0.1g fat
-- Quinoa: 120 cal/100g, 4.4g protein, 21g carbs, 1.9g fat
-- Oatmeal: 68 cal/100g, 2.4g protein, 12g carbs, 1.4g fat
-- Whole Wheat Pasta: 124 cal/100g, 5g protein, 25g carbs, 0.5g fat
-- White Rice: 130 cal/100g, 2.7g protein, 28g carbs, 0.3g fat
-- Bread (whole grain): 247 cal/100g, 13g protein, 41g carbs, 4g fat
-- Potatoes: 77 cal/100g, 2g protein, 17g carbs, 0.1g fat
-
-VEGETABLES & GREENS:
+=== VEGETABLES & GREENS ===
 - Broccoli: 34 cal/100g, 2.8g protein, 7g carbs, 0.4g fat
 - Spinach: 23 cal/100g, 2.9g protein, 3.6g carbs, 0.4g fat
 - Mixed Salad: 20 cal/100g, 1.5g protein, 3g carbs, 0.2g fat
 - Bell Peppers: 31 cal/100g, 1g protein, 6g carbs, 0.3g fat
 - Asparagus: 20 cal/100g, 2.2g protein, 4g carbs, 0.1g fat
+- Garden Egg (eggplant): 25 cal/100g, 1g protein, 6g carbs, 0.1g fat
+- Ugu (fluted pumpkin leaves): 30 cal/100g, 3g protein, 4g carbs, 0.5g fat
+- Water Leaf: 25 cal/100g, 2g protein, 4g carbs, 0.3g fat
 
-HEALTHY FATS:
+=== HEALTHY FATS ===
 - Avocado: 160 cal/100g, 2g protein, 9g carbs, 15g fat
 - Olive Oil: 884 cal/100ml, 0g protein, 0g carbs, 100g fat
 - Almonds: 579 cal/100g, 21g protein, 22g carbs, 50g fat
 - Walnuts: 654 cal/100g, 15g protein, 14g carbs, 65g fat
+- Roasted Groundnuts: 567 cal/100g, 26g protein, 16g carbs, 49g fat
+- Palm Oil (red): 884 cal/100ml, 0g protein, 0g carbs, 100g fat (use sparingly)
+
+=== SNACKS & BEVERAGES ===
+- Zobo (hibiscus drink, unsweetened): 20 cal/cup, 0g protein, 5g carbs, 0g fat
+- Kunu (millet drink): 80 cal/cup, 2g protein, 16g carbs, 1g fat
+- Tiger Nuts: 400 cal/100g, 5g protein, 45g carbs, 24g fat
+- Chin Chin (limit - treat): 450 cal/100g, 6g protein, 55g carbs, 22g fat
+- Protein Shake: 120 cal/scoop, 24g protein, 3g carbs, 1g fat
+- Green Smoothie: 100 cal/cup, 2g protein, 22g carbs, 0.5g fat
+`;
+
+    // Determine mixing instructions based on regional focus
+    const mixingInstructions = regionalFocus === 'african' 
+      ? `
+CUISINE MIXING PRIORITY: AFRICAN FOCUS
+- Prioritize Nigerian and West African foods (~70% of meals)
+- Include some International options for breakfast variety and snacks (~30%)
+- Every dinner should feature African dishes (soups with swallows, Jollof, Suya, etc.)
+- Breakfasts can alternate between African (Akara, Moi Moi) and International (Oatmeal, Eggs)
+- Lunches should be primarily African-inspired
+- Use African protein sources: Suya, Kilishi, Stockfish, Goat Meat, Grilled Fish
+`
+      : `
+CUISINE MIXING PRIORITY: BALANCED GLOBAL MIX
+- Create a diverse 50/50 mix of International and African cuisines
+- Alternate cuisine styles across meals and days for maximum variety
+- Day 1: African dinner, International breakfast
+- Day 2: International dinner, African lunch
+- Mix proteins creatively: Salmon one day, Suya the next
+- Pair International carbs (Quinoa, Brown Rice) with African proteins and vice versa
+- Include both Western salads and African soups for vegetables
+- Ensure each day has at least one meal from each cuisine tradition
 `;
 
     // Macro distribution based on goal
@@ -115,9 +144,11 @@ HEALTHY FATS:
 
     const macros = macroDistribution[goal as keyof typeof macroDistribution] || macroDistribution.maintenance;
 
-    const systemPrompt = `You are an expert nutritionist creating personalized meal plans. You MUST use the food database provided and respect all dietary restrictions.
+    const systemPrompt = `You are an expert nutritionist creating personalized meal plans. You have access to a UNIFIED food database containing both International AND Nigerian/West African foods. Create varied, culturally diverse meal plans.
 
-${cuisineDatabase}
+${unifiedFoodDatabase}
+
+${mixingInstructions}
 
 MACRO TARGETS FOR THIS PLAN:
 - Daily Calories: ${dailyCalories} kcal
@@ -136,24 +167,31 @@ MEAL DISTRIBUTION RULES:
 DIETARY RESTRICTIONS TO AVOID: ${restrictions.length > 0 ? restrictions.join(', ') : 'None'}
 
 DIET TYPE: ${dietType}
-${dietType === 'keto' ? '- Keep carbs under 20-50g per day total' : ''}
-${dietType === 'high_protein' ? '- Prioritize protein-rich foods in every meal' : ''}
-${dietType === 'vegetarian' ? '- No meat or fish, eggs and dairy allowed' : ''}
-${dietType === 'vegan' ? '- No animal products at all' : ''}
-${dietType === 'low_carb' ? '- Keep carbs moderate, focus on vegetables for carbs' : ''}
+${dietType === 'keto' ? '- Keep carbs under 20-50g per day total. Focus on proteins and healthy fats from both cuisines.' : ''}
+${dietType === 'high_protein' ? '- Prioritize protein-rich foods: Suya, Kilishi, Chicken, Fish, Eggs, Greek Yogurt' : ''}
+${dietType === 'vegetarian' ? '- No meat or fish. Use: Moi Moi, Akara, Eggs, Tofu, Greek Yogurt, Beans, Egusi (for vegetarians)' : ''}
+${dietType === 'vegan' ? '- No animal products. Use: Moi Moi, Akara, Tofu, Tempeh, Beans, Plantain, Vegetables' : ''}
+${dietType === 'low_carb' ? '- Keep carbs moderate. Focus on proteins and non-starchy vegetables from both cuisines' : ''}
 
 MEAL TYPES TO INCLUDE: ${mealTypes.join(', ')}
 
-Create a 7-day meal plan using ONLY foods from the ${cuisine} database. Each meal must have realistic portion sizes and accurate nutritional information.`;
+VARIETY REQUIREMENTS:
+- Each day must have different main dishes
+- Don't repeat the same meal on consecutive days
+- Mix cooking styles: grilled, stewed, boiled, baked
+- Include a variety of proteins, carbs, and vegetables across the week
 
-    const userPrompt = `Create a personalized 7-day ${cuisine} meal plan for a ${gender || 'person'} with a ${goal.replace('_', ' ')} goal.
+Create a 7-day meal plan using foods from the unified database. Each meal must have realistic portion sizes and accurate nutritional information.`;
 
+    const userPrompt = `Create a personalized 7-day meal plan for a ${gender || 'person'} with a ${goal.replace('_', ' ')} goal.
+
+Regional preference: ${regionalFocus === 'african' ? 'Prioritize Nigerian/African foods' : 'Balanced mix of International and African foods'}
 Daily target: ${dailyCalories} calories
 Diet approach: ${dietType}
 Include these meals each day: ${mealTypes.join(', ')}
 ${restrictions.length > 0 ? `Avoid: ${restrictions.join(', ')}` : ''}
 
-Generate varied, delicious meals that hit the macro targets while being practical to prepare.`;
+Generate varied, delicious meals that hit the macro targets while being practical to prepare. Mix cuisines intelligently based on the regional preference.`;
 
     console.log("Calling Lovable AI Gateway...");
 

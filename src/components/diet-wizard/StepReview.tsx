@@ -1,12 +1,12 @@
 import {
   DietGoal,
   DietType,
-  CuisinePreference,
+  RegionalFocus,
   DietaryRestriction,
   MealType,
   GOAL_LABELS,
   DIET_TYPE_LABELS,
-  CUISINE_LABELS,
+  REGIONAL_FOCUS_LABELS,
   RESTRICTION_LABELS,
   MEAL_TYPE_LABELS,
 } from '@/types/diet';
@@ -21,7 +21,7 @@ interface StepReviewProps {
   dietType: DietType | '';
   restrictions: DietaryRestriction[];
   mealTypes: MealType[];
-  cuisine: CuisinePreference | '';
+  regionalFocus: RegionalFocus;
 }
 
 export function StepReview({
@@ -30,7 +30,7 @@ export function StepReview({
   dietType,
   restrictions,
   mealTypes,
-  cuisine,
+  regionalFocus,
 }: StepReviewProps) {
   const { profile, tdee } = useProfile();
 
@@ -109,16 +109,16 @@ export function StepReview({
           </CardContent>
         </Card>
 
-        {/* Cuisine */}
+        {/* Regional Focus */}
         <Card>
           <CardHeader className="pb-1 sm:pb-2 p-3 sm:p-6">
             <CardTitle className="text-xs sm:text-sm font-medium flex items-center gap-1 sm:gap-2">
               <Globe className="w-3 h-3 sm:w-4 sm:h-4" />
-              Cuisine
+              Food Style
             </CardTitle>
           </CardHeader>
           <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
-            <p className="text-sm sm:text-lg font-bold">{cuisine ? CUISINE_LABELS[cuisine] : 'Not set'}</p>
+            <p className="text-sm sm:text-lg font-bold">{REGIONAL_FOCUS_LABELS[regionalFocus]}</p>
           </CardContent>
         </Card>
       </div>
