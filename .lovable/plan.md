@@ -1,371 +1,239 @@
 
-# Enhanced Diet Generator - Diverse Food Mix & Editing
 
-## Overview
-Expand the diet generator with a massive, truly diverse food database mixing Nigerian and international foods, implement proper meal-time proportions (light breakfast, proper snacks with fruits), and add full meal editing capabilities.
+# Enhanced Diet Generator - Smart Meal Pairing & Custom Food Addition
 
----
+## Problem Statement
 
-## Phase 1: Massive Food Database Expansion
+1. **Illogical Meal Combinations**: The AI generates culturally inappropriate meal pairings like "boiled yam with ogbono soup" for breakfast. Ogbono soup is a heavy, draw-style soup typically eaten for lunch/dinner with swallows (eba, pounded yam, amala), not with boiled yam and certainly not for breakfast.
 
-### Update Edge Function with 150+ Foods
-
-Expand `supabase/functions/generate-diet/index.ts` with a unified database:
-
-**PROTEINS - Mixed (40+ items)**
-```text
-=== PROTEINS ===
-# International
-- Grilled Chicken Breast: 165 cal/100g, 31g P, 0g C, 3.6g F
-- Salmon Fillet: 208 cal/100g, 20g P, 0g C, 13g F
-- Turkey Breast: 135 cal/100g, 30g P, 0g C, 1g F
-- Tuna Steak: 132 cal/100g, 28g P, 0g C, 1g F
-- Shrimp: 99 cal/100g, 24g P, 0g C, 0.3g F
-- Cod Fillet: 82 cal/100g, 18g P, 0g C, 0.7g F
-- Lean Ground Beef: 176 cal/100g, 20g P, 0g C, 10g F
-- Pork Tenderloin: 143 cal/100g, 26g P, 0g C, 3.5g F
-- Lamb Chops: 250 cal/100g, 25g P, 0g C, 16g F
-- Duck Breast: 135 cal/100g, 19g P, 0g C, 6g F
-- Greek Yogurt: 97 cal/100g, 9g P, 3.6g C, 5g F
-- Cottage Cheese: 98 cal/100g, 11g P, 3.4g C, 4.3g F
-- Eggs (2 large): 143 cal, 13g P, 1g C, 10g F
-- Whey Protein Shake: 120 cal/scoop, 24g P, 3g C, 1g F
-
-# Nigerian/African
-- Suya (grilled spiced beef): 250 cal/100g, 25g P, 5g C, 15g F
-- Kilishi (dried beef jerky): 300 cal/100g, 35g P, 8g C, 14g F
-- Grilled Tilapia: 128 cal/100g, 26g P, 0g C, 2.5g F
-- Catfish Pepper Soup: 160 cal/serving, 24g P, 4g C, 5g F
-- Smoked Fish (Eja Sise): 290 cal/100g, 52g P, 0g C, 12g F
-- Stockfish: 290 cal/100g, 62g P, 0g C, 2.5g F
-- Dried Prawns (Crayfish): 280 cal/100g, 60g P, 2g C, 3g F
-- Goat Meat Stew: 143 cal/100g, 27g P, 0g C, 3g F
-- Asun (spiced goat): 220 cal/100g, 24g P, 3g C, 12g F
-- Chicken Pepper Soup: 180 cal/serving, 22g P, 8g C, 6g F
-- Nkwobi (spiced cow foot): 200 cal/serving, 18g P, 5g C, 12g F
-- Ponmo (cow skin): 110 cal/100g, 25g P, 0g C, 0.5g F
-- Guinea Fowl: 160 cal/100g, 28g P, 0g C, 5g F
-- Snail (Igbin): 90 cal/100g, 16g P, 2g C, 1.5g F
-```
-
-**CARBOHYDRATES - Mixed (30+ items)**
-```text
-=== CARBOHYDRATES ===
-# International
-- Brown Rice: 123 cal/100g, 2.7g P, 26g C, 1g F
-- Quinoa: 120 cal/100g, 4.4g P, 21g C, 1.9g F
-- Sweet Potato: 86 cal/100g, 1.6g P, 20g C, 0.1g F
-- Oatmeal: 68 cal/100g, 2.4g P, 12g C, 1.4g F
-- Whole Wheat Bread: 247 cal/100g, 13g P, 41g C, 4g F
-- Basmati Rice: 130 cal/100g, 2.7g P, 28g C, 0.3g F
-- Whole Wheat Pasta: 124 cal/100g, 5g P, 25g C, 0.5g F
-- Couscous: 112 cal/100g, 3.8g P, 23g C, 0.2g F
-- Bulgur Wheat: 83 cal/100g, 3g P, 19g C, 0.2g F
-
-# Nigerian/African
-- Jollof Rice: 180 cal/100g, 4g P, 32g C, 4g F
-- Ofada Rice: 130 cal/100g, 2.5g P, 28g C, 0.5g F
-- Fried Rice: 200 cal/100g, 5g P, 30g C, 6g F
-- Pounded Yam: 118 cal/100g, 1.5g P, 28g C, 0.1g F
-- Amala: 120 cal/100g, 2g P, 28g C, 0.3g F
-- Eba (Garri): 160 cal/100g, 0.5g P, 38g C, 0.5g F
-- Fufu: 120 cal/100g, 1g P, 28g C, 0.5g F
-- Tuwo Shinkafa: 115 cal/100g, 2g P, 25g C, 0.3g F
-- Boiled Yam: 118 cal/100g, 1.5g P, 28g C, 0.1g F
-- Fried Plantain (Dodo): 150 cal/100g, 1g P, 35g C, 2g F
-- Boiled Plantain: 122 cal/100g, 1g P, 32g C, 0.4g F
-- Moi Moi: 180 cal/serving, 9g P, 18g C, 8g F
-- Akara (3 pieces): 170 cal, 6g P, 15g C, 10g F
-- Agidi/Eko: 90 cal/100g, 1g P, 20g C, 0.5g F
-- Masa (rice cakes): 150 cal/3 pieces, 3g P, 25g C, 4g F
-```
-
-**FRUITS - Extensive (25+ items)**
-```text
-=== FRUITS ===
-# Universal Fruits
-- Banana: 89 cal/medium, 1g P, 23g C, 0.3g F
-- Apple: 95 cal/medium, 0.5g P, 25g C, 0.3g F
-- Orange: 62 cal/medium, 1g P, 15g C, 0.2g F
-- Strawberries: 32 cal/100g, 0.7g P, 8g C, 0.3g F
-- Blueberries: 57 cal/100g, 0.7g P, 14g C, 0.3g F
-- Raspberries: 52 cal/100g, 1.2g P, 12g C, 0.7g F
-- Mango: 60 cal/100g, 0.8g P, 15g C, 0.4g F
-- Pineapple: 50 cal/100g, 0.5g P, 13g C, 0.1g F
-- Watermelon: 30 cal/100g, 0.6g P, 8g C, 0.2g F
-- Grapes: 69 cal/100g, 0.7g P, 18g C, 0.2g F
-- Kiwi: 61 cal/100g, 1g P, 15g C, 0.5g F
-- Grapefruit: 42 cal/100g, 0.8g P, 11g C, 0.1g F
-- Pear: 57 cal/medium, 0.4g P, 15g C, 0.1g F
-- Cantaloupe: 34 cal/100g, 0.8g P, 8g C, 0.2g F
-- Peach: 39 cal/medium, 0.9g P, 10g C, 0.3g F
-
-# African Fruits
-- Pawpaw (Papaya): 43 cal/100g, 0.5g P, 11g C, 0.3g F
-- African Star Apple (Agbalumo): 67 cal/100g, 1g P, 16g C, 0.4g F
-- Soursop: 66 cal/100g, 1g P, 17g C, 0.3g F
-- African Pear (Ube): 150 cal/100g, 2g P, 12g C, 10g F
-- Guava: 68 cal/100g, 2.5g P, 14g C, 1g F
-- African Cherry: 45 cal/100g, 0.8g P, 11g C, 0.3g F
-- Coconut (fresh): 354 cal/100g, 3g P, 15g C, 33g F
-- Tangerine: 53 cal/medium, 0.8g P, 13g C, 0.3g F
-```
-
-**HEALTHY SNACKS (30+ items)**
-```text
-=== HEALTHY SNACKS ===
-# Quick Protein Snacks
-- Greek Yogurt with Berries: 120 cal, 12g P, 15g C, 2g F
-- Boiled Eggs (2): 140 cal, 12g P, 1g C, 10g F
-- Cottage Cheese with Fruit: 150 cal, 14g P, 15g C, 3g F
-- Protein Bar: 200 cal, 20g P, 20g C, 6g F
-- String Cheese (2 sticks): 160 cal, 14g P, 2g C, 10g F
-- Beef Jerky: 116 cal/30g, 10g P, 3g C, 7g F
-
-# Nuts & Seeds
-- Almonds (handful): 164 cal/28g, 6g P, 6g C, 14g F
-- Cashews (handful): 157 cal/28g, 5g P, 9g C, 12g F
-- Walnuts (handful): 185 cal/28g, 4g P, 4g C, 18g F
-- Pumpkin Seeds: 151 cal/28g, 7g P, 5g C, 13g F
-- Mixed Nuts: 172 cal/28g, 5g P, 6g C, 15g F
-- Trail Mix: 180 cal/quarter cup, 5g P, 15g C, 12g F
-
-# Fruit-Based Snacks
-- Apple with Peanut Butter: 200 cal, 5g P, 25g C, 10g F
-- Banana with Almond Butter: 230 cal, 5g P, 30g C, 12g F
-- Mixed Fruit Bowl: 100 cal, 1g P, 25g C, 0.5g F
-- Berry Smoothie: 150 cal, 4g P, 28g C, 3g F
-- Frozen Grapes: 62 cal/100g, 0.6g P, 16g C, 0.3g F
-
-# Nigerian Snacks
-- Kulikuli (groundnut snack): 150 cal/30g, 7g P, 8g C, 11g F
-- Tiger Nuts (Aya): 120 cal/30g, 2g P, 15g C, 7g F
-- Garden Egg with Palm Oil: 80 cal, 2g P, 8g C, 5g F
-- Roasted Groundnuts: 170 cal/30g, 8g P, 5g C, 14g F
-- Coconut Chunks: 180 cal/50g, 2g P, 8g C, 17g F
-- Dried Mango Slices: 80 cal/30g, 1g P, 20g C, 0g F
-- Toasted Cashews: 160 cal/28g, 5g P, 9g C, 13g F
-
-# Light Snacks
-- Rice Cakes with Avocado: 100 cal, 2g P, 12g C, 5g F
-- Hummus with Veggies: 130 cal, 4g P, 15g C, 6g F
-- Edamame: 120 cal/100g, 11g P, 9g C, 5g F
-- Dark Chocolate (70%): 170 cal/30g, 2g P, 13g C, 12g F
-- Zobo (hibiscus drink): 20 cal/cup, 0g P, 5g C, 0g F
-```
-
-**SOUPS & VEGETABLES (25+ items)**
-```text
-=== NIGERIAN SOUPS ===
-- Egusi Soup: 250 cal/serving, 12g P, 8g C, 20g F
-- Okra Soup: 80 cal/serving, 4g P, 10g C, 3g F
-- Efo Riro: 180 cal/serving, 8g P, 6g C, 14g F
-- Ogbono Soup: 200 cal/serving, 10g P, 8g C, 15g F
-- Afang Soup: 150 cal/serving, 8g P, 5g C, 11g F
-- Edikang Ikong: 160 cal/serving, 10g P, 6g C, 11g F
-- Banga Soup: 280 cal/serving, 8g P, 10g C, 24g F
-- Pepper Soup: 120 cal/serving, 15g P, 5g C, 4g F
-- Oha Soup: 170 cal/serving, 9g P, 7g C, 13g F
-- Nsala (White Soup): 200 cal/serving, 12g P, 6g C, 15g F
-- Groundnut Soup: 220 cal/serving, 10g P, 12g C, 16g F
-- Miyan Kuka: 150 cal/serving, 7g P, 8g C, 10g F
-
-=== VEGETABLES ===
-- Broccoli: 34 cal/100g, 2.8g P, 7g C, 0.4g F
-- Spinach: 23 cal/100g, 2.9g P, 3.6g C, 0.4g F
-- Mixed Salad: 20 cal/100g, 1.5g P, 3g C, 0.2g F
-- Ugu (Pumpkin Leaves): 30 cal/100g, 3g P, 4g C, 0.5g F
-- Water Leaf: 25 cal/100g, 2g P, 4g C, 0.3g F
-- Ewedu: 25 cal/100g, 2g P, 3g C, 0.5g F
-- Bitter Leaf: 20 cal/100g, 2g P, 3g C, 0.3g F
-- Scent Leaf: 22 cal/100g, 2g P, 3g C, 0.3g F
-- Garden Egg: 25 cal/100g, 1g P, 6g C, 0.1g F
-- Cucumber: 16 cal/100g, 0.7g P, 4g C, 0.1g F
-- Carrots: 41 cal/100g, 0.9g P, 10g C, 0.2g F
-```
+2. **Missing Add Food Feature**: Users can only remove foods when editing but cannot add their own custom meals or substitute foods.
 
 ---
 
-## Phase 2: Proportional Meal-Time Logic
+## Solution Overview
 
-### Add Calorie Distribution Rules
+### Phase 1: Improve AI Meal Pairing Logic
 
-```text
-MEAL-TIME CALORIE DISTRIBUTION:
+Update the edge function prompt with explicit **Nigerian meal pairing rules** to teach the AI:
 
-BREAKFAST (6:30-8:00 AM) - 15-20% of daily calories
-├── Characteristics: Light, energizing, easy to digest
-├── Structure: 1 protein + 1 carb OR fruit + optional light side
-├── Examples:
-│   ├── Oatmeal + Banana + Boiled Eggs
-│   ├── Akara + Pap + Pawpaw
-│   ├── Toast + Scrambled Eggs + Orange
-│   └── Greek Yogurt + Berries + Almonds
+**Swallow + Soup Pairings (Lunch/Dinner ONLY):**
+- Eba, Pounded Yam, Amala, Fufu, Tuwo → Pair with: Egusi, Ogbono, Efo Riro, Afang, Edikang Ikong, Banga
+- NEVER for breakfast
+- Soups are NOT sides - they ARE the protein/vegetable component
 
-MID-MORNING SNACK (10:00 AM) - 150-200 cal max
-├── Characteristics: Fruit-focused, simple, 1-2 items only
-├── Examples:
-│   ├── Apple + Almonds
-│   ├── Banana
-│   ├── Mixed Fruit Bowl
-│   └── Orange + Tiger Nuts
+**Yam/Plantain Rules:**
+- Boiled Yam → Pair with: Egg sauce, Fried eggs, Fish stew, Palm oil sauce
+- NOT with draw soups (ogbono, okra) - that's wrong culturally
+- Fried Plantain (Dodo) → Goes with: Jollof rice, Fried rice, Beans, Eggs
 
-LUNCH (12:30-1:30 PM) - 25-30% of daily calories
-├── Characteristics: Substantial, balanced, main meal energy
-├── Structure: Protein + Carb + Vegetable/Soup
-├── Examples:
-│   ├── Grilled Chicken + Brown Rice + Steamed Veggies
-│   ├── Jollof Rice + Grilled Fish + Salad
-│   ├── Eba + Egusi Soup + Assorted Meat
-│   └── Quinoa Bowl + Salmon + Roasted Vegetables
+**Breakfast Appropriate Foods:**
+- International: Oatmeal, Eggs, Toast, Greek Yogurt, Smoothies
+- Nigerian: Akara + Pap, Moi Moi + Custard, Bread + Eggs, Tea + Bread
 
-AFTERNOON SNACK (3:30-4:00 PM) - 150-250 cal max
-├── Characteristics: Protein-focused, sustaining, 1-3 items
-├── Examples:
-│   ├── Greek Yogurt + Berries
-│   ├── Kulikuli + Tangerine
-│   ├── Boiled Eggs + Cucumber
-│   └── Protein Bar
+**Snack Rules (Already Present but Need Reinforcement):**
+- Snacks are NEVER swallow + soup combinations
+- Snacks should be simple, portable, 1-3 items max
 
-DINNER (7:00-8:00 PM) - 25-35% of daily calories
-├── Characteristics: Protein-heavy, moderate carbs, satisfying
-├── Structure: Larger protein + moderate carb + vegetables
-├── Examples:
-│   ├── Grilled Steak + Sweet Potato + Asparagus
-│   ├── Catfish Pepper Soup + Boiled Plantain
-│   ├── Suya + Salad + Small Rice
-│   └── Turkey + Amala + Efo Riro
+### Phase 2: Add Custom Food Modal
 
-EVENING SNACK (9:00 PM - optional) - 100-150 cal max
-├── Characteristics: Light, protein-based, no heavy carbs
-├── Examples:
-│   ├── Cottage Cheese
-│   ├── Small handful of Almonds
-│   ├── Protein Shake (half scoop)
-│   └── Boiled Egg
-```
+Create an `AddFoodModal` component that allows users to:
 
-### Snack-Specific Constraints
+1. **Search from the food database** - Quick-add common foods
+2. **Add custom foods** - Enter name, portion, calories, protein, carbs, fat manually
+3. **Add to specific meal** - Select which meal to add the food to
 
-```text
-SNACK RULES:
-1. Maximum 3 items per snack
-2. Each day must have at least 1 fruit-based snack
-3. Morning snack: prioritize fruits
-4. Afternoon snack: prioritize protein + fruit/nuts
-5. Snacks must be "grab-and-go" portable items
-6. Avoid heavy/oily snacks
-```
+**New State in DietGenerator:**
+- `showAddFoodModal: boolean`
+- `addFoodMealIndex: number` (which meal to add to)
+
+**New Handler:**
+- `handleAddFood(food: Food)` - Adds food to the specified meal and recalculates totals
 
 ---
 
-## Phase 3: Meal Editing Capabilities
-
-### Task 3.1: Add Editing State to DietGenerator
-
-Update `src/components/DietGenerator.tsx`:
-
-**New State:**
-```typescript
-const [isEditing, setIsEditing] = useState(false);
-```
-
-**New Handlers:**
-```typescript
-// Remove a specific food from a meal
-const handleRemoveFood = (dayIndex: number, mealIndex: number, foodIndex: number) => {
-  if (!generatedPlan) return;
-  
-  const updatedPlan = { ...generatedPlan };
-  const day = { ...updatedPlan.mealPlan[dayIndex] };
-  const meal = { ...day.meals[mealIndex] };
-  
-  // Remove the food
-  const removedFood = meal.foods[foodIndex];
-  meal.foods = meal.foods.filter((_, i) => i !== foodIndex);
-  
-  // Recalculate day totals
-  day.totalCalories -= removedFood.calories;
-  day.totalProtein -= removedFood.protein;
-  day.totalCarbs -= removedFood.carbs;
-  day.totalFat -= removedFood.fat;
-  
-  day.meals[mealIndex] = meal;
-  updatedPlan.mealPlan[dayIndex] = day;
-  
-  setGeneratedPlan(updatedPlan);
-  toast.success(`Removed ${removedFood.name}`);
-};
-
-// Remove entire meal
-const handleRemoveMeal = (dayIndex: number, mealIndex: number) => {
-  if (!generatedPlan) return;
-  
-  const updatedPlan = { ...generatedPlan };
-  const day = { ...updatedPlan.mealPlan[dayIndex] };
-  const removedMeal = day.meals[mealIndex];
-  
-  // Subtract meal totals from day
-  const mealCals = removedMeal.foods.reduce((s, f) => s + f.calories, 0);
-  const mealProtein = removedMeal.foods.reduce((s, f) => s + f.protein, 0);
-  const mealCarbs = removedMeal.foods.reduce((s, f) => s + f.carbs, 0);
-  const mealFat = removedMeal.foods.reduce((s, f) => s + f.fat, 0);
-  
-  day.totalCalories -= mealCals;
-  day.totalProtein -= mealProtein;
-  day.totalCarbs -= mealCarbs;
-  day.totalFat -= mealFat;
-  
-  day.meals = day.meals.filter((_, i) => i !== mealIndex);
-  updatedPlan.mealPlan[dayIndex] = day;
-  
-  setGeneratedPlan(updatedPlan);
-  toast.success(`Removed ${removedMeal.name}`);
-};
-```
-
-**UI Updates:**
-- Add "Edit" toggle button in the generated plan header
-- Pass `isEditing`, `onRemoveFood`, `onRemoveMeal` to MealCard
-- Show deficit/surplus indicator when totals change
-
-### Task 3.2: Enhanced MealCard Component
-
-Update `src/components/MealCard.tsx`:
-
-**New Props:**
-```typescript
-interface MealCardProps {
-  meal: Meal;
-  isEditing?: boolean;
-  onRemoveFood?: (foodIndex: number) => void;
-  onRemoveMeal?: () => void;
-}
-```
-
-**Enhanced UI:**
-- Add "Remove Meal" button when editing
-- Show visual indicator for edit mode (border color)
-- Animate food removal
-- Show warning if meal becomes empty
-
----
-
-## Implementation Summary
+## Technical Implementation
 
 ### Files to Modify
 
 | File | Changes |
 |------|---------|
-| `supabase/functions/generate-diet/index.ts` | Expand to 150+ foods, add meal-time rules, fruits, snacks, mixing instructions |
-| `src/components/DietGenerator.tsx` | Add editing state, handlers, UI toggle |
-| `src/components/MealCard.tsx` | Add onRemoveMeal prop, enhanced edit mode UI |
+| `supabase/functions/generate-diet/index.ts` | Add Nigerian meal pairing rules to the prompt |
+| `src/components/DietGenerator.tsx` | Add state and handlers for custom food addition |
+| `src/components/MealCard.tsx` | Add "Add Food" button when editing |
+| **NEW** `src/components/AddFoodModal.tsx` | Modal for adding custom foods |
 
-### Expected Outcomes
+---
 
-1. **Food Variety**: 150+ foods naturally mixing Nigerian & international cuisines
-2. **Proper Portions**: Breakfast light (15-20%), snacks 150-300 cal max
-3. **Fruits Included**: At least 1-2 fruit snacks per day
-4. **Snacks Done Right**: Simple, 1-3 item grab-and-go snacks
-5. **Editable Plans**: Remove foods/meals with auto-recalculation
-6. **Visual Feedback**: See calorie changes in real-time when editing
+### Phase 1: Edge Function Prompt Improvements
+
+Add these explicit rules to the system prompt:
+
+```text
+=== NIGERIAN MEAL PAIRING RULES (CRITICAL) ===
+
+SWALLOW + SOUP COMBINATIONS (Lunch/Dinner ONLY):
+- Swallows: Eba, Pounded Yam, Amala, Fufu, Tuwo Shinkafa, Starch
+- Pair ONLY with: Egusi, Ogbono, Efo Riro, Afang, Edikang Ikong, Oha, Banga, Nsala
+- The soup IS the protein/vegetable - do NOT add extra protein
+- NEVER serve swallow+soup for breakfast
+
+BOILED YAM PAIRINGS:
+- Good: Egg sauce, Fried eggs, Fish stew (tomato-based), Pepper sauce
+- BAD: Ogbono soup, Egusi soup, Okra soup (these need swallows)
+
+FRIED PLANTAIN (DODO) PAIRINGS:
+- Good: Jollof rice, Fried rice, Beans, Scrambled eggs, Stew
+- Can be a side dish or standalone snack
+
+RICE PAIRINGS:
+- Jollof Rice → With: Grilled/fried chicken, Fish, Plantain, Salad
+- Fried Rice → With: Chicken, Beef, Shrimp, Plantain
+- White Rice → With: Stews (tomato, chicken, beef), Beans
+
+BREAKFAST APPROPRIATE (Nigerian):
+- Akara + Pap (Ogi)
+- Moi Moi + Custard or Pap
+- Bread + Eggs (scrambled, fried, omelette)
+- Bread + Beans
+- Yam + Egg sauce or Fried eggs
+- Tea + Bread/Toast
+
+BREAKFAST INAPPROPRIATE:
+- Swallow + Soup (too heavy, wrong time)
+- Jollof Rice (lunch/dinner food)
+- Pepper Soup (evening food)
+
+SNACKS MUST BE:
+- Simple (1-3 items max)
+- Portable and quick
+- NOT full meals (no rice, swallow, soup)
+- Examples: Fruits, Nuts, Kulikuli, Tiger nuts, Greek yogurt, Boiled eggs
+```
+
+### Phase 2: AddFoodModal Component
+
+Create a new modal component with:
+
+**Structure:**
+- Two tabs: "Search Foods" and "Custom Food"
+- Search Foods tab: Searchable list of common foods from database
+- Custom Food tab: Form with inputs for name, portion, calories, protein, carbs, fat
+
+**Common Foods Database (Client-Side Quick Access):**
+```typescript
+const COMMON_FOODS: Food[] = [
+  // Proteins
+  { name: 'Grilled Chicken Breast', portion: '100g', calories: 165, protein: 31, carbs: 0, fat: 4 },
+  { name: 'Boiled Eggs (2)', portion: '2 large', calories: 140, protein: 12, carbs: 1, fat: 10 },
+  { name: 'Grilled Fish', portion: '150g', calories: 180, protein: 30, carbs: 0, fat: 6 },
+  // Carbs
+  { name: 'Brown Rice', portion: '150g', calories: 185, protein: 4, carbs: 39, fat: 1.5 },
+  { name: 'Boiled Yam', portion: '150g', calories: 177, protein: 2, carbs: 42, fat: 0.2 },
+  // Fruits
+  { name: 'Banana', portion: '1 medium', calories: 89, protein: 1, carbs: 23, fat: 0.3 },
+  { name: 'Apple', portion: '1 medium', calories: 95, protein: 0.5, carbs: 25, fat: 0.3 },
+  // Snacks
+  { name: 'Greek Yogurt', portion: '150g', calories: 145, protein: 13, carbs: 5, fat: 7 },
+  { name: 'Almonds', portion: '28g', calories: 164, protein: 6, carbs: 6, fat: 14 },
+  // ... 30+ more items
+];
+```
+
+**Modal Props:**
+```typescript
+interface AddFoodModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onAddFood: (food: Food) => void;
+  mealName: string;
+}
+```
+
+### Phase 3: DietGenerator Updates
+
+**New State:**
+```typescript
+const [showAddFoodModal, setShowAddFoodModal] = useState(false);
+const [addFoodMealIndex, setAddFoodMealIndex] = useState<number | null>(null);
+```
+
+**New Handler:**
+```typescript
+const handleAddFood = (food: Food) => {
+  if (!generatedPlan || addFoodMealIndex === null) return;
+  
+  const updatedPlan = { ...generatedPlan };
+  const day = { ...updatedPlan.mealPlan[selectedDayIndex] };
+  const meal = { ...day.meals[addFoodMealIndex] };
+  
+  // Add the food
+  meal.foods = [...meal.foods, food];
+  
+  // Recalculate day totals
+  day.totalCalories += food.calories;
+  day.totalProtein += food.protein;
+  day.totalCarbs += food.carbs;
+  day.totalFat += food.fat;
+  
+  day.meals[addFoodMealIndex] = meal;
+  updatedPlan.mealPlan[selectedDayIndex] = day;
+  
+  setGeneratedPlan(updatedPlan);
+  setShowAddFoodModal(false);
+  setAddFoodMealIndex(null);
+  toast.success(`Added ${food.name}`);
+};
+```
+
+### Phase 4: MealCard Updates
+
+Add "Add Food" button when in edit mode:
+
+```tsx
+{isEditing && onAddFood && (
+  <Button
+    variant="outline"
+    size="sm"
+    className="w-full mt-2"
+    onClick={onAddFood}
+  >
+    <Plus className="w-4 h-4 mr-1" />
+    Add Food
+  </Button>
+)}
+```
+
+**New Prop:**
+```typescript
+onAddFood?: () => void;
+```
+
+---
+
+## Files to Create/Modify Summary
+
+| File | Action | Description |
+|------|--------|-------------|
+| `supabase/functions/generate-diet/index.ts` | Modify | Add Nigerian meal pairing rules to prompt |
+| `src/components/AddFoodModal.tsx` | Create | Modal for adding custom foods |
+| `src/components/DietGenerator.tsx` | Modify | Add state/handlers for custom food addition |
+| `src/components/MealCard.tsx` | Modify | Add "Add Food" button in edit mode |
+| `src/data/commonFoods.ts` | Create | Client-side food database for quick-add |
+
+---
+
+## Expected Outcomes
+
+1. **Smarter Meal Generation**: AI will create culturally appropriate meal combinations
+   - Breakfast: Light, energizing (Akara + Pap, Oatmeal + Eggs)
+   - Lunch/Dinner: Proper pairings (Eba + Egusi, Jollof + Chicken)
+   - Snacks: Simple, portable (Fruits, Nuts, Kulikuli)
+
+2. **Full Editing Capability**: Users can:
+   - Remove foods they don't like (already working)
+   - Remove entire meals (already working)
+   - Add foods from a searchable database (new)
+   - Add custom foods with manual macro entry (new)
+
+3. **Real-Time Recalculation**: All totals update automatically when adding/removing foods
+
