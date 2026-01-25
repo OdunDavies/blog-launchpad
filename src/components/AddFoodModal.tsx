@@ -100,7 +100,7 @@ export function AddFoodModal({ isOpen, onClose, onAddFood, mealName }: AddFoodMo
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-md max-h-[85vh] flex flex-col">
+      <DialogContent className="max-w-md max-h-[85vh] flex flex-col overflow-hidden">
         <DialogHeader>
           <DialogTitle>Add Food to {mealName}</DialogTitle>
         </DialogHeader>
@@ -140,7 +140,7 @@ export function AddFoodModal({ isOpen, onClose, onAddFood, mealName }: AddFoodMo
             </div>
             
             {/* Food List */}
-            <ScrollArea className="flex-1 -mx-4 px-4">
+            <ScrollArea className="flex-1 -mx-4 px-4 min-h-0">
               <div className="space-y-1">
                 {getFilteredFoods().map((food, index) => (
                   <button

@@ -212,8 +212,14 @@ body {
   overflow-y: visible;
 }
 
-/* Remove any scroll locks that might be applied by modals/dialogs */
-html:not(.modal-open),
-html:not(.modal-open) body {
-  overflow-y: scroll !important;
+/* Mobile-friendly scrolling for modals and scroll areas */
+[data-radix-scroll-area-viewport] {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+/* Ensure dialogs don't block touch scrolling */
+[data-radix-dialog-content] {
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
