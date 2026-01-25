@@ -429,6 +429,57 @@ export const exercises: Exercise[] = [
     category: 'legs',
     imageUrl: 'https://liftmanual.com/wp-content/uploads/2023/04/barbell-hip-thrust.jpg'
   },
+  {
+    id: 'sumo-squat',
+    name: 'Sumo Squat',
+    primaryMuscles: ['quads', 'glutes'],
+    secondaryMuscles: ['hamstrings', 'abs'],
+    equipment: 'Barbell, Dumbbell, or Bodyweight',
+    difficulty: 'beginner',
+    videoUrl: 'https://www.youtube.com/embed/9ZuXKqRbT9k',
+    instructions: [
+      'Stand with feet wider than shoulder-width, toes pointed out 45 degrees',
+      'Keep chest up and core engaged',
+      'Lower by pushing hips back and bending knees',
+      'Descend until thighs are parallel or below',
+      'Drive through heels to stand'
+    ],
+    category: 'legs'
+  },
+  {
+    id: 'step-ups',
+    name: 'Step Ups',
+    primaryMuscles: ['quads', 'glutes'],
+    secondaryMuscles: ['hamstrings', 'calves'],
+    equipment: 'Bench or Box, Dumbbells (optional)',
+    difficulty: 'beginner',
+    videoUrl: 'https://www.youtube.com/embed/dQqApCGd5Ss',
+    instructions: [
+      'Stand facing a sturdy bench or box',
+      'Step up with one foot, driving through the heel',
+      'Bring the other foot up to stand on platform',
+      'Step back down with control',
+      'Alternate legs or complete all reps on one side'
+    ],
+    category: 'legs'
+  },
+  {
+    id: 'bulgarian-split-squat',
+    name: 'Bulgarian Split Squat',
+    primaryMuscles: ['quads', 'glutes'],
+    secondaryMuscles: ['hamstrings'],
+    equipment: 'Bench, Dumbbells (optional)',
+    difficulty: 'intermediate',
+    videoUrl: 'https://www.youtube.com/embed/2C-uNgKwPLE',
+    instructions: [
+      'Stand about 2 feet in front of a bench',
+      'Place rear foot on bench behind you',
+      'Lower until front thigh is parallel to ground',
+      'Keep torso upright and core tight',
+      'Push through front heel to stand'
+    ],
+    category: 'legs'
+  },
 
   // CORE
   {
