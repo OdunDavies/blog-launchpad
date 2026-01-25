@@ -454,7 +454,7 @@ export const exercises: Exercise[] = [
     secondaryMuscles: ['hamstrings', 'calves'],
     equipment: 'Bench or Box, Dumbbells (optional)',
     difficulty: 'beginner',
-    videoUrl: 'https://www.youtube.com/embed/DeCnHqrN22U',
+    videoUrl: 'https://www.youtube.com/embed/vLgNjXucUs0',
     instructions: [
       'Stand facing a sturdy bench or box',
       'Step up with one foot, driving through the heel',
