@@ -1,324 +1,231 @@
 
+# Mobile UI/UX Optimization Plan
 
-# AI Diet Plan Generator - Complete Implementation Plan
-
-## Overview
-This plan outlines the complete implementation of an AI-powered Diet Plan Generator for MuscleAtlas, following the established patterns from the existing Workout Generator while incorporating the previously designed features from the user profile system and diet generation logic.
+## Problem Summary
+The MuscleAtlas app has several components that don't adapt well to mobile screens (< 768px), causing cramped layouts, text overflow, and poor touch targets. This plan addresses all mobile UX issues across the application.
 
 ---
 
-## Architecture Summary
+## Phase 1: Main Navigation Tabs
+
+### Task 1.1: Responsive Tab Navigation
+**File:** `src/pages/Index.tsx`
+
+Current issue: 5 tabs in `grid-cols-5` become unreadable on mobile.
+
+**Solution:**
+- On mobile: Show only icons (no text labels)
+- Add horizontal scroll capability for very small screens
+- Increase touch target size for mobile
 
 ```text
-+------------------+     +-------------------+     +--------------------+
-|   Index.tsx      |     |   DietGenerator   |     |  generate-diet     |
-|   (Add Tab)      | --> |   (Wizard UI)     | --> |  (Edge Function)   |
-+------------------+     +-------------------+     +--------------------+
-        |                        |                         |
-        v                        v                         v
-+------------------+     +-------------------+     +--------------------+
-| ProfileContext   |     | Diet Wizard Steps |     | Lovable AI Gateway |
-| (Global State)   |     | (7 Components)    |     | (Gemini 2.5 Flash) |
-+------------------+     +-------------------+     +--------------------+
+Mobile View:
+[📚] [📋] [✨] [🥗] [📝]
+
+Desktop View:
+[📚 Library] [📋 Templates] [✨ AI Workout] [🥗 AI Diet] [📝 Tracker]
+```
+
+**Changes:**
+- Update TabsList to use `overflow-x-auto` with `scrollbar-hide` on mobile
+- Hide ALL tab text on mobile (not just partial words)
+- Use `flex` instead of `grid` for more flexible spacing
+- Increase TabsTrigger padding for better touch targets
+
+---
+
+## Phase 2: Active Workout Tracker
+
+### Task 2.1: Mobile-Optimized Set Logging
+**File:** `src/components/workout-tracker/ActiveWorkout.tsx`
+
+Current issue: 5-column grid for sets is too cramped on mobile.
+
+**Solution:**
+- Stack weight/reps inputs vertically on mobile
+- Use a card-based layout for each set instead of grid
+- Make Warmup/Working toggle full-width on mobile
+
+```text
+Mobile Layout (each set):
++---------------------------+
+| Set 1              [🗑️]  |
+| Weight: [____] kg         |
+| Reps:   [____]            |
+| [Warmup] [Working]        |
++---------------------------+
+
+Desktop Layout (unchanged):
+| Set | Weight | Reps | Type    | X |
+| 1   | [80]   | [8]  | Working | X |
+```
+
+**Changes:**
+- Add responsive breakpoint classes
+- Use `flex flex-col sm:grid sm:grid-cols-[40px_1fr_1fr_1fr_40px]`
+- Make inputs larger for touch (`h-10` instead of `h-9`)
+- Increase spacing on mobile
+
+### Task 2.2: Mobile-Optimized Header
+**File:** `src/components/workout-tracker/ActiveWorkout.tsx`
+
+Current issue: Timer, buttons, and session info crowd the header on mobile.
+
+**Solution:**
+- Stack session info and controls vertically on mobile
+- Make timer more prominent
+- Full-width buttons on mobile
+
+---
+
+## Phase 3: Workout History
+
+### Task 3.1: Mobile-Friendly Session Cards
+**File:** `src/components/workout-tracker/WorkoutHistory.tsx`
+
+Current issue: Date, duration, and volume stats overflow on mobile.
+
+**Solution:**
+- Stack metadata vertically on mobile
+- Use wrapping flex layout
+- Reduce text size on mobile
+
+```text
+Mobile Layout:
++---------------------------+
+| Push Day          [🗑️] ⌄ |
+| 📅 Today                  |
+| ⏱️ 45m  💪 12.5k kg      |
++---------------------------+
 ```
 
 ---
 
-## Phase 1: Data Models and Types
+## Phase 4: Start Workout Modal
 
-### Task 1.1: Create Diet Types
-**File:** `src/types/diet.ts`
+### Task 4.1: Mobile-Optimized Modal
+**File:** `src/components/workout-tracker/StartWorkoutModal.tsx`
 
-Define TypeScript interfaces for the diet feature:
-- `UserProfile` - name, gender, age, weight, height, activity level
-- `DietMeal` - meal name, foods array, calories, macros (protein/carbs/fats)
-- `DietDay` - day label, total calories, meals array
-- `GeneratedDietPlan` - full plan with user inputs and schedule
-- `SavedDietPlan` - extends generated plan with id, name, savedAt
-- `DietGoal` - enum for muscle_building, fat_loss, maintenance, endurance
-- `DietType` - enum for balanced, high_protein, low_carb, keto, vegetarian, vegan
-- `CuisinePreference` - enum for international, nigerian, west_african
+Current issue: Dialog content can be too wide on mobile.
+
+**Solution:**
+- Use `Drawer` component on mobile instead of `Dialog`
+- Full-width on mobile with proper padding
+- Larger touch targets for plan/template selection
 
 ---
 
-## Phase 2: Global User Profile System
+## Phase 5: Workout Stats Dashboard
 
-### Task 2.1: Create Profile Context
-**File:** `src/contexts/ProfileContext.tsx`
+### Task 5.1: Mobile Stats Grid
+**File:** `src/components/workout-tracker/WorkoutStats.tsx`
 
-Implement React context for global user profile:
-- Store user data: name, gender, age, weight (kg), height (cm), activity level
-- Persist to localStorage with key `muscleatlas-user-profile`
-- Calculate BMR using Mifflin-St Jeor equation
-- Calculate TDEE based on activity level multiplier
-- Provide `updateProfile` function for partial updates
-- Export `useProfile` hook for consuming components
+Current issue: Stats cards are cramped on mobile.
 
-**BMR Formula (Mifflin-St Jeor):**
-- Male: (10 x weight) + (6.25 x height) - (5 x age) + 5
-- Female: (10 x weight) + (6.25 x height) - (5 x age) - 161
-
-**Activity Multipliers:**
-- Sedentary: 1.2
-- Lightly Active: 1.375
-- Moderately Active: 1.55
-- Very Active: 1.725
-- Extremely Active: 1.9
-
-### Task 2.2: Create Profile Editor Component
-**File:** `src/components/ProfileEditor.tsx`
-
-Build a modal/sheet for editing user profile:
-- Input fields for all profile data
-- Plain-language explanations of BMR/TDEE
-- Real-time calculation display
-- Save button that updates context
-
-### Task 2.3: Create Profile Status Badge
-**File:** `src/components/ProfileStatusBadge.tsx`
-
-Create header badge showing profile status:
-- Display user's name if set, otherwise "Set Profile"
-- Click to open ProfileEditor
-- Visual indicator if profile is incomplete
+**Solution:**
+- Use 2-column grid on mobile with scrollable overflow
+- Reduce card padding on mobile
+- Stack icon and value vertically on very small screens
 
 ---
 
-## Phase 3: Diet Generator UI Components
+## Phase 6: Diet Generator Wizard
 
-### Task 3.1: Create Diet Wizard Step Components
-**Directory:** `src/components/diet-wizard/`
-
-Create 7 wizard step components following the workout-wizard pattern:
-
-| Step | Component | Purpose |
-|------|-----------|---------|
-| 1 | `StepGoal.tsx` | Select diet goal (muscle building, fat loss, maintenance, endurance) |
-| 2 | `StepCalories.tsx` | Set daily calorie target (auto-calculated from TDEE or manual) |
-| 3 | `StepDietType.tsx` | Choose diet approach (balanced, high protein, keto, etc.) |
-| 4 | `StepRestrictions.tsx` | Select dietary restrictions (gluten-free, dairy-free, allergies) |
-| 5 | `StepMeals.tsx` | Choose meal types (breakfast, lunch, dinner, snacks, pre/post workout) |
-| 6 | `StepCuisine.tsx` | Select cuisine preference (international, Nigerian, West African) |
-| 7 | `StepReview.tsx` | Summary of all selections before generation |
-
-### Task 3.2: Create Main DietGenerator Component
+### Task 6.1: Mobile Wizard Progress
 **File:** `src/components/DietGenerator.tsx`
 
-Build the main diet generator component:
-- 7-step wizard with progress indicator (reuse WizardProgress)
-- State management for all wizard inputs
-- Integration with ProfileContext for auto-populating data
-- Save/Load functionality with localStorage
-- PDF download capability
-- Share functionality (reuse ShareModal pattern)
-- Edit mode for generated plans
+Current issue: 7-step wizard progress indicator takes too much space.
+
+**Solution:**
+- Show step numbers only (no titles) on mobile
+- Use compact step indicators
+- Horizontal scroll for step navigation
+
+### Task 6.2: Mobile-Friendly Wizard Steps
+**Files:** `src/components/diet-wizard/*.tsx`
+
+**Solution:**
+- Full-width option cards on mobile
+- Increase tap targets
+- Reduce padding/margins on mobile
+- Single column grids on mobile
 
 ---
 
-## Phase 4: Backend Edge Function
+## Phase 7: Profile Components
 
-### Task 4.1: Create Diet Generation Edge Function
-**File:** `supabase/functions/generate-diet/index.ts`
+### Task 7.1: Mobile Header Optimization
+**Files:** `src/pages/Index.tsx`, `src/components/ProfileStatusBadge.tsx`
 
-Implement the AI-powered diet generation:
+Current issue: Header can get crowded on mobile.
 
-**Request Body:**
-```json
-{
-  "goal": "muscle_building",
-  "dailyCalories": 2500,
-  "dietType": "high_protein",
-  "restrictions": ["dairy-free"],
-  "mealTypes": ["breakfast", "lunch", "dinner", "post-workout"],
-  "cuisine": "nigerian",
-  "gender": "male"
-}
-```
+**Solution:**
+- Collapse ProfileStatusBadge to icon-only on mobile
+- Use a smaller logo on mobile
+- Add proper spacing
 
-**AI System Prompt Structure:**
-- Comprehensive food database for each cuisine
-- Macro distribution rules by goal:
-  - Muscle Building: 30% protein, 40% carbs, 30% fats
-  - Fat Loss: 35% protein, 30% carbs, 35% fats
-  - Maintenance: 25% protein, 45% carbs, 30% fats
-  - Endurance: 20% protein, 55% carbs, 25% fats
-- Meal-type specific guidelines:
-  - Breakfast: Light, energizing (15-20% daily calories)
-  - Snacks: Portable, 150-300 calories
-  - Lunch/Dinner: Substantial (25-35% daily calories)
-  - Pre/Post-Workout: Performance nutrition
-- Nigerian/West African food database:
-  - Proteins: Suya, Kilishi, Stockfish, Goat Meat, Dried Fish
-  - Carbs: Ofada Rice, Yam, Plantain, Garri, Moi Moi
-  - Soups: Egusi, Okra, Efo Riro
+### Task 7.2: Mobile Profile Editor
+**File:** `src/components/ProfileEditor.tsx`
 
-**Tool Calling Schema:**
-```json
-{
-  "name": "generate_diet_plan",
-  "parameters": {
-    "schedule": [{
-      "day": "string",
-      "totalCalories": "number",
-      "meals": [{
-        "mealType": "string",
-        "name": "string",
-        "foods": ["string"],
-        "calories": "number",
-        "protein": "number",
-        "carbs": "number",
-        "fats": "number"
-      }]
-    }]
-  }
-}
-```
-
-### Task 4.2: Update Supabase Config
-**File:** `supabase/config.toml`
-
-Add the generate-diet function configuration:
-```toml
-[functions.generate-diet]
-verify_jwt = false
-```
+**Solution:**
+- Sheet component already works well on mobile
+- Ensure input fields have proper spacing
+- Add scroll behavior for keyboard
 
 ---
 
-## Phase 5: PDF and Share Utilities
+## Phase 8: Global Mobile Styles
 
-### Task 5.1: Create Diet PDF Generator
-**File:** `src/utils/downloadDietPdf.ts`
+### Task 8.1: Add Utility Classes
+**File:** `src/index.css`
 
-Implement PDF generation for diet plans:
-- Generate styled HTML template (similar to workout PDF)
-- Include user's name in personalized title
-- Display daily breakdown with meals and macros
-- Show per-meal nutritional information
-- Include total daily summary
-- Use jsPDF + html2canvas for generation
-
-### Task 5.2: Create Diet Share Utility
-**File:** `src/utils/shareDiet.ts`
-
-Implement sharing functionality:
-- Generate shareable URL with diet plan data
-- Encode plan data for URL sharing
-- Reuse existing ShareModal component
+Add mobile-first utility classes:
+- `.scrollbar-hide` - Hide scrollbars for horizontal scroll areas
+- `.touch-target` - Minimum 44px touch targets
+- `.mobile-card` - Optimized card padding for mobile
 
 ---
 
-## Phase 6: Integration
+## Technical Implementation Details
 
-### Task 6.1: Update Index.tsx
-Add the Diet tab and integrate new components:
-- Import ProfileContext provider
-- Import ProfileStatusBadge
-- Import DietGenerator
-- Add Diet tab to TabsList (5 tabs total: Library, Templates, Workout, Diet, Tracker)
-- Add ProfileStatusBadge to header
+### Responsive Breakpoints Used
+- `sm:` (640px) - Small tablets
+- `md:` (768px) - Tablets/small laptops (main mobile breakpoint)
+- `lg:` (1024px) - Desktops
 
-### Task 6.2: Update App.tsx
-Wrap application with ProfileProvider:
-- Import ProfileProvider from ProfileContext
-- Wrap existing component tree
-
-### Task 6.3: Update Analytics Hook
-**File:** `src/hooks/useAnalytics.ts`
-
-Add diet-specific tracking:
-- `trackDietGenerated(dietType, mealCount)`
-- `trackDietPdfDownload(planName)`
+### Key Mobile Patterns
+1. **Icon-only navigation** on mobile
+2. **Stacked layouts** instead of horizontal grids
+3. **Drawer/Sheet** instead of Dialog for modals
+4. **Larger touch targets** (min 44px)
+5. **Horizontal scroll** instead of wrapping/hiding
 
 ---
 
-## Phase 7: Shared Workout/Diet Page (Optional Enhancement)
+## File Changes Summary
 
-### Task 7.1: Create Shared Diet Page
-**File:** `src/pages/SharedDiet.tsx`
-
-Similar to SharedWorkout.tsx but for diet plans:
-- Parse diet plan from URL parameters
-- Display formatted diet plan
-- Allow users to save/download
-
----
-
-## File Structure Summary
-
-```text
-src/
-├── types/
-│   └── diet.ts                    # Diet-related TypeScript interfaces
-├── contexts/
-│   └── ProfileContext.tsx         # Global user profile state
-├── components/
-│   ├── ProfileEditor.tsx          # Profile editing modal
-│   ├── ProfileStatusBadge.tsx     # Header profile indicator
-│   ├── DietGenerator.tsx          # Main diet generator component
-│   └── diet-wizard/
-│       ├── StepGoal.tsx           # Goal selection
-│       ├── StepCalories.tsx       # Calorie target
-│       ├── StepDietType.tsx       # Diet approach
-│       ├── StepRestrictions.tsx   # Dietary restrictions
-│       ├── StepMeals.tsx          # Meal types selection
-│       ├── StepCuisine.tsx        # Cuisine preference
-│       └── StepReview.tsx         # Summary review
-├── utils/
-│   ├── downloadDietPdf.ts         # Diet PDF generation
-│   └── shareDiet.ts               # Diet sharing utilities
-└── pages/
-    └── SharedDiet.tsx             # Shared diet viewer (optional)
-
-supabase/
-├── config.toml                    # Add generate-diet function
-└── functions/
-    └── generate-diet/
-        └── index.ts               # AI diet generation edge function
-```
-
----
-
-## Technical Details
-
-### Dependencies
-All required packages are already installed:
-- `jspdf` and `html2canvas` for PDF generation
-- `@tanstack/react-query` for data fetching
-- `sonner` for toast notifications
-- UI components from shadcn/ui
-
-### API Integration
-- Uses Lovable AI Gateway at `https://ai.gateway.lovable.dev/v1/chat/completions`
-- Model: `google/gemini-2.5-flash` (same as workout generator)
-- LOVABLE_API_KEY is already configured as a secret
-
-### Error Handling
-- Handle 429 (rate limit) errors with user-friendly message
-- Handle 402 (payment required) errors
-- Display toast notifications for all error states
-- Validate user inputs before API calls
-
-### localStorage Keys
-- `muscleatlas-user-profile` - User profile data
-- `diet-planner-saved-plans` - Saved diet plans
+| File | Change Type |
+|------|-------------|
+| `src/pages/Index.tsx` | Modify - Responsive tabs |
+| `src/components/workout-tracker/ActiveWorkout.tsx` | Modify - Mobile set logging |
+| `src/components/workout-tracker/WorkoutHistory.tsx` | Modify - Mobile cards |
+| `src/components/workout-tracker/StartWorkoutModal.tsx` | Modify - Mobile modal/drawer |
+| `src/components/workout-tracker/WorkoutStats.tsx` | Modify - Mobile stats grid |
+| `src/components/DietGenerator.tsx` | Modify - Mobile wizard |
+| `src/components/diet-wizard/*.tsx` | Modify - Mobile option cards |
+| `src/components/ProfileStatusBadge.tsx` | Modify - Mobile-compact |
+| `src/components/HeroSection.tsx` | Modify - Mobile stats |
+| `src/index.css` | Modify - Add utility classes |
 
 ---
 
 ## Implementation Order
 
-1. **Phase 1** - Create type definitions (foundation)
-2. **Phase 2** - Build ProfileContext and related components
-3. **Phase 4** - Create backend edge function (can be done in parallel)
-4. **Phase 3** - Build diet wizard components
-5. **Phase 5** - Add PDF and share utilities
-6. **Phase 6** - Integrate everything into main app
-7. **Phase 7** - Optional enhancements
-
----
-
-## Estimated Component Count
-- 12 new files to create
-- 3 existing files to modify (Index.tsx, App.tsx, useAnalytics.ts)
-- 1 config file update (supabase/config.toml)
-
+1. **Global styles** (CSS utilities)
+2. **Main navigation** (Index.tsx tabs)
+3. **Active Workout** (highest interaction frequency)
+4. **Start Workout Modal** (convert to Drawer on mobile)
+5. **Workout History** (viewing past workouts)
+6. **Stats Dashboard** (overview)
+7. **Diet Generator** (wizard flow)
+8. **Profile components** (finishing touches)
