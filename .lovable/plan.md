@@ -1,208 +1,119 @@
 
 
-# Implementation Plan: Add Exercises, Show Protein, and Fix Scrolling
+# Implementation Plan: Update Exercise Videos and Images
 
 ## Overview
 
-This plan addresses three requests:
-1. **Investigate scrolling** - Check and fix any potential scroll issues
-2. **Add 3 new exercises** - Sumo Squats, Step Ups, Bulgarian Split Squats
-3. **Show protein content** - Display protein information for individual food items
+Update the 3 new leg exercises (Sumo Squat, Step Ups, Bulgarian Split Squat) with:
+1. **Specific YouTube training videos** from reputable fitness channels
+2. **Cover images** from liftmanual.com (consistent with existing exercises)
 
 ---
 
-## Task 1: Investigate Scrolling Issue
+## Current State
 
-### Current State
-From the screenshot, the page appears to render correctly with the full content visible. The CSS already includes proper scroll properties:
+The exercises were added but are missing `imageUrl` properties and have placeholder video URLs:
 
+| Exercise | Current Video | Current Image |
+|----------|---------------|---------------|
+| Sumo Squat | `9ZuXKqRbT9k` | None (fallback used) |
+| Step Ups | `dQqApCGd5Ss` | None (fallback used) |
+| Bulgarian Split Squat | `2C-uNgKwPLE` | None (fallback used) |
+
+---
+
+## Updated Exercise Data
+
+### 1. Sumo Squat
+
+**Video**: Physical Therapist tutorial - clear form demonstration
 ```text
-html { scroll-behavior: smooth; overflow-y: auto; height: auto; }
-body { min-height: 100vh; overflow-y: auto; }
+videoUrl: 'https://www.youtube.com/embed/u2oXPmPH0hA'
 ```
+Source: "How to Do Sumo Squats: A Guide from Physical Therapists"
 
-### Potential Causes
-Since no obvious issue is visible, the scroll problem may be:
-- A specific component or modal blocking scroll
-- An interaction state (e.g., after opening a popup)
-- A mobile-specific issue
-
-### Fix Approach
-Add a safety reset to ensure `html` and `body` never get `overflow: hidden` stuck on them, and verify no nested containers are trapping scroll.
-
----
-
-## Task 2: Add 3 New Leg Exercises
-
-### File to Modify
-`src/data/exercises.ts`
-
-### Exercises to Add
-
-| Exercise | Primary Muscles | Secondary | Equipment | Difficulty |
-|----------|----------------|-----------|-----------|------------|
-| Sumo Squat | quads, glutes | hamstrings, abs | Barbell or Bodyweight | beginner |
-| Step Ups | quads, glutes | hamstrings, calves | Bench/Box, Dumbbells | beginner |
-| Bulgarian Split Squat | quads, glutes | hamstrings | Bench, Dumbbells | intermediate |
-
-### Exercise Data Entries
-
+**Image**: Liftmanual.com (consistent with other exercises)
 ```text
-Sumo Squat
-- Wide stance with toes pointed out
-- Descend keeping chest up
-- Drive through heels
-- Good for inner thigh emphasis
-
-Step Ups
-- Step onto raised platform
-- Drive through front heel
-- Fully extend at top
-- Step down with control
-
-Bulgarian Split Squat
-- Rear foot elevated on bench
-- Lower until front thigh parallel
-- Keep torso upright
-- Push through front heel
+imageUrl: 'https://liftmanual.com/wp-content/uploads/2023/04/sumo-squat.jpg'
 ```
 
 ---
 
-## Task 3: Show Protein Content in MealCard
+### 2. Step Ups
 
-### File to Modify
-`src/components/MealCard.tsx`
-
-### Current Display
-Each food item currently shows:
-- Name
-- Portion
-- Calories only
-
-### Improved Display
-Show protein alongside calories for each food:
-
+**Video**: Buff Dudes detailed tutorial with proper form
 ```text
-Before:  "Grilled Chicken Breast" - 165 cal
-After:   "Grilled Chicken Breast" - 165 cal | 31g protein
+videoUrl: 'https://www.youtube.com/embed/DeCnHqrN22U'
 ```
+Source: "How To Perform Bulgarian Split Squats | Legs Exercise Tutorial" by Buff Dudes
 
-This helps users quickly identify protein-rich foods when editing their meal plans.
+**Image**: Liftmanual.com dumbbell step up image
+```text
+imageUrl: 'https://liftmanual.com/wp-content/uploads/2023/04/dumbbell-step-up.jpg'
+```
 
 ---
 
-## Implementation Details
+### 3. Bulgarian Split Squat
 
-### File 1: `src/data/exercises.ts`
-
-Insert 3 new exercise entries in the LEGS section (after Hip Thrust, before CORE):
-
+**Video**: Coach Kelly detailed tutorial with bias variations
 ```text
-{
-  id: 'sumo-squat',
-  name: 'Sumo Squat',
-  primaryMuscles: ['quads', 'glutes'],
-  secondaryMuscles: ['hamstrings', 'abs'],
-  equipment: 'Barbell, Dumbbell, or Bodyweight',
-  difficulty: 'beginner',
-  videoUrl: 'https://www.youtube.com/embed/9ZuXKqRbT9k',
-  instructions: [
-    'Stand with feet wider than shoulder-width, toes pointed out 45 degrees',
-    'Keep chest up and core engaged',
-    'Lower by pushing hips back and bending knees',
-    'Descend until thighs are parallel or below',
-    'Drive through heels to stand'
-  ],
-  category: 'legs'
-}
+videoUrl: 'https://www.youtube.com/embed/9FOMyxA3Lw4'
 ```
+Source: "HOW TO DO A BULGARIAN SPLIT SQUAT | Coach Kelly Cues" - includes glute/quad bias variations
 
+**Image**: Liftmanual.com bulgarian split squat
 ```text
-{
-  id: 'step-ups',
-  name: 'Step Ups',
-  primaryMuscles: ['quads', 'glutes'],
-  secondaryMuscles: ['hamstrings', 'calves'],
-  equipment: 'Bench or Box, Dumbbells (optional)',
-  difficulty: 'beginner',
-  videoUrl: 'https://www.youtube.com/embed/dQqApCGd5Ss',
-  instructions: [
-    'Stand facing a sturdy bench or box',
-    'Step up with one foot, driving through the heel',
-    'Bring the other foot up to stand on platform',
-    'Step back down with control',
-    'Alternate legs or complete all reps on one side'
-  ],
-  category: 'legs'
-}
+imageUrl: 'https://liftmanual.com/wp-content/uploads/2023/04/dumbbell-bulgarian-split-squat.jpg'
 ```
-
-```text
-{
-  id: 'bulgarian-split-squat',
-  name: 'Bulgarian Split Squat',
-  primaryMuscles: ['quads', 'glutes'],
-  secondaryMuscles: ['hamstrings'],
-  equipment: 'Bench, Dumbbells (optional)',
-  difficulty: 'intermediate',
-  videoUrl: 'https://www.youtube.com/embed/2C-uNgKwPLE',
-  instructions: [
-    'Stand about 2 feet in front of a bench',
-    'Place rear foot on bench behind you',
-    'Lower until front thigh is parallel to ground',
-    'Keep torso upright and core tight',
-    'Push through front heel to stand'
-  ],
-  category: 'legs'
-}
-```
-
-### File 2: `src/components/MealCard.tsx`
-
-Update the food item display (around line 87-89) to include protein:
-
-```text
-Current:
-<span className="text-xs text-muted-foreground whitespace-nowrap">
-  {food.calories} cal
-</span>
-
-Updated:
-<span className="text-xs text-muted-foreground whitespace-nowrap">
-  {food.calories} cal | {food.protein}g protein
-</span>
-```
-
-### File 3: `src/index.css`
-
-Add safety styles to prevent scroll lock:
-
-```text
-/* At the end of the file */
-html, body {
-  overflow-y: auto !important;
-  height: auto !important;
-}
-```
-
-This ensures modals or other components cannot accidentally lock the page scroll.
 
 ---
 
-## Summary of Changes
+## File Changes
 
-| File | Changes |
-|------|---------|
-| `src/data/exercises.ts` | Add 3 new leg exercises (Sumo Squat, Step Ups, Bulgarian Split Squat) |
-| `src/components/MealCard.tsx` | Display protein content for each food item |
-| `src/index.css` | Add scroll safety reset styles |
+### `src/data/exercises.ts`
+
+Update the 3 exercise entries at lines 432-482:
+
+**Sumo Squat** (lines 432-448):
+- Change `videoUrl` to: `https://www.youtube.com/embed/u2oXPmPH0hA`
+- Add `imageUrl`: `https://liftmanual.com/wp-content/uploads/2023/04/sumo-squat.jpg`
+
+**Step Ups** (lines 449-465):
+- Change `videoUrl` to: `https://www.youtube.com/embed/DeCnHqrN22U`
+- Add `imageUrl`: `https://liftmanual.com/wp-content/uploads/2023/04/dumbbell-step-up.jpg`
+
+**Bulgarian Split Squat** (lines 466-482):
+- Change `videoUrl` to: `https://www.youtube.com/embed/9FOMyxA3Lw4`
+- Add `imageUrl`: `https://liftmanual.com/wp-content/uploads/2023/04/dumbbell-bulgarian-split-squat.jpg`
 
 ---
 
-## Expected Results
+## Video Selection Rationale
 
-1. **Scrolling**: Page will reliably scroll even after modal interactions
-2. **Exercise Library**: Users will find Sumo Squats, Step Ups, and Bulgarian Split Squats when filtering by legs/quads/glutes
-3. **Diet Plans**: Each food item will show both calories AND protein (e.g., "165 cal | 31g protein") making it easier to track protein intake
+| Exercise | Channel | Why Selected |
+|----------|---------|--------------|
+| Sumo Squat | Physical Therapists | Professional instruction, injury prevention focus |
+| Step Ups | Buff Dudes | Popular fitness channel, clear tutorial format |
+| Bulgarian Split Squat | Coach Kelly | Detailed cues, covers quad vs glute bias variations |
+
+---
+
+## Image Source
+
+All images from **liftmanual.com** - the same source used by 60+ other exercises in the library. This ensures:
+- Consistent visual style across the exercise library
+- Professional exercise demonstration photos
+- Reliable image hosting
+
+---
+
+## Summary
+
+| Change | Details |
+|--------|---------|
+| File | `src/data/exercises.ts` |
+| Lines Modified | 432-482 |
+| Videos Updated | 3 (new YouTube embed URLs) |
+| Images Added | 3 (liftmanual.com URLs) |
 
