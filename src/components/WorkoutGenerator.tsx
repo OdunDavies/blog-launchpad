@@ -18,7 +18,7 @@ import { ExercisePickerModal } from './ExercisePickerModal';
 import { ShareModal } from './ShareModal';
 import { generateWorkoutPdf } from '@/utils/downloadHtml';
 import { generateShareUrl, WorkoutForSharing } from '@/utils/shareWorkout';
-import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
+import { DndContext, closestCenter, MouseSensor, TouchSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { SortableExerciseItem } from './SortableExerciseItem';
 
@@ -82,11 +82,17 @@ export function WorkoutGenerator() {
   const { toast } = useToast();
   const { trackWorkoutGenerated, trackPdfDownload } = useAnalytics();
 
-  // DnD sensors
+  // DnD sensors - separate Mouse and Touch for proper mobile scrolling
   const sensors = useSensors(
-    useSensor(PointerSensor, {
+    useSensor(MouseSensor, {
       activationConstraint: {
-        distance: 8,
+        distance: 8, // 8px movement before drag activates (desktop)
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 200, // 200ms press-and-hold before drag activates (mobile)
+        tolerance: 5, // 5px movement allowed during delay
       },
     })
   );
