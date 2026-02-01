@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <!-- Homepage -->
   <url>
-    <loc>https://muscleatlas.app/</loc>
+    <loc>https://www.muscleatlas.site/</loc>
     <lastmod>2026-02-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
@@ -10,7 +10,7 @@
   
   <!-- Exercise Library -->
   <url>
-    <loc>https://muscleatlas.app/#library</loc>
+    <loc>https://www.muscleatlas.site/#library</loc>
     <lastmod>2026-02-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
@@ -18,7 +18,7 @@
   
   <!-- Workout Templates -->
   <url>
-    <loc>https://muscleatlas.app/#templates</loc>
+    <loc>https://www.muscleatlas.site/#templates</loc>
     <lastmod>2026-02-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -26,7 +26,7 @@
   
   <!-- AI Workout Generator -->
   <url>
-    <loc>https://muscleatlas.app/#generator</loc>
+    <loc>https://www.muscleatlas.site/#generator</loc>
     <lastmod>2026-02-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
@@ -34,7 +34,7 @@
   
   <!-- AI Diet Generator -->
   <url>
-    <loc>https://muscleatlas.app/#diet</loc>
+    <loc>https://www.muscleatlas.site/#diet</loc>
     <lastmod>2026-02-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
@@ -42,7 +42,7 @@
   
   <!-- Workout Tracker -->
   <url>
-    <loc>https://muscleatlas.app/#tracker</loc>
+    <loc>https://www.muscleatlas.site/#tracker</loc>
     <lastmod>2026-02-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -50,7 +50,7 @@
   
   <!-- Shared Workouts -->
   <url>
-    <loc>https://muscleatlas.app/shared</loc>
+    <loc>https://www.muscleatlas.site/shared</loc>
     <lastmod>2026-02-01</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
