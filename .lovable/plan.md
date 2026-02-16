@@ -1,119 +1,29 @@
 
-# Fix Mobile Touch Scrolling in Workout Plan Editor
 
-## Problem Summary
+## Domain Migration Banner
 
-When editing an exercise plan on mobile, users cannot scroll through the list of exercises or the page. However, if they click on the "search exercise" box and go back, scrolling works again. This is a classic DnD Kit touch conflict issue.
+**Goal:** Show a banner to users visiting from the old `.netlify.app` domain, prompting them to switch to `www.muscleatlas.site`.
 
-## Root Cause Analysis
+### How it works
 
-The issue is in `WorkoutGenerator.tsx` at lines 86-92:
+When the app loads, it checks `window.location.hostname`. If it contains `.netlify.app`, a dismissible banner appears at the top of the page with a link to the new domain.
 
-```tsx
-const sensors = useSensors(
-  useSensor(PointerSensor, {
-    activationConstraint: {
-      distance: 8,
-    },
-  })
-);
-```
+### Implementation
 
-**Why this causes the bug:**
+1. **Create `src/components/DomainMigrationBanner.tsx`**
+   - A component that checks if `window.location.hostname` includes `netlify.app`
+   - If yes, renders a sticky banner at the top with a message like: "We've moved! Visit us at www.muscleatlas.site for the best experience."
+   - Includes a "Go to new site" button that navigates to `https://www.muscleatlas.site` (preserving the current path/hash)
+   - Includes a dismiss (X) button that hides the banner for the session (using `sessionStorage` so it doesn't nag on every page)
+   - Styled with a distinct background (e.g., primary/red) so it stands out
 
-1. **PointerSensor captures ALL touch events** - It intercepts touch gestures to detect potential drags, which blocks native touch scrolling on mobile
-2. **Distance-based activation doesn't distinguish swipe direction** - An 8px movement in any direction (including vertical scroll) triggers drag mode consideration
-3. **The "search box workaround"** - When users focus the search input, the browser regains touch event control temporarily, which is why scrolling works after interacting with the input
+2. **Update `src/App.tsx`**
+   - Import and render `<DomainMigrationBanner />` at the top level, above the router, so it appears on every page
 
-## Solution
+### Technical details
 
-Replace `PointerSensor` with separate `MouseSensor` and `TouchSensor` sensors:
+- Detection: `window.location.hostname.includes('netlify.app')`
+- Redirect URL construction: `https://www.muscleatlas.site${window.location.pathname}${window.location.hash}`
+- Dismissal persisted via `sessionStorage.setItem('domain-banner-dismissed', 'true')`
+- No external dependencies needed
 
-- **MouseSensor**: For desktop pointer interactions (click and drag)
-- **TouchSensor**: For touch devices with a **delay-based activation** - users can scroll immediately, but must press-and-hold to initiate a drag
-
-This is the official DnD Kit recommendation for sortable lists on touch devices.
-
----
-
-## File Changes
-
-### `src/components/WorkoutGenerator.tsx`
-
-**1. Update imports (line 21):**
-
-```text
-Before:
-import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
-
-After:
-import { DndContext, closestCenter, MouseSensor, TouchSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
-```
-
-**2. Update sensor configuration (lines 85-92):**
-
-```text
-Before:
-// DnD sensors
-const sensors = useSensors(
-  useSensor(PointerSensor, {
-    activationConstraint: {
-      distance: 8,
-    },
-  })
-);
-
-After:
-// DnD sensors - separate Mouse and Touch for proper mobile scrolling
-const sensors = useSensors(
-  useSensor(MouseSensor, {
-    activationConstraint: {
-      distance: 8, // 8px movement before drag activates (desktop)
-    },
-  }),
-  useSensor(TouchSensor, {
-    activationConstraint: {
-      delay: 200, // 200ms press-and-hold before drag activates (mobile)
-      tolerance: 5, // 5px movement allowed during delay
-    },
-  })
-);
-```
-
----
-
-## Technical Explanation
-
-| Sensor | Device | Activation | Result |
-|--------|--------|------------|--------|
-| `MouseSensor` | Desktop | Move 8px | Immediate drag, like before |
-| `TouchSensor` | Mobile | Hold 200ms | Scroll works normally; hold to drag |
-
-The **delay-based activation** for touch is the key fix:
-
-- **Immediate swipes** = normal page/content scrolling
-- **Press and hold (200ms)** = drag mode activates for reordering
-
-The `tolerance: 5` allows for small finger movements during the delay period without canceling the drag activation.
-
----
-
-## Why the Search Box "Fixes" It Temporarily
-
-When users tap the search input:
-1. The input gains focus, triggering a keyboard appearance
-2. The browser takes control of touch events for text input
-3. The DndContext temporarily loses event priority
-4. When focus leaves, there's a brief window where native scrolling works
-
-This is a race condition between DnD Kit's event listeners and the browser's focus handling, not a real fix.
-
----
-
-## Expected Result
-
-After this change:
-- Users can scroll through their workout plan normally on mobile
-- To reorder exercises, users press and hold for 200ms, then drag
-- Desktop behavior remains unchanged (8px movement to drag)
-- The drag handle grip icon still provides a visual cue for dragging
