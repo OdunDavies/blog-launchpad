@@ -10,6 +10,7 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import SharedWorkout from "./pages/SharedWorkout";
 import { InstallPrompt } from "./components/InstallPrompt";
+import { DomainMigrationBanner } from "./components/DomainMigrationBanner";
 import { useAnalytics } from "./hooks/useAnalytics";
 
 const queryClient = new QueryClient();
@@ -33,6 +34,7 @@ const App = () => (
           <Toaster />
           <Sonner />
           <InstallPrompt />
+          <DomainMigrationBanner />
           <BrowserRouter>
             <AnalyticsTracker />
             <Routes>
