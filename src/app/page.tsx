@@ -23,6 +23,9 @@ export const metadata = {
     description:
       'Train smarter with 100+ exercises, AI-powered workout plans, diet planner, progress tracking, and analytics. Your complete fitness companion.',
     image: '/og-image.png',
+    siteName: 'MuscleAtlas',
+    locale: 'en_NG',
+    type: 'website',
   },
   alternates: {
     canonical: '/',
