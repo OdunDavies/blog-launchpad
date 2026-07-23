@@ -1,0 +1,62 @@
+import Link from 'next/link'
+import { notFound } from 'next/navigation'
+import { ArrowLeft } from 'lucide-react'
+import { Card, CardContent } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import Markdown from '@/components/Markdown'
+import { blogPosts, getBlogPost } from '@/data/blog-posts'
+import type { Metadata } from 'next'
+
+interface Props {
+  params: Promise<{ slug: string }>
+}
+
+export async function generateStaticParams() {
+  return blogPosts.map(post => ({ slug: post.slug }))
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params
+  const post = getBlogPost(slug)
+  if (!post) return { title: 'Post Not Found — MuscleAtlas' }
+  return {
+    title: `${post.title} — MuscleAtlas`,
+    description: post.description,
+    openGraph: { title: post.title, description: post.description, images: [post.image] },
+  }
+}
+
+export default async function BlogPost({ params }: Props) {
+  const { slug } = await params
+  const post = getBlogPost(slug)
+
+  if (!post) notFound()
+
+  return (
+    <div className="min-h-screen bg-background">
+      <div className="container max-w-3xl mx-auto px-4 py-12">
+        <Link href="/blog"><Button variant="ghost" size="sm" className="mb-6"><ArrowLeft className="w-4 h-4 mr-1" /> All Posts</Button></Link>
+
+        <article>
+          <header className="mb-8">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
+              <span>{post.date}</span>
+              <span>·</span>
+              <span>{post.readTime}</span>
+              <span>·</span>
+              <span>{post.author}</span>
+            </div>
+            <h1 className="text-3xl font-bold mb-3">{post.title}</h1>
+            <p className="text-lg text-muted-foreground">{post.description}</p>
+          </header>
+
+          <Card>
+            <CardContent className="prose prose-sm dark:prose-invert max-w-none pt-6">
+              <Markdown content={post.content} />
+            </CardContent>
+          </Card>
+        </article>
+      </div>
+    </div>
+  )
+}
