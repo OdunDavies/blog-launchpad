@@ -14,9 +14,11 @@ export const metadata: Metadata = {
     title: 'MuscleAtlas — Free Exercise Library, AI Workouts & Diet Planner',
     description:
       'Browse 100+ exercises with video demos, AI-powered workout plans, diet planner, and progress tracking. Free fitness app for every level.',
+    url: 'https://www.muscleatlas.site',
     siteName: 'MuscleAtlas',
     locale: 'en_NG',
     type: 'website',
+    images: [{ url: '/og-image.png', width: 1200, height: 630 }],
   },
   twitter: {
     card: 'summary_large_image',

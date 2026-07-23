@@ -22,10 +22,11 @@ export const metadata = {
     title: 'MuscleAtlas — Free Exercise Library, AI Workouts & Diet Planner',
     description:
       'Train smarter with 100+ exercises, AI-powered workout plans, diet planner, progress tracking, and analytics. Your complete fitness companion.',
-    image: '/og-image.png',
+    url: 'https://www.muscleatlas.site',
     siteName: 'MuscleAtlas',
     locale: 'en_NG',
     type: 'website',
+    images: [{ url: '/og-image.png', width: 1200, height: 630 }],
   },
   alternates: {
     canonical: '/',
