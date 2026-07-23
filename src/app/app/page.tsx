@@ -106,7 +106,7 @@ function AppPageInner() {
       </header>
 
       <main id="main-content" className="container max-w-6xl mx-auto px-4 py-6 sm:py-8" role="main" aria-label="Main content">
-        <div className="grid grid-cols-5 gap-1 mb-6">
+        <div className="grid grid-cols-5 gap-1 mb-6 max-w-xl mx-auto">
           {TABS.map(tab => {
             const isActive = activeTab === tab.id
             const isAI = tab.id === 'generator'
@@ -114,7 +114,7 @@ function AppPageInner() {
               <button
                 key={tab.id}
                 onClick={() => { setActiveTab(tab.id); if (tab.id !== 'challenges') setCS('list') }}
-                className={`flex flex-col items-center gap-1 py-2.5 px-1 rounded-lg text-[11px] font-medium transition-colors touch-target ${
+                className={`flex flex-col items-center gap-0.5 sm:gap-1 py-2 sm:py-2.5 px-0.5 sm:px-1 rounded-lg text-[10px] sm:text-[11px] font-medium transition-colors touch-target ${
                   isActive
                     ? 'bg-primary text-primary-foreground'
                     : isAI
@@ -124,8 +124,8 @@ function AppPageInner() {
                 role="tab"
                 aria-selected={isActive}
               >
-                <tab.icon className={`w-5 h-5 ${isAI && !isActive ? 'text-red-500' : ''}`} />
-                <span>{tab.label}</span>
+                <tab.icon className={`w-4 h-4 sm:w-5 sm:h-5 ${isAI && !isActive ? 'text-red-500' : ''}`} />
+                <span className="truncate w-full text-center leading-tight">{tab.label}</span>
               </button>
             )
           })}

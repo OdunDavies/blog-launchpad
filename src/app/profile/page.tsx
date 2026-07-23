@@ -71,7 +71,7 @@ export default function ProfilePage() {
         </CardHeader>
         <CardContent className="space-y-4">
           {editing ? (
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="space-y-2">
                 <Label>Name</Label>
                 <Input value={name} onChange={e => setName(e.target.value)} placeholder="Your name" />
@@ -109,7 +109,7 @@ export default function ProfilePage() {
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-4 text-sm">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
               <div><span className="text-muted-foreground">Name</span><p>{profile.name || 'Not set'}</p></div>
               <div><span className="text-muted-foreground">Age</span><p>{profile.age || 'Not set'}</p></div>
               <div><span className="text-muted-foreground">Gender</span><p>{profile.gender ? profile.gender.charAt(0).toUpperCase() + profile.gender.slice(1) : 'Not set'}</p></div>
@@ -127,7 +127,7 @@ export default function ProfilePage() {
         </CardHeader>
         <CardContent className="space-y-4">
           {editing ? (
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="space-y-2">
                 <Label>Weight ({profile.weightUnit || 'kg'})</Label>
                 <Input type="number" value={weight} onChange={e => setWeight(e.target.value)} placeholder="70" />
@@ -158,7 +158,7 @@ export default function ProfilePage() {
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-4 text-sm">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
               <div><span className="text-muted-foreground">Weight</span><p>{profile.weight ? `${profile.weight} ${profile.weightUnit || 'kg'}` : 'Not set'}</p></div>
               <div><span className="text-muted-foreground">Height</span><p>{profile.height ? `${profile.height} ${profile.heightUnit || 'cm'}` : 'Not set'}</p></div>
               <div><span className="text-muted-foreground">BMI</span><p>{bmi || '—'}</p></div>

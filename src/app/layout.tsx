@@ -26,6 +26,11 @@ export const metadata: Metadata = {
     description: 'Browse 100+ exercises, AI workout plans, diet planner, and progress tracking.',
   },
   robots: { index: true, follow: true },
+  manifest: '/manifest.json',
+  icons: {
+    icon: '/favicon.png',
+    apple: '/favicon.png',
+  },
   alternates: {
     canonical: '/',
   },
