@@ -3,28 +3,30 @@ import { Providers } from './providers';
 import './globals.css';
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://muscleatlas.site'),
+  metadataBase: new URL('https://www.muscleatlas.site'),
   title: {
-    default: 'MuscleAtlas - Free Exercise Library & AI Workout Generator',
+    default: 'MuscleAtlas — Free Exercise Library, AI Workouts & Diet Planner',
     template: '%s | MuscleAtlas',
   },
   description:
-    'Browse 100+ exercises with video demos, AI-powered workout plans, and progress tracking. Free fitness app for Nigerian gym-goers.',
+    'Browse 100+ exercises with video demos, AI-powered workout plans, diet planner, and progress tracking. Free fitness app for Nigerian gym-goers.',
   openGraph: {
-    title: 'MuscleAtlas - Free Exercise Library & AI Workout Generator',
+    title: 'MuscleAtlas — Free Exercise Library, AI Workouts & Diet Planner',
     description:
-      'Browse 100+ exercises with video demos, AI-powered workout plans, and progress tracking.',
-    url: 'https://muscleatlas.site',
+      'Browse 100+ exercises with video demos, AI-powered workout plans, diet planner, and progress tracking. Free fitness app for every level.',
     siteName: 'MuscleAtlas',
     locale: 'en_NG',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'MuscleAtlas',
-    description: 'Free Exercise Library & AI Workout Generator',
+    title: 'MuscleAtlas — Free Exercise Library & AI Workouts',
+    description: 'Browse 100+ exercises, AI workout plans, diet planner, and progress tracking.',
   },
   robots: { index: true, follow: true },
+  alternates: {
+    canonical: '/',
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -15,16 +15,19 @@ import {
 export const revalidate = 3600;
 
 export const metadata = {
-  title: 'MuscleAtlas — Free Exercise Library & AI Workout Generator',
+  title: 'MuscleAtlas — Free Exercise Library, AI Workouts & Diet Planner',
   description:
-    'Train smarter with 100+ exercises, AI-powered workout plans, progress tracking, and analytics. Your complete fitness companion.',
+    'Train smarter with 100+ exercises, AI-powered workout plans, diet planner, progress tracking, and analytics. Your complete fitness companion.',
   openGraph: {
-    title: 'MuscleAtlas — Free Exercise Library & AI Workout Generator',
+    title: 'MuscleAtlas — Free Exercise Library, AI Workouts & Diet Planner',
     description:
-      'Train smarter with 100+ exercises, AI-powered workout plans, progress tracking, and analytics. Your complete fitness companion.',
+      'Train smarter with 100+ exercises, AI-powered workout plans, diet planner, progress tracking, and analytics. Your complete fitness companion.',
     image: '/og-image.png',
   },
-};
+  alternates: {
+    canonical: '/',
+  },
+}
 
 const features = [
   {
