@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo, useCallback, Suspense } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { Dumbbell, Library, Sparkles, BarChart3, LayoutTemplate, Trophy, ArrowUp, Users, Plus, Search, Lock, Globe, Check, ChevronRight, ArrowLeft, Share2, UserPlus, Target, Clock, Award, Eye, ExternalLink, Loader2 } from 'lucide-react'
+import { Dumbbell, Library, Sparkles, BarChart3, LayoutTemplate, Trophy, ArrowUp, Users, Plus, Search, Lock, Globe, Check, ChevronRight, ArrowLeft, Share2, UserPlus, Target, Clock, Award, Eye, ExternalLink, Loader2, Brain } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -14,6 +14,7 @@ import { Separator } from '@/components/ui/separator'
 import { useAuth } from '@/contexts/AuthContext'
 import { getChallenges, saveChallenge, getParticipants, addParticipant, getUserParticipations, generateChallengeId, generateInviteCode, GOAL_METRIC_LABELS, GOAL_METRIC_UNITS, CHALLENGE_REFERRAL_KEY } from '@/types/challenges'
 import type { Challenge, ChallengeVisibility, ChallengeGoalMetric, ChallengeParticipant } from '@/types/challenges'
+import DailyCheckIn from '@/components/DailyCheckIn'
 
 const TABS = [
   { id: 'library', icon: Library, label: 'Library' },
@@ -151,9 +152,7 @@ function AppPageInner() {
 
         {activeTab === 'generator' && (
           <section>
-            <h2 className="text-xl sm:text-2xl font-bold mb-2">AI Workout Generator</h2>
-            <p className="text-sm sm:text-base text-muted-foreground mb-6">Get a personalized workout split based on your goals and target muscles.</p>
-            <Link href="/about"><Button>Try Generator</Button></Link>
+            <DailyCheckIn />
           </section>
         )}
 
