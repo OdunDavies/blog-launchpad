@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useEffect, useMemo, Suspense } from 'react'
+import { useState, useEffect, useMemo, useCallback, Suspense } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { Dumbbell, Library, Sparkles, BarChart3, LayoutTemplate, Trophy, ArrowUp, Users, Plus, Search, Lock, Globe, Check, ChevronRight, ArrowLeft, Share2, UserPlus, Target, Clock, Award, Eye, ExternalLink } from 'lucide-react'
+import { Dumbbell, Library, Sparkles, BarChart3, LayoutTemplate, Trophy, ArrowUp, Users, Plus, Search, Lock, Globe, Check, ChevronRight, ArrowLeft, Share2, UserPlus, Target, Clock, Award, Eye, ExternalLink, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -43,12 +43,13 @@ function AppPageInner() {
 
   useEffect(() => {
     if (challengeIdParam && activeTab === 'challenges') {
-      const all = getChallenges()
-      const c = all.find(x => x.id === challengeIdParam)
-      if (c) {
-        setChallengeView('detail')
-        setSelectedChallenge(c)
-      }
+      getChallenges().then(all => {
+        const c = all.find(x => x.id === challengeIdParam)
+        if (c) {
+          setChallengeView('detail')
+          setSelectedChallenge(c)
+        }
+      })
     }
   }, [challengeIdParam, activeTab])
 
@@ -58,13 +59,14 @@ function AppPageInner() {
       try {
         const { challengeId } = JSON.parse(referral)
         localStorage.removeItem(CHALLENGE_REFERRAL_KEY)
-        const all = getChallenges()
-        const c = all.find(x => x.id === challengeId)
-        if (c) {
-          setActiveTab('challenges')
-          setChallengeView('detail')
-          setSelectedChallenge(c)
-        }
+        getChallenges().then(all => {
+          const c = all.find(x => x.id === challengeId)
+          if (c) {
+            setActiveTab('challenges')
+            setChallengeView('detail')
+            setSelectedChallenge(c)
+          }
+        })
       } catch {}
     }
   }, [user])
@@ -238,10 +240,28 @@ export default function AppPage() {
 function ChallengesList({ userId, user, onDiscover, onCreate, onSelect }: {
   userId: string; user: boolean; onDiscover: () => void; onCreate: () => void; onSelect: (c: Challenge) => void
 }) {
-  const participations = useMemo(() => getUserParticipations(userId), [userId])
-  const allChallenges = useMemo(() => getChallenges(), [])
-  const myChallengeIds = new Set(participations.map(p => p.challengeId))
-  const myChallenges = allChallenges.filter(c => myChallengeIds.has(c.id))
+  const [allChallenges, setAllChallenges] = useState<Challenge[]>([])
+  const [participations, setParticipations] = useState<ChallengeParticipant[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    let cancelled = false
+    setLoading(true)
+    Promise.all([getChallenges(), getUserParticipations(userId)]).then(([challenges, parts]) => {
+      if (cancelled) return
+      setAllChallenges(challenges)
+      setParticipations(parts)
+      setLoading(false)
+    })
+    return () => { cancelled = true }
+  }, [userId])
+
+  const myChallengeIds = useMemo(() => new Set(participations.map(p => p.challengeId)), [participations])
+  const myChallenges = useMemo(() => allChallenges.filter(c => myChallengeIds.has(c.id)), [allChallenges, myChallengeIds])
+
+  if (loading) {
+    return <div className="flex justify-center py-12"><Loader2 className="w-6 h-6 animate-spin" /></div>
+  }
 
   return (
     <div className="space-y-6">
@@ -319,18 +339,42 @@ function ChallengesList({ userId, user, onDiscover, onCreate, onSelect }: {
 function DiscoverChallenges({ userId, user, onBack, onSelect }: {
   userId: string; user: boolean; onBack: () => void; onSelect: (c: Challenge) => void
 }) {
-  const allChallenges = useMemo(() => getChallenges().filter(c => c.visibility === 'public'), [])
-  const participations = useMemo(() => getUserParticipations(userId), [userId])
-  const joinedIds = new Set(participations.map(p => p.challengeId))
+  const [allChallenges, setAllChallenges] = useState<Challenge[]>([])
+  const [participations, setParticipations] = useState<ChallengeParticipant[]>([])
+  const [participantMap, setParticipantMap] = useState<Record<string, ChallengeParticipant[]>>({})
+  const [loading, setLoading] = useState(true)
 
-  const handleJoin = (c: Challenge) => {
+  useEffect(() => {
+    let cancelled = false
+    setLoading(true)
+    Promise.all([getChallenges(), getUserParticipations(userId)]).then(([challenges, parts]) => {
+      if (cancelled) return
+      const publicChallenges = challenges.filter(c => c.visibility === 'public')
+      setAllChallenges(publicChallenges)
+      setParticipations(parts)
+      setLoading(false)
+    })
+    return () => { cancelled = true }
+  }, [userId])
+
+  useEffect(() => {
+    Promise.all(allChallenges.map(c => getParticipants(c.id))).then(results => {
+      const map: Record<string, ChallengeParticipant[]> = {}
+      allChallenges.forEach((c, i) => { map[c.id] = results[i] })
+      setParticipantMap(map)
+    })
+  }, [allChallenges])
+
+  const joinedIds = useMemo(() => new Set(participations.map(p => p.challengeId)), [participations])
+
+  const handleJoin = useCallback(async (c: Challenge) => {
     if (!user) {
       localStorage.setItem(CHALLENGE_REFERRAL_KEY, JSON.stringify({ challengeId: c.id }))
       window.location.href = '/'
       return
     }
     if (!joinedIds.has(c.id)) {
-      addParticipant({
+      await addParticipant({
         challengeId: c.id,
         userId,
         joinedAt: new Date().toISOString(),
@@ -338,8 +382,15 @@ function DiscoverChallenges({ userId, user, onBack, onSelect }: {
         goalTarget: c.goalTarget,
         completed: false,
       })
+      const parts = await getParticipants(c.id)
+      setParticipantMap(prev => ({ ...prev, [c.id]: parts }))
+      setParticipations(await getUserParticipations(userId))
     }
     onSelect(c)
+  }, [user, userId, joinedIds, onSelect])
+
+  if (loading) {
+    return <div className="flex justify-center py-12"><Loader2 className="w-6 h-6 animate-spin" /></div>
   }
 
   return (
@@ -362,7 +413,7 @@ function DiscoverChallenges({ userId, user, onBack, onSelect }: {
         <div className="grid gap-3 sm:grid-cols-2">
           {allChallenges.map(c => {
             const isJoined = joinedIds.has(c.id)
-            const participants = getParticipants(c.id)
+            const participants = participantMap[c.id] || []
             return (
               <Card key={c.id} className={isJoined ? 'border-primary/50' : ''}>
                 <CardContent className="p-4">
@@ -381,7 +432,7 @@ function DiscoverChallenges({ userId, user, onBack, onSelect }: {
                     <span>&middot;</span>
                     <span>{c.durationDays} days</span>
                     <span>&middot;</span>
-                    <span>{participants.length + c.participantCount} joined</span>
+                    <span>{participants.length} joined</span>
                   </div>
                   <div className="flex gap-2">
                     <Button
@@ -416,6 +467,7 @@ function CreateChallenge({ userId, user, onBack, onCreated }: {
   const [goalTarget, setGoalTarget] = useState('')
   const [durationDays, setDurationDays] = useState('30')
   const [visibility, setVisibility] = useState<ChallengeVisibility>('invite_only')
+  const [creating, setCreating] = useState(false)
 
   if (!user) {
     return (
@@ -428,8 +480,9 @@ function CreateChallenge({ userId, user, onBack, onCreated }: {
     )
   }
 
-  const handleCreate = () => {
-    if (!name.trim() || !goalTarget) return
+  const handleCreate = async () => {
+    if (!name.trim() || !goalTarget || creating) return
+    setCreating(true)
     const c: Challenge = {
       id: generateChallengeId(),
       creatorId: userId,
@@ -443,15 +496,18 @@ function CreateChallenge({ userId, user, onBack, onCreated }: {
       createdAt: new Date().toISOString(),
       participantCount: 1,
     }
-    saveChallenge(c)
-    addParticipant({
-      challengeId: c.id,
-      userId,
-      joinedAt: new Date().toISOString(),
-      progress: 0,
-      goalTarget: c.goalTarget,
-      completed: false,
-    })
+    await Promise.all([
+      saveChallenge(c),
+      addParticipant({
+        challengeId: c.id,
+        userId,
+        joinedAt: new Date().toISOString(),
+        progress: 0,
+        goalTarget: c.goalTarget,
+        completed: false,
+      }),
+    ])
+    setCreating(false)
     onCreated(c)
   }
 
@@ -524,8 +580,8 @@ function CreateChallenge({ userId, user, onBack, onCreated }: {
             </button>
           </div>
         </div>
-        <Button className="w-full" onClick={handleCreate} disabled={!name.trim() || !goalTarget}>
-          <Plus className="w-4 h-4 mr-1" /> Create Challenge
+        <Button className="w-full" onClick={handleCreate} disabled={!name.trim() || !goalTarget || creating}>
+          {creating ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Creating...</> : <><Plus className="w-4 h-4 mr-1" /> Create Challenge</>}
         </Button>
       </div>
     </div>
@@ -535,28 +591,43 @@ function CreateChallenge({ userId, user, onBack, onCreated }: {
 function ChallengeDetail({ challenge, userId, user, onBack }: {
   challenge: Challenge; userId: string; user: boolean; onBack: () => void
 }) {
-  const participations = useMemo(() => getUserParticipations(userId), [userId])
-  const allParticipants = useMemo(() => getParticipants(challenge.id), [challenge.id])
+  const [participations, setParticipations] = useState<ChallengeParticipant[]>([])
+  const [allParticipants, setAllParticipants] = useState<ChallengeParticipant[]>([])
+  const [loading, setLoading] = useState(true)
+  const [joining, setJoining] = useState(false)
+
+  const loadData = useCallback(() => {
+    Promise.all([getUserParticipations(userId), getParticipants(challenge.id)]).then(([parts, participants]) => {
+      setParticipations(parts)
+      setAllParticipants(participants)
+      setLoading(false)
+    })
+  }, [userId, challenge.id])
+
+  useEffect(() => { loadData() }, [loadData])
+
   const isJoined = participations.some(p => p.challengeId === challenge.id)
   const myParticipation = participations.find(p => p.challengeId === challenge.id)
   const isCreator = challenge.creatorId === userId || challenge.creatorId === 'muscleatlas'
 
-  const handleJoin = () => {
+  const handleJoin = async () => {
     if (!user) {
       localStorage.setItem(CHALLENGE_REFERRAL_KEY, JSON.stringify({ challengeId: challenge.id }))
       window.location.href = '/'
       return
     }
-    if (!isJoined) {
-      addParticipant({
-        challengeId: challenge.id,
-        userId,
-        joinedAt: new Date().toISOString(),
-        progress: 0,
-        goalTarget: challenge.goalTarget,
-        completed: false,
-      })
-    }
+    if (isJoined || joining) return
+    setJoining(true)
+    await addParticipant({
+      challengeId: challenge.id,
+      userId,
+      joinedAt: new Date().toISOString(),
+      progress: 0,
+      goalTarget: challenge.goalTarget,
+      completed: false,
+    })
+    setJoining(false)
+    loadData()
   }
 
   const sortedParticipants = useMemo(() =>
@@ -578,6 +649,10 @@ function ChallengeDetail({ challenge, userId, user, onBack }: {
   const progressPct = myParticipation
     ? Math.min(100, Math.round((myParticipation.progress / myParticipation.goalTarget) * 100))
     : 0
+
+  if (loading) {
+    return <div className="flex justify-center py-12"><Loader2 className="w-6 h-6 animate-spin" /></div>
+  }
 
   return (
     <div className="space-y-6 max-w-2xl">
@@ -614,15 +689,15 @@ function ChallengeDetail({ challenge, userId, user, onBack }: {
         </div>
         <div className="p-3 rounded-lg bg-muted/50 text-center">
           <Users className="w-4 h-4 mx-auto mb-1 text-muted-foreground" />
-          <p className="text-lg font-bold">{allParticipants.length + challenge.participantCount}</p>
+          <p className="text-lg font-bold">{allParticipants.length}</p>
           <p className="text-[11px] text-muted-foreground">Participants</p>
         </div>
       </div>
 
       {!isJoined && (
         <div className="flex gap-2">
-          <Button className="flex-1" onClick={handleJoin}>
-            <UserPlus className="w-4 h-4 mr-1" /> {user ? 'Join Challenge' : 'Sign Up to Join'}
+          <Button className="flex-1" onClick={handleJoin} disabled={joining}>
+            {joining ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Joining...</> : <><UserPlus className="w-4 h-4 mr-1" /> {user ? 'Join Challenge' : 'Sign Up to Join'}</>}
           </Button>
           <Button variant="outline" onClick={handleShare}>
             <Share2 className="w-4 h-4" />

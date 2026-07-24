@@ -1,24 +1,38 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { Dumbbell, Trophy, Users, Target, Clock, Lock, Globe, BadgeCheck, ArrowLeft, UserPlus, Share2 } from 'lucide-react'
+import { Dumbbell, Trophy, Users, Target, Clock, Lock, Globe, BadgeCheck, ArrowLeft, UserPlus, Share2, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { useAuth } from '@/contexts/AuthContext'
 import { getChallenges, getParticipants, addParticipant, GOAL_METRIC_LABELS, GOAL_METRIC_UNITS, CHALLENGE_REFERRAL_KEY } from '@/types/challenges'
-import type { ChallengeParticipant } from '@/types/challenges'
+import type { Challenge, ChallengeParticipant } from '@/types/challenges'
 
 export default function ChallengeDetailPage() {
   const params = useParams()
   const { user } = useAuth()
   const challengeId = params.id as string
 
-  const challenge = useMemo(() => getChallenges().find(c => c.id === challengeId), [challengeId])
-  const participants = useMemo(() => getParticipants(challengeId), [challengeId])
+  const [challenge, setChallenge] = useState<Challenge | null>(null)
+  const [participants, setParticipants] = useState<ChallengeParticipant[]>([])
+  const [loading, setLoading] = useState(true)
+  const [joining, setJoining] = useState(false)
+
+  const loadData = useCallback(() => {
+    setLoading(true)
+    Promise.all([getChallenges(), getParticipants(challengeId)]).then(([challenges, parts]) => {
+      setChallenge(challenges.find(c => c.id === challengeId) || null)
+      setParticipants(parts)
+      setLoading(false)
+    })
+  }, [challengeId])
+
+  useEffect(() => { loadData() }, [loadData])
+
   const isJoined = user ? participants.some(p => p.userId === user.id) : false
 
   const sortedParticipants = useMemo(() =>
@@ -26,22 +40,24 @@ export default function ChallengeDetailPage() {
     [participants]
   )
 
-  const handleJoin = () => {
+  const handleJoin = async () => {
     if (!user) {
       localStorage.setItem(CHALLENGE_REFERRAL_KEY, JSON.stringify({ challengeId }))
       window.location.href = '/'
       return
     }
-    if (!isJoined && challenge) {
-      addParticipant({
-        challengeId: challenge.id,
-        userId: user.id,
-        joinedAt: new Date().toISOString(),
-        progress: 0,
-        goalTarget: challenge.goalTarget,
-        completed: false,
-      })
-    }
+    if (!challenge || isJoined || joining) return
+    setJoining(true)
+    await addParticipant({
+      challengeId: challenge.id,
+      userId: user.id,
+      joinedAt: new Date().toISOString(),
+      progress: 0,
+      goalTarget: challenge.goalTarget,
+      completed: false,
+    })
+    setJoining(false)
+    loadData()
   }
 
   const handleShare = async () => {
@@ -51,6 +67,14 @@ export default function ChallengeDetailPage() {
     } else {
       await navigator.clipboard.writeText(url)
     }
+  }
+
+  if (loading && !challenge) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-6 h-6 animate-spin" />
+      </div>
+    )
   }
 
   if (!challenge) {
@@ -115,14 +139,13 @@ export default function ChallengeDetailPage() {
             </div>
             <div className="p-4 rounded-lg bg-muted/50 text-center">
               <Users className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
-              <p className="text-xl font-bold">{participants.length + challenge.participantCount}</p>
+              <p className="text-xl font-bold">{participants.length}</p>
               <p className="text-xs text-muted-foreground">Participants</p>
             </div>
           </div>
 
-          <Button className="w-full" size="lg" onClick={handleJoin}>
-            <UserPlus className="w-4 h-4 mr-2" />
-            {user ? (isJoined ? 'Already Joined' : 'Join Challenge') : 'Sign Up to Join'}
+          <Button className="w-full" size="lg" onClick={handleJoin} disabled={joining}>
+            {joining ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Joining...</> : <><UserPlus className="w-4 h-4 mr-2" />{user ? (isJoined ? 'Already Joined' : 'Join Challenge') : 'Sign Up to Join'}</>}
           </Button>
 
           <Separator />

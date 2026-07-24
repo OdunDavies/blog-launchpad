@@ -1,3 +1,5 @@
+import { supabase } from '@/integrations/supabase/client'
+
 export type ChallengeVisibility = 'public' | 'invite_only'
 export type ChallengeGoalMetric = 'reps' | 'weight' | 'streak_days' | 'sessions' | 'distance' | 'other'
 
@@ -48,14 +50,14 @@ export const GOAL_METRIC_UNITS: Record<ChallengeGoalMetric, string> = {
   other: '',
 }
 
-export const CHALLENGES_KEY = 'muscleatlas-challenges'
-export const CHALLENGE_PARTICIPANTS_KEY = 'muscleatlas-challenge-participants'
 export const CHALLENGE_REFERRAL_KEY = 'muscleatlas-challenge-referral'
 
-export const CURATED_CHALLENGES: Challenge[] = [
+export const SYSTEM_USER_ID = '00000000-0000-0000-0000-000000000001'
+
+const CURATED_CHALLENGES: Challenge[] = [
   {
     id: '30-day-pushup',
-    creatorId: 'muscleatlas',
+    creatorId: SYSTEM_USER_ID,
     creatorName: 'MuscleAtlas',
     name: '30-Day Push-Up Challenge',
     description: 'Complete 3,000 push-ups in 30 days. Build chest, shoulder, and tricep endurance with this classic bodyweight challenge.',
@@ -69,7 +71,7 @@ export const CURATED_CHALLENGES: Challenge[] = [
   },
   {
     id: 'squat-streak',
-    creatorId: 'muscleatlas',
+    creatorId: SYSTEM_USER_ID,
     creatorName: 'MuscleAtlas',
     name: '14-Day Squat Streak',
     description: 'Squat every day for 14 days. Build leg strength and consistency with daily squat sessions.',
@@ -83,7 +85,7 @@ export const CURATED_CHALLENGES: Challenge[] = [
   },
   {
     id: 'plank-progress',
-    creatorId: 'muscleatlas',
+    creatorId: SYSTEM_USER_ID,
     creatorName: 'MuscleAtlas',
     name: '21-Day Plank Progress',
     description: 'Hold plank for a cumulative 60 minutes over 21 days. Strengthen your core and improve stability.',
@@ -97,7 +99,7 @@ export const CURATED_CHALLENGES: Challenge[] = [
   },
   {
     id: 'deadlift-milestone',
-    creatorId: 'muscleatlas',
+    creatorId: SYSTEM_USER_ID,
     creatorName: 'MuscleAtlas',
     name: '28-Day Deadlift Builder',
     description: 'Accumulate 50,000 kg in deadlift volume over 28 days. Build posterior chain strength and track your progress.',
@@ -111,7 +113,7 @@ export const CURATED_CHALLENGES: Challenge[] = [
   },
   {
     id: 'weekly-warrior',
-    creatorId: 'muscleatlas',
+    creatorId: SYSTEM_USER_ID,
     creatorName: 'MuscleAtlas',
     name: 'Weekly Warrior (4 Sessions)',
     description: 'Complete 4 workout sessions per week for 4 weeks. Build the habit of consistent training.',
@@ -125,6 +127,71 @@ export const CURATED_CHALLENGES: Challenge[] = [
   },
 ]
 
+function rowToChallenge(row: any): Challenge {
+  return {
+    id: row.id,
+    creatorId: row.creator_id,
+    creatorName: row.creator_name || undefined,
+    name: row.name,
+    description: row.description || undefined,
+    goalMetric: row.goal_metric as ChallengeGoalMetric,
+    goalTarget: row.goal_target,
+    durationDays: row.duration_days,
+    visibility: row.visibility as ChallengeVisibility,
+    inviteCode: row.invite_code || undefined,
+    createdAt: row.created_at || new Date().toISOString(),
+    startDate: row.start_date || undefined,
+    endDate: row.end_date || undefined,
+    participantCount: row.participant_count || 0,
+    isCurated: row.creator_id === SYSTEM_USER_ID,
+  }
+}
+
+function challengeToRow(c: Challenge): any {
+  return {
+    id: c.id,
+    creator_id: c.creatorId,
+    creator_name: c.creatorName || null,
+    name: c.name,
+    description: c.description || null,
+    goal_metric: c.goalMetric,
+    goal_target: c.goalTarget,
+    duration_days: c.durationDays,
+    visibility: c.visibility,
+    invite_code: c.inviteCode || null,
+    created_at: c.createdAt,
+    start_date: c.startDate || null,
+    end_date: c.endDate || null,
+    participant_count: c.participantCount,
+  }
+}
+
+function rowToParticipant(row: any): ChallengeParticipant {
+  return {
+    challengeId: row.challenge_id,
+    userId: row.user_id,
+    displayName: row.display_name || undefined,
+    joinedAt: row.joined_at || new Date().toISOString(),
+    progress: row.progress || 0,
+    goalTarget: row.goal_target || 0,
+    completed: row.completed || false,
+    completedAt: row.completed_at || undefined,
+  }
+}
+
+function participantToRow(p: ChallengeParticipant): any {
+  return {
+    challenge_id: p.challengeId,
+    user_id: p.userId,
+    display_name: p.displayName || null,
+    joined_at: p.joinedAt,
+    progress: p.progress,
+    goal_target: p.goalTarget,
+    completed: p.completed,
+    completed_at: p.completedAt || null,
+  }
+}
+
 export function generateChallengeId(): string {
   return `ch-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
 }
@@ -133,59 +200,52 @@ export function generateInviteCode(): string {
   return Math.random().toString(36).slice(2, 8).toUpperCase()
 }
 
-export function getChallenges(): Challenge[] {
-  try {
-    const raw = localStorage.getItem(CHALLENGES_KEY)
-    const userChallenges: Challenge[] = raw ? JSON.parse(raw) : []
-    const all = [...CURATED_CHALLENGES]
-    for (const uc of userChallenges) {
-      const existing = all.findIndex(c => c.id === uc.id)
-      if (existing >= 0) {
-        all[existing] = uc
-      } else {
-        all.push(uc)
-      }
-    }
-    return all
-  } catch {
+export async function getChallenges(): Promise<Challenge[]> {
+  const { data, error } = await supabase
+    .from('challenges')
+    .select('*')
+    .order('created_at', { ascending: false })
+  if (error || !data) {
+    console.warn('[challenges] Supabase query failed, using fallback:', error?.message)
     return CURATED_CHALLENGES
   }
+  const all = data.map(rowToChallenge)
+  for (const curated of CURATED_CHALLENGES) {
+    if (!all.find(c => c.id === curated.id)) {
+      all.push(curated)
+    }
+  }
+  return all
 }
 
-export function saveChallenge(c: Challenge): void {
-  try {
-    const raw = localStorage.getItem(CHALLENGES_KEY)
-    const list: Challenge[] = raw ? JSON.parse(raw) : []
-    const idx = list.findIndex(x => x.id === c.id)
-    if (idx >= 0) list[idx] = c
-    else list.push(c)
-    localStorage.setItem(CHALLENGES_KEY, JSON.stringify(list))
-  } catch {}
+export async function saveChallenge(c: Challenge): Promise<void> {
+  const { error } = await supabase
+    .from('challenges')
+    .upsert(challengeToRow(c))
+  if (error) console.error('[challenges] Failed to save challenge:', error.message)
 }
 
-export function getParticipants(challengeId: string): ChallengeParticipant[] {
-  try {
-    const raw = localStorage.getItem(CHALLENGE_PARTICIPANTS_KEY)
-    const all: ChallengeParticipant[] = raw ? JSON.parse(raw) : []
-    return all.filter(p => p.challengeId === challengeId)
-  } catch { return [] }
+export async function getParticipants(challengeId: string): Promise<ChallengeParticipant[]> {
+  const { data, error } = await supabase
+    .from('challenge_participants')
+    .select('*')
+    .eq('challenge_id', challengeId)
+  if (error || !data) return []
+  return data.map(rowToParticipant)
 }
 
-export function addParticipant(p: ChallengeParticipant): void {
-  try {
-    const raw = localStorage.getItem(CHALLENGE_PARTICIPANTS_KEY)
-    const list: ChallengeParticipant[] = raw ? JSON.parse(raw) : []
-    const idx = list.findIndex(x => x.challengeId === p.challengeId && x.userId === p.userId)
-    if (idx >= 0) list[idx] = p
-    else list.push(p)
-    localStorage.setItem(CHALLENGE_PARTICIPANTS_KEY, JSON.stringify(list))
-  } catch {}
+export async function addParticipant(p: ChallengeParticipant): Promise<void> {
+  const { error } = await supabase
+    .from('challenge_participants')
+    .upsert(participantToRow(p))
+  if (error) console.error('[challenges] Failed to add participant:', error.message)
 }
 
-export function getUserParticipations(userId: string): ChallengeParticipant[] {
-  try {
-    const raw = localStorage.getItem(CHALLENGE_PARTICIPANTS_KEY)
-    const all: ChallengeParticipant[] = raw ? JSON.parse(raw) : []
-    return all.filter(p => p.userId === userId)
-  } catch { return [] }
+export async function getUserParticipations(userId: string): Promise<ChallengeParticipant[]> {
+  const { data, error } = await supabase
+    .from('challenge_participants')
+    .select('*')
+    .eq('user_id', userId)
+  if (error || !data) return []
+  return data.map(rowToParticipant)
 }
